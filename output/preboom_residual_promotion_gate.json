@@ -1,0 +1,46 @@
+{
+  "generated_at": "2026-05-21",
+  "status": "report_only_product_review_lane",
+  "current_decision": "Do not promote the learned residual surface into production ranking.",
+  "allowed_uses": [
+    "Product Mode Pre-Boom tab",
+    "watchlist candidate discovery",
+    "county memo narrative support",
+    "shortlist/export review",
+    "X-factor research and dataset-impact diagnostics"
+  ],
+  "disallowed_uses": [
+    "do not feed investable_residual_model_score into scoring_pipeline.py",
+    "do not merge pre-boom labels into features_county_year.parquet as live features",
+    "do not use structural-plus residual output as the primary production rank",
+    "do not train default production models on Wave 3/static structural families from this lane until family-specific historical semantics are approved"
+  ],
+  "current_guardrail": {
+    "score": "investable_residual_model_score",
+    "formula": "residual_model_score * (0.60 + 0.40 * emerging_market_depth_adequacy)",
+    "source_artifact": "output/investable_residual_guardrail_sweep_2024.md"
+  },
+  "recommended_product_surface": {
+    "surface": "guarded_two_score_blend",
+    "formula": "90% quiet-breakout classifier rank + 10% investable residual-upside rank",
+    "source_artifact": "output/preboom_two_score_blend_sweep_2024.md"
+  },
+  "gate_status": {
+    "research_validity": "pass_for_report_only",
+    "product_cleanliness": "pass_only_for_guarded_blend_and_balanced_review",
+    "analog_timing": "partial",
+    "static_wave3_training_semantics": "not_passed",
+    "ranking_impact": "not_attempted",
+    "operator_workflow": "passed_for_internal_product_mode_review"
+  },
+  "promotion_ladder": {
+    "level_0_research_artifact": "passed",
+    "level_1_product_review_surface": "passed_for_guarded_blend_and_balanced_review",
+    "level_2_product_lens_overlay": "passed_as_report_only_overlay",
+    "level_3_scoring_policy_experiment": "not_ready",
+    "level_4_production_ranking_component": "not_allowed"
+  },
+  "latest_product_overlay_status": "Product Mode Pre-Boom now uses output/preboom_residual_overlay_display_guarded_top100_2024.csv as the report-only Residual-Upside Magnitude (Display-Guarded) overlay, compares it against guarded blend rank, and keeps output/investable_residual_guardrail_top100_2024.csv as Unfiltered Residual-Upside (Audit).",
+  "next_implementation_step": "Design a longer-history or analog-recall treatment for missed analog families while keeping Product Mode guarded blend and display-guarded residual overlay report-only.",
+  "latest_analog_family_coverage_status": "Analog-family diagnostic complete: guarded blend top-100 captures 11/86 analog county-windows, guarded top-250 captures 12/86, and unguarded blend top-100 captures 9/86. Misses are dominated by already-hot-before-scored-surface timing plus residual-signal-below-cut and low-surface-signal cases, not by product guardrails."
+}

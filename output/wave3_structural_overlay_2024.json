@@ -1,0 +1,11 @@
+{
+  "year": 2024,
+  "max_adjustment": 1.5,
+  "top_n": 25,
+  "counties": 3144,
+  "top_overlap": 25,
+  "top_churn_pct": 0.0,
+  "mean_abs_rank_delta": 17.66793893129771,
+  "p95_abs_rank_delta": 48.0,
+  "mean_abs_adjustment": 0.2098608793193027
+}

@@ -1,0 +1,1152 @@
+{
+  "inputs": {
+    "historical": "/Users/coryseidel/Desktop/IdeaTests/LandInvest/data/processed/preboom_classifier_comparison.parquet",
+    "features": "/Users/coryseidel/Desktop/IdeaTests/LandInvest/data/processed/features_county_year.parquet",
+    "labels": "/Users/coryseidel/Desktop/IdeaTests/LandInvest/data/processed/preboom_labels.parquet"
+  },
+  "config": {
+    "feature_set": "structural_plus",
+    "prior_momentum_max": 0.75,
+    "top_n": 100,
+    "eval_top_k": [
+      100,
+      250
+    ],
+    "raw_proxy_formula": "0.45 classifier_rank_pct + 0.35 residual_rank_pct + 0.20 depth_rank_pct; historical Wave 3 net support is unavailable in the classifier-comparison artifact"
+  },
+  "score_year_min": 2013,
+  "score_year_max": 2019,
+  "window_rows": [
+    {
+      "analog_group": "boise_treasure_valley",
+      "theme": "migration, amenity, affordability spillover, constrained desirable supply",
+      "window_start": 2011,
+      "window_end": 2015,
+      "window": "2011-2015",
+      "analog_counties": 5,
+      "full_year_count": 5,
+      "score_year_count": 3,
+      "score_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "available_county_year_rows": 15
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "theme": "migration, amenity, affordability spillover, constrained desirable supply",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "analog_counties": 5,
+      "full_year_count": 5,
+      "score_year_count": 5,
+      "score_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "available_county_year_rows": 25
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "theme": "jobs, population growth, regional spillover, affordability gradient",
+      "window_start": 2010,
+      "window_end": 2014,
+      "window": "2010-2014",
+      "analog_counties": 6,
+      "full_year_count": 5,
+      "score_year_count": 2,
+      "score_years": [
+        2013,
+        2014
+      ],
+      "available_county_year_rows": 12
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "theme": "jobs, population growth, regional spillover, affordability gradient",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "analog_counties": 6,
+      "full_year_count": 5,
+      "score_year_count": 4,
+      "score_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "available_county_year_rows": 24
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "theme": "amenity geography, high-income migration, job centers, supply pressure",
+      "window_start": 2010,
+      "window_end": 2014,
+      "window": "2010-2014",
+      "analog_counties": 8,
+      "full_year_count": 5,
+      "score_year_count": 2,
+      "score_years": [
+        2013,
+        2014
+      ],
+      "available_county_year_rows": 16
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "theme": "amenity geography, high-income migration, job centers, supply pressure",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "analog_counties": 8,
+      "full_year_count": 5,
+      "score_year_count": 4,
+      "score_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "available_county_year_rows": 32
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "theme": "generalization beyond the obvious Boise metro",
+      "window_start": 2011,
+      "window_end": 2015,
+      "window": "2011-2015",
+      "analog_counties": 5,
+      "full_year_count": 5,
+      "score_year_count": 3,
+      "score_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "available_county_year_rows": 15
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "theme": "generalization beyond the obvious Boise metro",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "analog_counties": 5,
+      "full_year_count": 5,
+      "score_year_count": 5,
+      "score_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "available_county_year_rows": 25
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "theme": "tech/jobs growth, affordability spillover, Hill Country amenity migration",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "analog_counties": 5,
+      "full_year_count": 5,
+      "score_year_count": 4,
+      "score_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "available_county_year_rows": 20
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "theme": "tech/jobs growth, affordability spillover, Hill Country amenity migration",
+      "window_start": 2014,
+      "window_end": 2018,
+      "window": "2014-2018",
+      "analog_counties": 5,
+      "full_year_count": 5,
+      "score_year_count": 5,
+      "score_years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "available_county_year_rows": 25
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "theme": "university/research jobs, regional spillover, affordability gradient",
+      "window_start": 2011,
+      "window_end": 2015,
+      "window": "2011-2015",
+      "analog_counties": 5,
+      "full_year_count": 5,
+      "score_year_count": 3,
+      "score_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "available_county_year_rows": 15
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "theme": "university/research jobs, regional spillover, affordability gradient",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "analog_counties": 5,
+      "full_year_count": 5,
+      "score_year_count": 5,
+      "score_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "available_county_year_rows": 25
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "theme": "corporate anchor growth, logistics, affordability, regional spillover",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "analog_counties": 4,
+      "full_year_count": 5,
+      "score_year_count": 4,
+      "score_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "available_county_year_rows": 16
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "theme": "corporate anchor growth, logistics, affordability, regional spillover",
+      "window_start": 2014,
+      "window_end": 2018,
+      "window": "2014-2018",
+      "analog_counties": 4,
+      "full_year_count": 5,
+      "score_year_count": 5,
+      "score_years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "available_county_year_rows": 20
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "theme": "jobs, amenity geography, high-growth metro spillover, constrained valleys",
+      "window_start": 2011,
+      "window_end": 2015,
+      "window": "2011-2015",
+      "analog_counties": 5,
+      "full_year_count": 5,
+      "score_year_count": 3,
+      "score_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "available_county_year_rows": 15
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "theme": "jobs, amenity geography, high-growth metro spillover, constrained valleys",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "analog_counties": 5,
+      "full_year_count": 5,
+      "score_year_count": 5,
+      "score_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "available_county_year_rows": 25
+    }
+  ],
+  "summary_rows": [
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 100,
+      "county_windows": 86,
+      "scored_county_windows": 86,
+      "selected_county_windows": 12,
+      "selected_share": 0.13953488372093023,
+      "selected_before_hot_count": 12,
+      "selected_before_hot_share_of_scored": 0.13953488372093023,
+      "selected_before_hot_share_of_selected": 1.0,
+      "median_best_selected_rank": 18.5
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 100,
+      "analog_group": "austin_hill_country",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 12.5
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 100,
+      "analog_group": "boise_treasure_valley",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 32.5
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 100,
+      "analog_group": "colorado_front_range",
+      "county_windows": 16,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 100,
+      "analog_group": "idaho_beyond_boise",
+      "county_windows": 10,
+      "selected_county_windows": 6,
+      "selected_share": 0.6,
+      "selected_before_hot_count": 6,
+      "selected_before_hot_share": 0.6,
+      "median_best_selected_rank": 17.0
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 100,
+      "analog_group": "nashville_middle_tennessee",
+      "county_windows": 12,
+      "selected_county_windows": 2,
+      "selected_share": 0.16666666666666666,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.16666666666666666,
+      "median_best_selected_rank": 94.0
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 100,
+      "analog_group": "northwest_arkansas",
+      "county_windows": 8,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 100,
+      "analog_group": "raleigh_triangle_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 100,
+      "analog_group": "utah_wasatch_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 250,
+      "county_windows": 86,
+      "scored_county_windows": 86,
+      "selected_county_windows": 21,
+      "selected_share": 0.2441860465116279,
+      "selected_before_hot_count": 21,
+      "selected_before_hot_share_of_scored": 0.2441860465116279,
+      "selected_before_hot_share_of_selected": 1.0,
+      "median_best_selected_rank": 94.0
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 250,
+      "analog_group": "austin_hill_country",
+      "county_windows": 10,
+      "selected_county_windows": 3,
+      "selected_share": 0.3,
+      "selected_before_hot_count": 3,
+      "selected_before_hot_share": 0.3,
+      "median_best_selected_rank": 15.0
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 250,
+      "analog_group": "boise_treasure_valley",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 32.5
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 250,
+      "analog_group": "colorado_front_range",
+      "county_windows": 16,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 250,
+      "analog_group": "idaho_beyond_boise",
+      "county_windows": 10,
+      "selected_county_windows": 6,
+      "selected_share": 0.6,
+      "selected_before_hot_count": 6,
+      "selected_before_hot_share": 0.6,
+      "median_best_selected_rank": 17.0
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 250,
+      "analog_group": "nashville_middle_tennessee",
+      "county_windows": 12,
+      "selected_county_windows": 8,
+      "selected_share": 0.6666666666666666,
+      "selected_before_hot_count": 8,
+      "selected_before_hot_share": 0.6666666666666666,
+      "median_best_selected_rank": 205.0
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 250,
+      "analog_group": "northwest_arkansas",
+      "county_windows": 8,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 250,
+      "analog_group": "raleigh_triangle_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 107.0
+    },
+    {
+      "surface": "balanced_raw_proxy",
+      "top_k": 250,
+      "analog_group": "utah_wasatch_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 100,
+      "county_windows": 86,
+      "scored_county_windows": 86,
+      "selected_county_windows": 9,
+      "selected_share": 0.10465116279069768,
+      "selected_before_hot_count": 9,
+      "selected_before_hot_share_of_scored": 0.10465116279069768,
+      "selected_before_hot_share_of_selected": 1.0,
+      "median_best_selected_rank": 14.0
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 100,
+      "analog_group": "austin_hill_country",
+      "county_windows": 10,
+      "selected_county_windows": 1,
+      "selected_share": 0.1,
+      "selected_before_hot_count": 1,
+      "selected_before_hot_share": 0.1,
+      "median_best_selected_rank": 25.0
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 100,
+      "analog_group": "boise_treasure_valley",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 14.0
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 100,
+      "analog_group": "colorado_front_range",
+      "county_windows": 16,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 100,
+      "analog_group": "idaho_beyond_boise",
+      "county_windows": 10,
+      "selected_county_windows": 6,
+      "selected_share": 0.6,
+      "selected_before_hot_count": 6,
+      "selected_before_hot_share": 0.6,
+      "median_best_selected_rank": 8.5
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 100,
+      "analog_group": "nashville_middle_tennessee",
+      "county_windows": 12,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 100,
+      "analog_group": "northwest_arkansas",
+      "county_windows": 8,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 100,
+      "analog_group": "raleigh_triangle_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 100,
+      "analog_group": "utah_wasatch_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 250,
+      "county_windows": 86,
+      "scored_county_windows": 86,
+      "selected_county_windows": 16,
+      "selected_share": 0.18604651162790697,
+      "selected_before_hot_count": 16,
+      "selected_before_hot_share_of_scored": 0.18604651162790697,
+      "selected_before_hot_share_of_selected": 1.0,
+      "median_best_selected_rank": 82.0
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 250,
+      "analog_group": "austin_hill_country",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 63.5
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 250,
+      "analog_group": "boise_treasure_valley",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 14.0
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 250,
+      "analog_group": "colorado_front_range",
+      "county_windows": 16,
+      "selected_county_windows": 2,
+      "selected_share": 0.125,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.125,
+      "median_best_selected_rank": 226.0
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 250,
+      "analog_group": "idaho_beyond_boise",
+      "county_windows": 10,
+      "selected_county_windows": 6,
+      "selected_share": 0.6,
+      "selected_before_hot_count": 6,
+      "selected_before_hot_share": 0.6,
+      "median_best_selected_rank": 8.5
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 250,
+      "analog_group": "nashville_middle_tennessee",
+      "county_windows": 12,
+      "selected_county_windows": 2,
+      "selected_share": 0.16666666666666666,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.16666666666666666,
+      "median_best_selected_rank": 159.0
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 250,
+      "analog_group": "northwest_arkansas",
+      "county_windows": 8,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 250,
+      "analog_group": "raleigh_triangle_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 244.0
+    },
+    {
+      "surface": "blend_90_10",
+      "top_k": 250,
+      "analog_group": "utah_wasatch_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 100,
+      "county_windows": 86,
+      "scored_county_windows": 86,
+      "selected_county_windows": 11,
+      "selected_share": 0.12790697674418605,
+      "selected_before_hot_count": 11,
+      "selected_before_hot_share_of_scored": 0.12790697674418605,
+      "selected_before_hot_share_of_selected": 1.0,
+      "median_best_selected_rank": 10.0
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 100,
+      "analog_group": "austin_hill_country",
+      "county_windows": 10,
+      "selected_county_windows": 1,
+      "selected_share": 0.1,
+      "selected_before_hot_count": 1,
+      "selected_before_hot_share": 0.1,
+      "median_best_selected_rank": 19.0
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 100,
+      "analog_group": "boise_treasure_valley",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 8.5
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 100,
+      "analog_group": "colorado_front_range",
+      "county_windows": 16,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 100,
+      "analog_group": "idaho_beyond_boise",
+      "county_windows": 10,
+      "selected_county_windows": 6,
+      "selected_share": 0.6,
+      "selected_before_hot_count": 6,
+      "selected_before_hot_share": 0.6,
+      "median_best_selected_rank": 6.5
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 100,
+      "analog_group": "nashville_middle_tennessee",
+      "county_windows": 12,
+      "selected_county_windows": 2,
+      "selected_share": 0.16666666666666666,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.16666666666666666,
+      "median_best_selected_rank": 79.0
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 100,
+      "analog_group": "northwest_arkansas",
+      "county_windows": 8,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 100,
+      "analog_group": "raleigh_triangle_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 100,
+      "analog_group": "utah_wasatch_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 250,
+      "county_windows": 86,
+      "scored_county_windows": 86,
+      "selected_county_windows": 12,
+      "selected_share": 0.13953488372093023,
+      "selected_before_hot_count": 12,
+      "selected_before_hot_share_of_scored": 0.13953488372093023,
+      "selected_before_hot_share_of_selected": 1.0,
+      "median_best_selected_rank": 14.5
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 250,
+      "analog_group": "austin_hill_country",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 102.5
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 250,
+      "analog_group": "boise_treasure_valley",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 8.5
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 250,
+      "analog_group": "colorado_front_range",
+      "county_windows": 16,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 250,
+      "analog_group": "idaho_beyond_boise",
+      "county_windows": 10,
+      "selected_county_windows": 6,
+      "selected_share": 0.6,
+      "selected_before_hot_count": 6,
+      "selected_before_hot_share": 0.6,
+      "median_best_selected_rank": 6.5
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 250,
+      "analog_group": "nashville_middle_tennessee",
+      "county_windows": 12,
+      "selected_county_windows": 2,
+      "selected_share": 0.16666666666666666,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.16666666666666666,
+      "median_best_selected_rank": 79.0
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 250,
+      "analog_group": "northwest_arkansas",
+      "county_windows": 8,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 250,
+      "analog_group": "raleigh_triangle_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "top_k": 250,
+      "analog_group": "utah_wasatch_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 100,
+      "county_windows": 86,
+      "scored_county_windows": 86,
+      "selected_county_windows": 10,
+      "selected_share": 0.11627906976744186,
+      "selected_before_hot_count": 10,
+      "selected_before_hot_share_of_scored": 0.11627906976744186,
+      "selected_before_hot_share_of_selected": 1.0,
+      "median_best_selected_rank": 20.0
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 100,
+      "analog_group": "austin_hill_country",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 13.5
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 100,
+      "analog_group": "boise_treasure_valley",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 35.0
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 100,
+      "analog_group": "colorado_front_range",
+      "county_windows": 16,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 100,
+      "analog_group": "idaho_beyond_boise",
+      "county_windows": 10,
+      "selected_county_windows": 6,
+      "selected_share": 0.6,
+      "selected_before_hot_count": 6,
+      "selected_before_hot_share": 0.6,
+      "median_best_selected_rank": 20.0
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 100,
+      "analog_group": "nashville_middle_tennessee",
+      "county_windows": 12,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 100,
+      "analog_group": "northwest_arkansas",
+      "county_windows": 8,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 100,
+      "analog_group": "raleigh_triangle_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 100,
+      "analog_group": "utah_wasatch_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 250,
+      "county_windows": 86,
+      "scored_county_windows": 86,
+      "selected_county_windows": 21,
+      "selected_share": 0.2441860465116279,
+      "selected_before_hot_count": 21,
+      "selected_before_hot_share_of_scored": 0.2441860465116279,
+      "selected_before_hot_share_of_selected": 1.0,
+      "median_best_selected_rank": 156.0
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 250,
+      "analog_group": "austin_hill_country",
+      "county_windows": 10,
+      "selected_county_windows": 3,
+      "selected_share": 0.3,
+      "selected_before_hot_count": 3,
+      "selected_before_hot_share": 0.3,
+      "median_best_selected_rank": 16.0
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 250,
+      "analog_group": "boise_treasure_valley",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 35.0
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 250,
+      "analog_group": "colorado_front_range",
+      "county_windows": 16,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 250,
+      "analog_group": "idaho_beyond_boise",
+      "county_windows": 10,
+      "selected_county_windows": 6,
+      "selected_share": 0.6,
+      "selected_before_hot_count": 6,
+      "selected_before_hot_share": 0.6,
+      "median_best_selected_rank": 20.0
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 250,
+      "analog_group": "nashville_middle_tennessee",
+      "county_windows": 12,
+      "selected_county_windows": 8,
+      "selected_share": 0.6666666666666666,
+      "selected_before_hot_count": 8,
+      "selected_before_hot_share": 0.6666666666666666,
+      "median_best_selected_rank": 167.0
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 250,
+      "analog_group": "northwest_arkansas",
+      "county_windows": 8,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 250,
+      "analog_group": "raleigh_triangle_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 2,
+      "selected_share": 0.2,
+      "selected_before_hot_count": 2,
+      "selected_before_hot_share": 0.2,
+      "median_best_selected_rank": 156.0
+    },
+    {
+      "surface": "raw_proxy",
+      "top_k": 250,
+      "analog_group": "utah_wasatch_spillover",
+      "county_windows": 10,
+      "selected_county_windows": 0,
+      "selected_share": 0.0,
+      "selected_before_hot_count": 0,
+      "selected_before_hot_share": 0.0,
+      "median_best_selected_rank": null
+    }
+  ],
+  "selection_health": [
+    {
+      "surface": "balanced_raw_proxy",
+      "selected_rows": 700,
+      "years": 7,
+      "avg_per_year": 100.0,
+      "state_hhi": 0.03259591836734694,
+      "top_state": "MO",
+      "top_state_share": 0.06714285714285714,
+      "appalachia_state_share": 0.32285714285714284,
+      "population_lt_25k_share": 0.0,
+      "depth_lt_0_45_share": 0.0,
+      "severe_qa_share": 0.0
+    },
+    {
+      "surface": "blend_90_10",
+      "selected_rows": 700,
+      "years": 7,
+      "avg_per_year": 100.0,
+      "state_hhi": 0.04621632653061225,
+      "top_state": "TX",
+      "top_state_share": 0.10571428571428572,
+      "appalachia_state_share": 0.24428571428571427,
+      "population_lt_25k_share": 0.5385714285714286,
+      "depth_lt_0_45_share": 0.31285714285714283,
+      "severe_qa_share": 0.5385714285714286
+    },
+    {
+      "surface": "guarded_blend_90_10",
+      "selected_rows": 700,
+      "years": 7,
+      "avg_per_year": 100.0,
+      "state_hhi": 0.03479591836734695,
+      "top_state": "TX",
+      "top_state_share": 0.07,
+      "appalachia_state_share": 0.29285714285714287,
+      "population_lt_25k_share": 0.0,
+      "depth_lt_0_45_share": 0.0,
+      "severe_qa_share": 0.0
+    },
+    {
+      "surface": "raw_proxy",
+      "selected_rows": 700,
+      "years": 7,
+      "avg_per_year": 100.0,
+      "state_hhi": 0.045081632653061234,
+      "top_state": "TX",
+      "top_state_share": 0.09285714285714286,
+      "appalachia_state_share": 0.3171428571428571,
+      "population_lt_25k_share": 0.18857142857142858,
+      "depth_lt_0_45_share": 0.007142857142857143,
+      "severe_qa_share": 0.18857142857142858
+    }
+  ],
+  "outputs": {
+    "csv": "/Users/coryseidel/Desktop/IdeaTests/LandInvest/output/preboom_surface_analog_overlap.csv",
+    "json": "/Users/coryseidel/Desktop/IdeaTests/LandInvest/output/preboom_surface_analog_overlap.json",
+    "markdown": "/Users/coryseidel/Desktop/IdeaTests/LandInvest/output/preboom_surface_analog_overlap.md"
+  }
+}

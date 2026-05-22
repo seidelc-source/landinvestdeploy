@@ -1,0 +1,7 @@
+# Minimal runtime for the remote dashboard viewer.
+# This intentionally excludes ingestion/training dependencies and the 336GB local data tree.
+pandas>=2.1.0
+numpy>=1.25.0
+pyarrow>=14.0.0
+plotly>=5.18.0
+streamlit>=1.30.0

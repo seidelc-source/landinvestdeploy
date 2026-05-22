@@ -1,0 +1,145 @@
+[
+  {
+    "source": "zillow",
+    "file": "zhvi_county_annual.parquet",
+    "exists": true,
+    "rows": 76825,
+    "columns": 7,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-14T20:01:12.169176",
+    "error": null
+  },
+  {
+    "source": "census",
+    "file": "census_acs_county_annual.parquet",
+    "exists": true,
+    "rows": 48311,
+    "columns": 13,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-14T20:54:56.185292",
+    "error": null
+  },
+  {
+    "source": "bls",
+    "file": "bls_qcew_county_annual.parquet",
+    "exists": true,
+    "rows": 78485,
+    "columns": 11,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-14T20:01:07.599997",
+    "error": null
+  },
+  {
+    "source": "irs_migration",
+    "file": "irs_migration_county_annual.parquet",
+    "exists": true,
+    "rows": 57558,
+    "columns": 12,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-14T20:01:11.483089",
+    "error": null
+  },
+  {
+    "source": "fhfa",
+    "file": "fhfa_state_hpi_annual.parquet",
+    "exists": true,
+    "rows": 1275,
+    "columns": 4,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-16T08:19:36.079903",
+    "error": null
+  },
+  {
+    "source": "fred",
+    "file": "fred_macro_annual.parquet",
+    "exists": true,
+    "rows": 25,
+    "columns": 7,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-14T20:55:19.758847",
+    "error": null
+  },
+  {
+    "source": "usda_ers",
+    "file": "usda_ers.parquet",
+    "exists": true,
+    "rows": 3233,
+    "columns": 5,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-14T20:54:57.919191",
+    "error": null
+  },
+  {
+    "source": "building_permits",
+    "file": "building_permits_county_annual.parquet",
+    "exists": true,
+    "rows": 60627,
+    "columns": 8,
+    "duplicate_keys": 10,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-14T20:55:14.999925",
+    "error": null
+  },
+  {
+    "source": "zillow_rental",
+    "file": "zori_county_annual.parquet",
+    "exists": true,
+    "rows": 13150,
+    "columns": 6,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-14T20:55:16.358665",
+    "error": null
+  },
+  {
+    "source": "fema_nri",
+    "file": "fema_nri.parquet",
+    "exists": true,
+    "rows": 3231,
+    "columns": 10,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-14T20:57:39.538605",
+    "error": null
+  },
+  {
+    "source": "redfin",
+    "file": "redfin_market_tightness.parquet",
+    "exists": true,
+    "rows": 24479,
+    "columns": 13,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-14T20:55:16.234339",
+    "error": null
+  },
+  {
+    "source": "hmda",
+    "file": "hmda_county_annual.parquet",
+    "exists": true,
+    "rows": 22646,
+    "columns": 11,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-15T14:48:28.295003",
+    "error": null
+  },
+  {
+    "source": "satellite_proxy",
+    "file": "satellite_proxy.parquet",
+    "exists": true,
+    "rows": 82622,
+    "columns": 10,
+    "duplicate_keys": 0,
+    "key_null_rows": 0,
+    "updated_at": "2026-05-16T08:19:36.524420",
+    "error": null
+  }
+]

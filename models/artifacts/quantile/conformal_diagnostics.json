@@ -1,0 +1,47 @@
+{
+  "1yr": {
+    "target": "fwd_appreciation_1yr",
+    "conformal": {
+      "alpha": 0.2,
+      "global_qhat": 0.023165300475982045,
+      "n_calib": 12162,
+      "by_regime": {}
+    },
+    "coverage": {
+      "n_eval": 12162,
+      "target_coverage": 0.8,
+      "coverage_raw": 0.6924847886860713,
+      "coverage_calibrated": 0.7999506660088801
+    }
+  },
+  "3yr": {
+    "target": "fwd_appreciation_3yr",
+    "conformal": {
+      "alpha": 0.2,
+      "global_qhat": 0.0009910375263838345,
+      "n_calib": 6030,
+      "by_regime": {}
+    },
+    "coverage": {
+      "n_eval": 6030,
+      "target_coverage": 0.8,
+      "coverage_raw": 0.7985074626865671,
+      "coverage_calibrated": 0.8
+    }
+  },
+  "5yr": {
+    "target": "fwd_appreciation_5yr",
+    "conformal": {
+      "alpha": 0.2,
+      "global_qhat": 0.0269949794994941,
+      "n_calib": 3005,
+      "by_regime": {}
+    },
+    "coverage": {
+      "n_eval": 3005,
+      "target_coverage": 0.8,
+      "coverage_raw": 0.7267886855241265,
+      "coverage_calibrated": 0.8
+    }
+  }
+}

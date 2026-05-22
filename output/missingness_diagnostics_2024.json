@@ -1,0 +1,145 @@
+{
+  "year": 2024,
+  "rows": 3153,
+  "n_features": 351,
+  "row_missingness": {
+    "avg_share": 0.13528561863480987,
+    "p50_share": 0.1282051282051282,
+    "p90_share": 0.17094017094017094,
+    "avg_count": 47.48525214081827,
+    "p90_count": 60.0
+  },
+  "top_missing_features": [
+    {
+      "feature": "lodes_resident_jobs_yoy",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "urbanization_pressure",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "migration_pressure_score",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "returns_out_pc",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "exemptions_in_pc",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "activity_intensity_accel",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "net_migration_rate_lag1",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "exemptions_out_pc",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "lodes_workplace_jobs_yoy",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "job_growth_5yr",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "wage_premium",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "net_migration_rate_vs_state",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "migration_2yr_avg",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "migration_persistence",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "establishment_density",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "wage_growth_yoy",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "net_migration_rate",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "activity_intensity_yoy",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "returns_in_pc",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "migration_accel",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "employment_density",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "migration_3yr_avg",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "nn_peer_net_migration_rate_lag1",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "prox_peer_net_migration_rate_lag1",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    },
+    {
+      "feature": "activity_intensity",
+      "missing_share": 1.0,
+      "missing_count": 3153
+    }
+  ],
+  "dominant_patterns": [
+    {
+      "pattern_key": "111111111111",
+      "rows": 3153
+    }
+  ]
+}
