@@ -1,17 +1,17 @@
 {
   "year": 2024,
-  "generated_at": "2026-05-20T16:00:50.748888",
+  "generated_at": "2026-05-27T16:19:11.514702",
   "run_count": 12,
-  "latest_run": "20260519_150139",
-  "earliest_run": "20260518_203024",
+  "latest_run": "20260520_231218",
+  "earliest_run": "20260518_211711",
   "stable_top25": [
     {
       "fips": "51580",
       "county_name": "Covington city, Virginia",
       "state": "VA",
       "latest_rank": 1.0,
-      "avg_rank": 1.5,
-      "std_rank": 1.243163121016122,
+      "avg_rank": 1.3333333333333333,
+      "std_rank": 1.1547005383792515,
       "top25_presence_share": 1.0
     },
     {
@@ -19,8 +19,8 @@
       "county_name": "Jefferson County, Ohio",
       "state": "OH",
       "latest_rank": 2.0,
-      "avg_rank": 2.4166666666666665,
-      "std_rank": 1.2401124093721454,
+      "avg_rank": 2.1666666666666665,
+      "std_rank": 0.9374368665610922,
       "top25_presence_share": 1.0
     },
     {
@@ -28,8 +28,8 @@
       "county_name": "St. Clair County, Illinois",
       "state": "IL",
       "latest_rank": 3.0,
-      "avg_rank": 4.25,
-      "std_rank": 1.912875037500074,
+      "avg_rank": 3.9166666666666665,
+      "std_rank": 1.7298624923456323,
       "top25_presence_share": 1.0
     },
     {
@@ -37,8 +37,8 @@
       "county_name": "Martinsville city, Virginia",
       "state": "VA",
       "latest_rank": 4.0,
-      "avg_rank": 12.416666666666666,
-      "std_rank": 19.251721686093116,
+      "avg_rank": 12.0,
+      "std_rank": 19.386030584371365,
       "top25_presence_share": 0.9166666666666666
     },
     {
@@ -46,8 +46,8 @@
       "county_name": "Miami County, Indiana",
       "state": "IN",
       "latest_rank": 5.0,
-      "avg_rank": 5.583333333333333,
-      "std_rank": 1.5050420310248867,
+      "avg_rank": 5.666666666666667,
+      "std_rank": 1.4354811251305468,
       "top25_presence_share": 1.0
     },
     {
@@ -55,17 +55,17 @@
       "county_name": "Buena Vista city, Virginia",
       "state": "VA",
       "latest_rank": 6.0,
-      "avg_rank": 10.833333333333334,
-      "std_rank": 12.415776864599136,
-      "top25_presence_share": 0.9166666666666666
+      "avg_rank": 7.25,
+      "std_rank": 3.1370223287233854,
+      "top25_presence_share": 1.0
     },
     {
       "fips": "51105",
       "county_name": "Lee County, Virginia",
       "state": "VA",
       "latest_rank": 7.0,
-      "avg_rank": 10.833333333333334,
-      "std_rank": 8.547549710917513,
+      "avg_rank": 11.333333333333334,
+      "std_rank": 8.082903768654761,
       "top25_presence_share": 0.8333333333333334
     },
     {
@@ -73,8 +73,8 @@
       "county_name": "Gogebic County, Michigan",
       "state": "MI",
       "latest_rank": 8.0,
-      "avg_rank": 13.0,
-      "std_rank": 14.678369986294305,
+      "avg_rank": 12.416666666666666,
+      "std_rank": 14.73066272244478,
       "top25_presence_share": 0.9166666666666666
     },
     {
@@ -82,17 +82,17 @@
       "county_name": "Clinton County, Illinois",
       "state": "IL",
       "latest_rank": 9.0,
-      "avg_rank": 13.916666666666666,
-      "std_rank": 7.128155866744642,
-      "top25_presence_share": 0.9166666666666666
+      "avg_rank": 12.25,
+      "std_rank": 5.412527556091936,
+      "top25_presence_share": 1.0
     },
     {
       "fips": "26163",
       "county_name": "Wayne County, Michigan",
       "state": "MI",
       "latest_rank": 10.0,
-      "avg_rank": 12.083333333333334,
-      "std_rank": 6.82852750443226,
+      "avg_rank": 11.583333333333334,
+      "std_rank": 6.734690832255078,
       "top25_presence_share": 0.9166666666666666
     },
     {
@@ -100,8 +100,8 @@
       "county_name": "Vermilion County, Illinois",
       "state": "IL",
       "latest_rank": 11.0,
-      "avg_rank": 11.75,
-      "std_rank": 4.594957710756037,
+      "avg_rank": 10.583333333333334,
+      "std_rank": 1.9286515936521478,
       "top25_presence_share": 1.0
     },
     {
@@ -109,8 +109,8 @@
       "county_name": "Iron County, Michigan",
       "state": "MI",
       "latest_rank": 12.0,
-      "avg_rank": 21.583333333333332,
-      "std_rank": 30.233811095085805,
+      "avg_rank": 21.0,
+      "std_rank": 30.355469778188997,
       "top25_presence_share": 0.9166666666666666
     },
     {
@@ -118,8 +118,8 @@
       "county_name": "Madison County, Illinois",
       "state": "IL",
       "latest_rank": 13.0,
-      "avg_rank": 12.166666666666666,
-      "std_rank": 1.80067327475704,
+      "avg_rank": 12.333333333333334,
+      "std_rank": 1.775250729197189,
       "top25_presence_share": 1.0
     },
     {
@@ -127,8 +127,8 @@
       "county_name": "Delaware County, Indiana",
       "state": "IN",
       "latest_rank": 14.0,
-      "avg_rank": 14.0,
-      "std_rank": 3.9312269655344827,
+      "avg_rank": 14.666666666666666,
+      "std_rank": 3.0251471289038405,
       "top25_presence_share": 1.0
     },
     {
@@ -136,8 +136,8 @@
       "county_name": "Wayne County, Indiana",
       "state": "IN",
       "latest_rank": 15.0,
-      "avg_rank": 16.0,
-      "std_rank": 2.9848100289785457,
+      "avg_rank": 15.833333333333334,
+      "std_rank": 2.9797294975866317,
       "top25_presence_share": 1.0
     },
     {
@@ -145,8 +145,8 @@
       "county_name": "Vermillion County, Indiana",
       "state": "IN",
       "latest_rank": 16.0,
-      "avg_rank": 17.916666666666668,
-      "std_rank": 5.8068663640294815,
+      "avg_rank": 18.166666666666668,
+      "std_rank": 5.638074031784151,
       "top25_presence_share": 0.9166666666666666
     },
     {
@@ -154,8 +154,8 @@
       "county_name": "Madison County, Indiana",
       "state": "IN",
       "latest_rank": 17.0,
-      "avg_rank": 18.416666666666668,
-      "std_rank": 4.679905463950649,
+      "avg_rank": 18.75,
+      "std_rank": 4.287932326467343,
       "top25_presence_share": 0.9166666666666666
     },
     {
@@ -163,8 +163,8 @@
       "county_name": "Schuylkill County, Pennsylvania",
       "state": "PA",
       "latest_rank": 18.0,
-      "avg_rank": 17.333333333333332,
-      "std_rank": 3.5248038845079632,
+      "avg_rank": 18.0,
+      "std_rank": 1.8586407545691703,
       "top25_presence_share": 1.0
     },
     {
@@ -172,17 +172,17 @@
       "county_name": "Lucas County, Ohio",
       "state": "OH",
       "latest_rank": 19.0,
-      "avg_rank": 20.5,
-      "std_rank": 4.738622738153508,
-      "top25_presence_share": 0.8333333333333334
+      "avg_rank": 19.333333333333332,
+      "std_rank": 3.366501646120692,
+      "top25_presence_share": 0.9166666666666666
     },
     {
       "fips": "18135",
       "county_name": "Randolph County, Indiana",
       "state": "IN",
       "latest_rank": 20.0,
-      "avg_rank": 20.333333333333332,
-      "std_rank": 4.7354242074224375,
+      "avg_rank": 20.666666666666668,
+      "std_rank": 4.2923469599092785,
       "top25_presence_share": 0.9166666666666666
     },
     {
@@ -190,8 +190,8 @@
       "county_name": "Tazewell County, Illinois",
       "state": "IL",
       "latest_rank": 21.0,
-      "avg_rank": 22.5,
-      "std_rank": 2.812310599683277,
+      "avg_rank": 22.0,
+      "std_rank": 2.7633971188310293,
       "top25_presence_share": 0.9166666666666666
     },
     {
@@ -199,18 +199,27 @@
       "county_name": "Cambria County, Pennsylvania",
       "state": "PA",
       "latest_rank": 22.0,
-      "avg_rank": 22.083333333333332,
-      "std_rank": 7.833010954036808,
-      "top25_presence_share": 0.8333333333333334
+      "avg_rank": 20.666666666666668,
+      "std_rank": 6.38653887390336,
+      "top25_presence_share": 0.9166666666666666
+    },
+    {
+      "fips": "17041",
+      "county_name": "Douglas County, Illinois",
+      "state": "IL",
+      "latest_rank": 23.0,
+      "avg_rank": 33.083333333333336,
+      "std_rank": 31.873209991331514,
+      "top25_presence_share": 0.75
     },
     {
       "fips": "39039",
       "county_name": "Defiance County, Ohio",
       "state": "OH",
       "latest_rank": 24.0,
-      "avg_rank": 23.75,
-      "std_rank": 5.029458673202768,
-      "top25_presence_share": 0.75
+      "avg_rank": 24.0,
+      "std_rank": 4.6122366887148445,
+      "top25_presence_share": 0.8333333333333334
     }
   ],
   "volatile_boundary": [
@@ -219,90 +228,70 @@
       "county_name": "Elk County, Kansas",
       "state": "KS",
       "latest_rank": 54.0,
-      "avg_rank": 176.5,
-      "std_rank": 318.59563998614584,
+      "avg_rank": 160.16666666666666,
+      "std_rank": 319.88402254377735,
       "rank_range": 1124,
-      "net_rank_change": 189.0
+      "net_rank_change": 85.0
     },
     {
       "fips": "15005",
       "county_name": "Kalawao County, Hawaii",
       "state": "HI",
       "latest_rank": 75.0,
-      "avg_rank": 117.75,
-      "std_rank": 196.49618316903766,
+      "avg_rank": 113.08333333333333,
+      "std_rank": 195.92877107084948,
       "rank_range": 693,
-      "net_rank_change": 80.0
-    },
-    {
-      "fips": "17187",
-      "county_name": "Warren County, Illinois",
-      "state": "IL",
-      "latest_rank": 84.0,
-      "avg_rank": 162.41666666666666,
-      "std_rank": 161.493854841338,
-      "rank_range": 433,
-      "net_rank_change": 433.0
+      "net_rank_change": -25.0
     },
     {
       "fips": "13273",
       "county_name": "Terrell County, Georgia",
       "state": "GA",
       "latest_rank": 144.0,
-      "avg_rank": 185.5,
-      "std_rank": 156.72065478539716,
+      "avg_rank": 184.16666666666666,
+      "std_rank": 157.06155905673845,
       "rank_range": 559,
-      "net_rank_change": 7.0
+      "net_rank_change": -7.0
     },
     {
       "fips": "09003",
       "county_name": "Hartford County, Connecticut",
       "state": "CT",
       "latest_rank": 149.0,
-      "avg_rank": 207.66666666666666,
-      "std_rank": 139.18877523534414,
+      "avg_rank": 201.83333333333334,
+      "std_rank": 140.55463727891035,
       "rank_range": 521,
-      "net_rank_change": 11.0
-    },
-    {
-      "fips": "19179",
-      "county_name": "Wapello County, Iowa",
-      "state": "IA",
-      "latest_rank": 87.0,
-      "avg_rank": 130.41666666666666,
-      "std_rank": 131.29041946168138,
-      "rank_range": 465,
-      "net_rank_change": 459.0
-    },
-    {
-      "fips": "55057",
-      "county_name": "Juneau County, Wisconsin",
-      "state": "WI",
-      "latest_rank": 126.0,
-      "avg_rank": 186.33333333333334,
-      "std_rank": 127.50710021822553,
-      "rank_range": 429,
-      "net_rank_change": 196.0
+      "net_rank_change": -24.0
     },
     {
       "fips": "29115",
       "county_name": "Linn County, Missouri",
       "state": "MO",
       "latest_rank": 74.0,
-      "avg_rank": 117.91666666666667,
-      "std_rank": 127.11802556774717,
+      "avg_rank": 114.5,
+      "std_rank": 127.94068227822682,
       "rank_range": 450,
-      "net_rank_change": 33.0
+      "net_rank_change": 23.0
     },
     {
-      "fips": "55075",
-      "county_name": "Marinette County, Wisconsin",
+      "fips": "55057",
+      "county_name": "Juneau County, Wisconsin",
       "state": "WI",
-      "latest_rank": 139.0,
-      "avg_rank": 177.58333333333334,
-      "std_rank": 111.0957476752155,
-      "rank_range": 372,
-      "net_rank_change": 204.0
+      "latest_rank": 126.0,
+      "avg_rank": 169.25,
+      "std_rank": 121.19715343191852,
+      "rank_range": 429,
+      "net_rank_change": 54.0
+    },
+    {
+      "fips": "17187",
+      "county_name": "Warren County, Illinois",
+      "state": "IL",
+      "latest_rank": 84.0,
+      "avg_rank": 125.58333333333333,
+      "std_rank": 117.68714947484774,
+      "rank_range": 413,
+      "net_rank_change": 39.0
     },
     {
       "fips": "26135",
@@ -310,415 +299,435 @@
       "state": "MI",
       "latest_rank": 89.0,
       "avg_rank": 123.33333333333333,
-      "std_rank": 107.12977120664395,
-      "rank_range": 383,
-      "net_rank_change": -9.0
+      "std_rank": 107.06101347390938,
+      "rank_range": 374,
+      "net_rank_change": 14.0
+    },
+    {
+      "fips": "55075",
+      "county_name": "Marinette County, Wisconsin",
+      "state": "WI",
+      "latest_rank": 139.0,
+      "avg_rank": 159.83333333333334,
+      "std_rank": 98.49950007564259,
+      "rank_range": 372,
+      "net_rank_change": -33.0
     },
     {
       "fips": "51590",
       "county_name": "Danville city, Virginia",
       "state": "VA",
       "latest_rank": 57.0,
-      "avg_rank": 104.75,
-      "std_rank": 91.68634774946794,
+      "avg_rank": 100.75,
+      "std_rank": 92.99670082124614,
       "rank_range": 312,
-      "net_rank_change": 41.0
-    },
-    {
-      "fips": "17117",
-      "county_name": "Macoupin County, Illinois",
-      "state": "IL",
-      "latest_rank": 78.0,
-      "avg_rank": 114.16666666666667,
-      "std_rank": 90.53761983872012,
-      "rank_range": 333,
-      "net_rank_change": 309.0
+      "net_rank_change": 112.0
     },
     {
       "fips": "37169",
       "county_name": "Stokes County, North Carolina",
       "state": "NC",
       "latest_rank": 70.0,
-      "avg_rank": 92.16666666666667,
-      "std_rank": 77.57323030921208,
+      "avg_rank": 91.66666666666667,
+      "std_rank": 77.68740781705446,
       "rank_range": 277,
-      "net_rank_change": -2.0
+      "net_rank_change": 0.0
     },
     {
       "fips": "09013",
       "county_name": "Tolland County, Connecticut",
       "state": "CT",
       "latest_rank": 92.0,
-      "avg_rank": 118.41666666666667,
-      "std_rank": 76.76109139085472,
-      "rank_range": 303,
-      "net_rank_change": -42.0
-    },
-    {
-      "fips": "20099",
-      "county_name": "Labette County, Kansas",
-      "state": "KS",
-      "latest_rank": 141.0,
-      "avg_rank": 165.0,
-      "std_rank": 75.65111307238585,
-      "rank_range": 277,
-      "net_rank_change": 262.0
-    },
-    {
-      "fips": "40147",
-      "county_name": "Washington County, Oklahoma",
-      "state": "OK",
-      "latest_rank": 106.0,
-      "avg_rank": 146.58333333333334,
-      "std_rank": 74.60009545854645,
-      "rank_range": 203,
-      "net_rank_change": 201.0
-    },
-    {
-      "fips": "37157",
-      "county_name": "Rockingham County, North Carolina",
-      "state": "NC",
-      "latest_rank": 103.0,
-      "avg_rank": 131.25,
-      "std_rank": 72.40181439213197,
-      "rank_range": 252,
-      "net_rank_change": 83.0
-    },
-    {
-      "fips": "20009",
-      "county_name": "Barton County, Kansas",
-      "state": "KS",
-      "latest_rank": 147.0,
-      "avg_rank": 181.41666666666666,
-      "std_rank": 72.25266064095474,
-      "rank_range": 244,
-      "net_rank_change": 242.0
+      "avg_rank": 120.91666666666667,
+      "std_rank": 74.61837250403894,
+      "rank_range": 271,
+      "net_rank_change": -1.0
     },
     {
       "fips": "37065",
       "county_name": "Edgecombe County, North Carolina",
       "state": "NC",
       "latest_rank": 119.0,
-      "avg_rank": 145.16666666666666,
-      "std_rank": 71.80508127542016,
+      "avg_rank": 143.08333333333334,
+      "std_rank": 72.38465223227834,
       "rank_range": 267,
-      "net_rank_change": 16.0
+      "net_rank_change": 41.0
     },
     {
-      "fips": "55031",
-      "county_name": "Douglas County, Wisconsin",
-      "state": "WI",
-      "latest_rank": 134.0,
-      "avg_rank": 175.58333333333334,
-      "std_rank": 67.52435026557367,
-      "rank_range": 199,
-      "net_rank_change": 199.0
-    },
-    {
-      "fips": "17105",
-      "county_name": "Livingston County, Illinois",
-      "state": "IL",
-      "latest_rank": 56.0,
-      "avg_rank": 82.91666666666667,
-      "std_rank": 66.16708648061612,
-      "rank_range": 229,
-      "net_rank_change": 78.0
+      "fips": "37157",
+      "county_name": "Rockingham County, North Carolina",
+      "state": "NC",
+      "latest_rank": 103.0,
+      "avg_rank": 123.58333333333333,
+      "std_rank": 70.82944730873315,
+      "rank_range": 252,
+      "net_rank_change": 8.0
     },
     {
       "fips": "26001",
       "county_name": "Alcona County, Michigan",
       "state": "MI",
       "latest_rank": 100.0,
-      "avg_rank": 127.91666666666667,
-      "std_rank": 64.7210213613831,
+      "avg_rank": 124.16666666666667,
+      "std_rank": 65.39645991716195,
       "rank_range": 230,
-      "net_rank_change": 36.0
+      "net_rank_change": 27.0
     },
     {
-      "fips": "29081",
-      "county_name": "Harrison County, Missouri",
-      "state": "MO",
-      "latest_rank": 117.0,
-      "avg_rank": 155.91666666666666,
-      "std_rank": 63.362533141128495,
-      "rank_range": 177,
-      "net_rank_change": 139.0
-    },
-    {
-      "fips": "20035",
-      "county_name": "Cowley County, Kansas",
-      "state": "KS",
-      "latest_rank": 118.0,
-      "avg_rank": 151.5,
-      "std_rank": 60.29849990596026,
-      "rank_range": 187,
-      "net_rank_change": 182.0
+      "fips": "17105",
+      "county_name": "Livingston County, Illinois",
+      "state": "IL",
+      "latest_rank": 56.0,
+      "avg_rank": 75.83333333333333,
+      "std_rank": 64.66674476721307,
+      "rank_range": 229,
+      "net_rank_change": 5.0
     },
     {
       "fips": "20011",
       "county_name": "Bourbon County, Kansas",
       "state": "KS",
       "latest_rank": 138.0,
-      "avg_rank": 170.58333333333334,
-      "std_rank": 60.18676739696999,
+      "avg_rank": 163.5,
+      "std_rank": 59.4879666976287,
       "rank_range": 208,
-      "net_rank_change": 76.0
+      "net_rank_change": 70.0
     },
     {
       "fips": "09015",
       "county_name": "Windham County, Connecticut",
       "state": "CT",
       "latest_rank": 33.0,
-      "avg_rank": 53.25,
-      "std_rank": 57.71737567271622,
+      "avg_rank": 52.833333333333336,
+      "std_rank": 57.86164270887664,
       "rank_range": 203,
-      "net_rank_change": 1.0
+      "net_rank_change": 9.0
     },
     {
       "fips": "20073",
       "county_name": "Greenwood County, Kansas",
       "state": "KS",
       "latest_rank": 129.0,
-      "avg_rank": 150.66666666666666,
-      "std_rank": 56.80002134015818,
-      "rank_range": 205,
-      "net_rank_change": -19.0
+      "avg_rank": 151.5,
+      "std_rank": 56.088404246413454,
+      "rank_range": 201,
+      "net_rank_change": 57.0
+    },
+    {
+      "fips": "29081",
+      "county_name": "Harrison County, Missouri",
+      "state": "MO",
+      "latest_rank": 117.0,
+      "avg_rank": 143.58333333333334,
+      "std_rank": 55.96664320392238,
+      "rank_range": 177,
+      "net_rank_change": 95.0
+    },
+    {
+      "fips": "40147",
+      "county_name": "Washington County, Oklahoma",
+      "state": "OK",
+      "latest_rank": 106.0,
+      "avg_rank": 129.08333333333334,
+      "std_rank": 55.681657389996666,
+      "rank_range": 195,
+      "net_rank_change": 44.0
     },
     {
       "fips": "51620",
       "county_name": "Franklin city, Virginia",
       "state": "VA",
       "latest_rank": 125.0,
-      "avg_rank": 146.66666666666666,
-      "std_rank": 54.80101746456461,
-      "rank_range": 181,
-      "net_rank_change": -44.0
+      "avg_rank": 149.58333333333334,
+      "std_rank": 51.697473708865,
+      "rank_range": 155,
+      "net_rank_change": 97.0
     },
     {
-      "fips": "36041",
-      "county_name": "Hamilton County, New York",
-      "state": "NY",
-      "latest_rank": 105.0,
-      "avg_rank": 136.16666666666666,
-      "std_rank": 50.068740626051174,
-      "rank_range": 161,
-      "net_rank_change": 161.0
-    },
-    {
-      "fips": "37191",
-      "county_name": "Wayne County, North Carolina",
-      "state": "NC",
-      "latest_rank": 71.0,
-      "avg_rank": 95.33333333333333,
-      "std_rank": 47.275466121125625,
-      "rank_range": 139,
-      "net_rank_change": 111.0
-    },
-    {
-      "fips": "17195",
-      "county_name": "Whiteside County, Illinois",
-      "state": "IL",
-      "latest_rank": 69.0,
-      "avg_rank": 80.75,
-      "std_rank": 46.8035060846747,
-      "rank_range": 191,
-      "net_rank_change": 156.0
-    },
-    {
-      "fips": "55037",
-      "county_name": "Florence County, Wisconsin",
+      "fips": "55031",
+      "county_name": "Douglas County, Wisconsin",
       "state": "WI",
-      "latest_rank": 29.0,
-      "avg_rank": 51.25,
-      "std_rank": 46.69460743636639,
-      "rank_range": 136,
-      "net_rank_change": 133.0
+      "latest_rank": 134.0,
+      "avg_rank": 158.25,
+      "std_rank": 46.87143925869802,
+      "rank_range": 163,
+      "net_rank_change": 50.0
     },
     {
       "fips": "20001",
       "county_name": "Allen County, Kansas",
       "state": "KS",
       "latest_rank": 60.0,
-      "avg_rank": 81.91666666666667,
-      "std_rank": 44.538968297095714,
+      "avg_rank": 74.66666666666667,
+      "std_rank": 41.07052323489291,
       "rank_range": 148,
-      "net_rank_change": 80.0
+      "net_rank_change": 21.0
     },
     {
-      "fips": "55141",
-      "county_name": "Wood County, Wisconsin",
-      "state": "WI",
-      "latest_rank": 43.0,
-      "avg_rank": 60.75,
-      "std_rank": 42.19462481923928,
-      "rank_range": 148,
-      "net_rank_change": 140.0
+      "fips": "37191",
+      "county_name": "Wayne County, North Carolina",
+      "state": "NC",
+      "latest_rank": 71.0,
+      "avg_rank": 85.41666666666667,
+      "std_rank": 39.09303200718961,
+      "rank_range": 139,
+      "net_rank_change": 19.0
     },
     {
-      "fips": "42047",
-      "county_name": "Elk County, Pennsylvania",
-      "state": "PA",
-      "latest_rank": 137.0,
-      "avg_rank": 148.66666666666666,
-      "std_rank": 39.52291241875535,
-      "rank_range": 150,
-      "net_rank_change": 134.0
-    },
-    {
-      "fips": "54077",
-      "county_name": "Preston County, West Virginia",
-      "state": "WV",
-      "latest_rank": 115.0,
-      "avg_rank": 120.83333333333333,
-      "std_rank": 39.14038447651859,
-      "rank_range": 159,
-      "net_rank_change": -85.0
-    },
-    {
-      "fips": "39009",
-      "county_name": "Athens County, Ohio",
-      "state": "OH",
-      "latest_rank": 77.0,
-      "avg_rank": 96.75,
-      "std_rank": 38.13641781337575,
+      "fips": "20035",
+      "county_name": "Cowley County, Kansas",
+      "state": "KS",
+      "latest_rank": 118.0,
+      "avg_rank": 135.58333333333334,
+      "std_rank": 38.784857245001575,
       "rank_range": 134,
-      "net_rank_change": 131.0
+      "net_rank_change": 46.0
     },
     {
       "fips": "54055",
       "county_name": "Mercer County, West Virginia",
       "state": "WV",
       "latest_rank": 82.0,
-      "avg_rank": 107.83333333333333,
-      "std_rank": 38.064140445815774,
+      "avg_rank": 100.91666666666667,
+      "std_rank": 35.7960341463417,
       "rank_range": 95,
-      "net_rank_change": 74.0
-    },
-    {
-      "fips": "18021",
-      "county_name": "Clay County, Indiana",
-      "state": "IN",
-      "latest_rank": 123.0,
-      "avg_rank": 107.25,
-      "std_rank": 36.8118681455266,
-      "rank_range": 116,
-      "net_rank_change": -102.0
-    },
-    {
-      "fips": "17039",
-      "county_name": "De Witt County, Illinois",
-      "state": "IL",
-      "latest_rank": 114.0,
-      "avg_rank": 136.41666666666666,
-      "std_rank": 35.763003568526294,
-      "rank_range": 127,
-      "net_rank_change": 127.0
-    },
-    {
-      "fips": "39007",
-      "county_name": "Ashtabula County, Ohio",
-      "state": "OH",
-      "latest_rank": 136.0,
-      "avg_rank": 118.25,
-      "std_rank": 35.7036412708844,
-      "rank_range": 103,
-      "net_rank_change": -94.0
-    },
-    {
-      "fips": "01031",
-      "county_name": "Coffee County, Alabama",
-      "state": "AL",
-      "latest_rank": 65.0,
-      "avg_rank": 89.33333333333333,
-      "std_rank": 35.1654100019616,
-      "rank_range": 94,
-      "net_rank_change": 61.0
-    },
-    {
-      "fips": "40111",
-      "county_name": "Okmulgee County, Oklahoma",
-      "state": "OK",
-      "latest_rank": 63.0,
-      "avg_rank": 73.58333333333333,
-      "std_rank": 35.07254386743758,
-      "rank_range": 122,
-      "net_rank_change": -36.0
-    },
-    {
-      "fips": "18169",
-      "county_name": "Wabash County, Indiana",
-      "state": "IN",
-      "latest_rank": 142.0,
-      "avg_rank": 127.41666666666667,
-      "std_rank": 34.95050613063964,
-      "rank_range": 107,
-      "net_rank_change": -88.0
+      "net_rank_change": 88.0
     },
     {
       "fips": "01127",
       "county_name": "Walker County, Alabama",
       "state": "AL",
       "latest_rank": 99.0,
-      "avg_rank": 98.58333333333333,
-      "std_rank": 34.69466381116406,
+      "avg_rank": 96.5,
+      "std_rank": 34.15339727544751,
       "rank_range": 141,
-      "net_rank_change": 16.0
-    },
-    {
-      "fips": "26049",
-      "county_name": "Genesee County, Michigan",
-      "state": "MI",
-      "latest_rank": 122.0,
-      "avg_rank": 115.33333333333333,
-      "std_rank": 33.65151174054803,
-      "rank_range": 125,
-      "net_rank_change": -51.0
+      "net_rank_change": 45.0
     },
     {
       "fips": "36003",
       "county_name": "Allegany County, New York",
       "state": "NY",
       "latest_rank": 39.0,
-      "avg_rank": 55.833333333333336,
-      "std_rank": 33.64475734746346,
+      "avg_rank": 53.75,
+      "std_rank": 34.133760946658604,
       "rank_range": 119,
-      "net_rank_change": 20.0
+      "net_rank_change": 40.0
     },
     {
-      "fips": "42007",
-      "county_name": "Beaver County, Pennsylvania",
-      "state": "PA",
-      "latest_rank": 130.0,
-      "avg_rank": 127.83333333333333,
-      "std_rank": 33.217830188382905,
-      "rank_range": 118,
-      "net_rank_change": 48.0
-    },
-    {
-      "fips": "42121",
-      "county_name": "Venango County, Pennsylvania",
-      "state": "PA",
-      "latest_rank": 132.0,
-      "avg_rank": 131.5,
-      "std_rank": 33.10177144394651,
-      "rank_range": 149,
-      "net_rank_change": 69.0
+      "fips": "01031",
+      "county_name": "Coffee County, Alabama",
+      "state": "AL",
+      "latest_rank": 65.0,
+      "avg_rank": 83.58333333333333,
+      "std_rank": 34.08400940279323,
+      "rank_range": 94,
+      "net_rank_change": 71.0
     },
     {
       "fips": "51111",
       "county_name": "Lunenburg County, Virginia",
       "state": "VA",
       "latest_rank": 47.0,
-      "avg_rank": 64.0,
-      "std_rank": 33.02891295379082,
+      "avg_rank": 63.75,
+      "std_rank": 33.07876275580067,
       "rank_range": 94,
-      "net_rank_change": -4.0
+      "net_rank_change": 87.0
+    },
+    {
+      "fips": "40111",
+      "county_name": "Okmulgee County, Oklahoma",
+      "state": "OK",
+      "latest_rank": 63.0,
+      "avg_rank": 75.91666666666667,
+      "std_rank": 32.35164273848838,
+      "rank_range": 93,
+      "net_rank_change": 86.0
+    },
+    {
+      "fips": "39145",
+      "county_name": "Scioto County, Ohio",
+      "state": "OH",
+      "latest_rank": 112.0,
+      "avg_rank": 111.66666666666667,
+      "std_rank": 32.11154800303958,
+      "rank_range": 134,
+      "net_rank_change": 44.0
+    },
+    {
+      "fips": "17041",
+      "county_name": "Douglas County, Illinois",
+      "state": "IL",
+      "latest_rank": 23.0,
+      "avg_rank": 33.083333333333336,
+      "std_rank": 31.873209991331514,
+      "rank_range": 112,
+      "net_rank_change": 8.0
+    },
+    {
+      "fips": "55037",
+      "county_name": "Florence County, Wisconsin",
+      "state": "WI",
+      "latest_rank": 29.0,
+      "avg_rank": 39.833333333333336,
+      "std_rank": 31.3508977204607,
+      "rank_range": 112,
+      "net_rank_change": 16.0
+    },
+    {
+      "fips": "20009",
+      "county_name": "Barton County, Kansas",
+      "state": "KS",
+      "latest_rank": 147.0,
+      "avg_rank": 160.5,
+      "std_rank": 31.34413095707944,
+      "rank_range": 110,
+      "net_rank_change": 29.0
+    },
+    {
+      "fips": "18121",
+      "county_name": "Parke County, Indiana",
+      "state": "IN",
+      "latest_rank": 88.0,
+      "avg_rank": 97.16666666666667,
+      "std_rank": 30.845165624846988,
+      "rank_range": 117,
+      "net_rank_change": -2.0
+    },
+    {
+      "fips": "26049",
+      "county_name": "Genesee County, Michigan",
+      "state": "MI",
+      "latest_rank": 122.0,
+      "avg_rank": 118.83333333333333,
+      "std_rank": 30.43273755598591,
+      "rank_range": 125,
+      "net_rank_change": -48.0
+    },
+    {
+      "fips": "26071",
+      "county_name": "Iron County, Michigan",
+      "state": "MI",
+      "latest_rank": 12.0,
+      "avg_rank": 21.0,
+      "std_rank": 30.355469778188997,
+      "rank_range": 108,
+      "net_rank_change": 8.0
+    },
+    {
+      "fips": "26129",
+      "county_name": "Ogemaw County, Michigan",
+      "state": "MI",
+      "latest_rank": 86.0,
+      "avg_rank": 90.91666666666667,
+      "std_rank": 29.867764116741874,
+      "rank_range": 123,
+      "net_rank_change": -21.0
+    },
+    {
+      "fips": "36041",
+      "county_name": "Hamilton County, New York",
+      "state": "NY",
+      "latest_rank": 105.0,
+      "avg_rank": 122.0,
+      "std_rank": 29.79017531762016,
+      "rank_range": 78,
+      "net_rank_change": 78.0
+    },
+    {
+      "fips": "42007",
+      "county_name": "Beaver County, Pennsylvania",
+      "state": "PA",
+      "latest_rank": 130.0,
+      "avg_rank": 123.08333333333333,
+      "std_rank": 28.974780047273505,
+      "rank_range": 93,
+      "net_rank_change": -61.0
+    },
+    {
+      "fips": "17117",
+      "county_name": "Macoupin County, Illinois",
+      "state": "IL",
+      "latest_rank": 78.0,
+      "avg_rank": 87.83333333333333,
+      "std_rank": 28.878533497560028,
+      "rank_range": 98,
+      "net_rank_change": 74.0
+    },
+    {
+      "fips": "51089",
+      "county_name": "Henry County, Virginia",
+      "state": "VA",
+      "latest_rank": 133.0,
+      "avg_rank": 131.75,
+      "std_rank": 28.873155194905372,
+      "rank_range": 113,
+      "net_rank_change": 48.0
+    },
+    {
+      "fips": "36063",
+      "county_name": "Niagara County, New York",
+      "state": "NY",
+      "latest_rank": 91.0,
+      "avg_rank": 98.83333333333333,
+      "std_rank": 28.673184600799313,
+      "rank_range": 104,
+      "net_rank_change": 3.0
+    },
+    {
+      "fips": "54077",
+      "county_name": "Preston County, West Virginia",
+      "state": "WV",
+      "latest_rank": 115.0,
+      "avg_rank": 127.16666666666667,
+      "std_rank": 27.265807202873024,
+      "rank_range": 80,
+      "net_rank_change": 74.0
+    },
+    {
+      "fips": "39007",
+      "county_name": "Ashtabula County, Ohio",
+      "state": "OH",
+      "latest_rank": 136.0,
+      "avg_rank": 125.33333333333333,
+      "std_rank": 26.147599692839297,
+      "rank_range": 97,
+      "net_rank_change": -18.0
+    },
+    {
+      "fips": "18169",
+      "county_name": "Wabash County, Indiana",
+      "state": "IN",
+      "latest_rank": 142.0,
+      "avg_rank": 134.0,
+      "std_rank": 25.92997563368767,
+      "rank_range": 85,
+      "net_rank_change": -34.0
+    },
+    {
+      "fips": "26085",
+      "county_name": "Lake County, Michigan",
+      "state": "MI",
+      "latest_rank": 113.0,
+      "avg_rank": 127.5,
+      "std_rank": 25.29283046096804,
+      "rank_range": 82,
+      "net_rank_change": 41.0
+    },
+    {
+      "fips": "42129",
+      "county_name": "Westmoreland County, Pennsylvania",
+      "state": "PA",
+      "latest_rank": 96.0,
+      "avg_rank": 89.91666666666667,
+      "std_rank": 25.292680699556083,
+      "rank_range": 96,
+      "net_rank_change": -50.0
     }
   ],
   "summary_stats": {
     "n_counties": 3152,
-    "avg_rank_std": 99.42811310744584,
-    "stable_top25_count": 26,
-    "watchlist_boundary_count": 114
+    "avg_rank_std": 78.87729807728377,
+    "stable_top25_count": 24,
+    "watchlist_boundary_count": 93
   }
 }

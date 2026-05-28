@@ -1,0 +1,4857 @@
+{
+  "generated_at": "2026-05-21T21:03:10.767951+00:00",
+  "labels_input": "/Users/coryseidel/Desktop/IdeaTests/LandInvest/data/processed/preboom_labels.parquet",
+  "analog_count": 15,
+  "window_count": 30,
+  "county_timeline_rows": 150,
+  "signal_county_windows": 58,
+  "signal_before_hot_county_windows": 55,
+  "window_summaries": [
+    {
+      "analog_group": "boise_treasure_valley",
+      "theme": "migration, amenity, affordability spillover, constrained desirable supply",
+      "window_start": 2011,
+      "window_end": 2015,
+      "window": "2011-2015",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 20,
+      "any_signal_share": 0.36,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.9288112585863875,
+      "avg_preboom_prior_momentum_rank_pct": 0.5051540723948896,
+      "avg_future_growth_residual_rank_pct_5yr": 0.852592306895842,
+      "avg_preboom_land_support_score": 0.7592723424195836,
+      "avg_pre_boom_breakout_5yr": 0.4,
+      "avg_underpriced_growth_5yr": 0.45,
+      "avg_preboom_residual_breakout_5yr": 0.25,
+      "avg_land_optionality_breakout_5yr": 0.35,
+      "avg_preboom_already_hot_flag": 0.44
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "theme": "migration, amenity, affordability spillover, constrained desirable supply",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 22,
+      "any_signal_share": 0.16,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.9840751520211097,
+      "avg_preboom_prior_momentum_rank_pct": 0.8134314011309273,
+      "avg_future_growth_residual_rank_pct_5yr": 0.9536439336967881,
+      "avg_preboom_land_support_score": 0.7592785950061192,
+      "avg_pre_boom_breakout_5yr": 0.13636363636363635,
+      "avg_underpriced_growth_5yr": 0.18181818181818182,
+      "avg_preboom_residual_breakout_5yr": 0.13636363636363635,
+      "avg_land_optionality_breakout_5yr": 0.18181818181818182,
+      "avg_preboom_already_hot_flag": 0.8
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "theme": "jobs, population growth, regional spillover, affordability gradient",
+      "window_start": 2010,
+      "window_end": 2014,
+      "window": "2010-2014",
+      "rows": 30,
+      "counties": 6,
+      "valid_fwd_5yr": 30,
+      "any_signal_share": 0.5333333333333333,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.901229521211421,
+      "avg_preboom_prior_momentum_rank_pct": 0.5447040758249545,
+      "avg_future_growth_residual_rank_pct_5yr": 0.9025389297033811,
+      "avg_preboom_land_support_score": 0.5430958226959454,
+      "avg_pre_boom_breakout_5yr": 0.4,
+      "avg_underpriced_growth_5yr": 0.06666666666666667,
+      "avg_preboom_residual_breakout_5yr": 0.5,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.23333333333333334
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "theme": "jobs, population growth, regional spillover, affordability gradient",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "rows": 30,
+      "counties": 6,
+      "valid_fwd_5yr": 30,
+      "any_signal_share": 0.36666666666666664,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.8879223135218094,
+      "avg_preboom_prior_momentum_rank_pct": 0.7666279565986994,
+      "avg_future_growth_residual_rank_pct_5yr": 0.8101398363429752,
+      "avg_preboom_land_support_score": 0.5431029614825953,
+      "avg_pre_boom_breakout_5yr": 0.26666666666666666,
+      "avg_underpriced_growth_5yr": 0.03333333333333333,
+      "avg_preboom_residual_breakout_5yr": 0.36666666666666664,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.6333333333333333
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "theme": "amenity geography, high-income migration, job centers, supply pressure",
+      "window_start": 2010,
+      "window_end": 2014,
+      "window": "2010-2014",
+      "rows": 40,
+      "counties": 8,
+      "valid_fwd_5yr": 40,
+      "any_signal_share": 0.35,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.9340425518548615,
+      "avg_preboom_prior_momentum_rank_pct": 0.7213077184426604,
+      "avg_future_growth_residual_rank_pct_5yr": 0.9187986008059911,
+      "avg_preboom_land_support_score": 0.6948269059871129,
+      "avg_pre_boom_breakout_5yr": 0.3,
+      "avg_underpriced_growth_5yr": 0.175,
+      "avg_preboom_residual_breakout_5yr": 0.35,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.55
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "theme": "amenity geography, high-income migration, job centers, supply pressure",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "rows": 40,
+      "counties": 8,
+      "valid_fwd_5yr": 40,
+      "any_signal_share": 0.075,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.840290723597416,
+      "avg_preboom_prior_momentum_rank_pct": 0.8981682519721617,
+      "avg_future_growth_residual_rank_pct_5yr": 0.6225518479524486,
+      "avg_preboom_land_support_score": 0.6948329624091143,
+      "avg_pre_boom_breakout_5yr": 0.025,
+      "avg_underpriced_growth_5yr": 0.025,
+      "avg_preboom_residual_breakout_5yr": 0.05,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.875
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "theme": "generalization beyond the obvious Boise metro",
+      "window_start": 2011,
+      "window_end": 2015,
+      "window": "2011-2015",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 24,
+      "any_signal_share": 0.44,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.8389044149945232,
+      "avg_preboom_prior_momentum_rank_pct": 0.39910580466046214,
+      "avg_future_growth_residual_rank_pct_5yr": 0.7430160229685748,
+      "avg_preboom_land_support_score": 0.7122089311893628,
+      "avg_pre_boom_breakout_5yr": 0.25,
+      "avg_underpriced_growth_5yr": 0.3333333333333333,
+      "avg_preboom_residual_breakout_5yr": 0.20833333333333334,
+      "avg_land_optionality_breakout_5yr": 0.16666666666666666,
+      "avg_preboom_already_hot_flag": 0.24
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "theme": "generalization beyond the obvious Boise metro",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.36,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.938780748161522,
+      "avg_preboom_prior_momentum_rank_pct": 0.6345663102127458,
+      "avg_future_growth_residual_rank_pct_5yr": 0.8860101261420374,
+      "avg_preboom_land_support_score": 0.7122145620133736,
+      "avg_pre_boom_breakout_5yr": 0.28,
+      "avg_underpriced_growth_5yr": 0.28,
+      "avg_preboom_residual_breakout_5yr": 0.28,
+      "avg_land_optionality_breakout_5yr": 0.16,
+      "avg_preboom_already_hot_flag": 0.52
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "theme": "tech/jobs growth, affordability spillover, Hill Country amenity migration",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.24,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.7996959806754353,
+      "avg_preboom_prior_momentum_rank_pct": 0.8125813911045203,
+      "avg_future_growth_residual_rank_pct_5yr": 0.7068723910964413,
+      "avg_preboom_land_support_score": 0.605532382402941,
+      "avg_pre_boom_breakout_5yr": 0.12,
+      "avg_underpriced_growth_5yr": 0.12,
+      "avg_preboom_residual_breakout_5yr": 0.24,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.72
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "theme": "tech/jobs growth, affordability spillover, Hill Country amenity migration",
+      "window_start": 2014,
+      "window_end": 2018,
+      "window": "2014-2018",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.0,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.7423286789085976,
+      "avg_preboom_prior_momentum_rank_pct": 0.8570121284120646,
+      "avg_future_growth_residual_rank_pct_5yr": 0.6369061590969701,
+      "avg_preboom_land_support_score": 0.6055386428729043,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.88
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "theme": "university/research jobs, regional spillover, affordability gradient",
+      "window_start": 2011,
+      "window_end": 2015,
+      "window": "2011-2015",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.04,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.6464432797181562,
+      "avg_preboom_prior_momentum_rank_pct": 0.4238115042126094,
+      "avg_future_growth_residual_rank_pct_5yr": 0.6672764964043729,
+      "avg_preboom_land_support_score": 0.47391948624580904,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.04,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.04
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "theme": "university/research jobs, regional spillover, affordability gradient",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.04,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.6825815945993847,
+      "avg_preboom_prior_momentum_rank_pct": 0.5877944523520239,
+      "avg_future_growth_residual_rank_pct_5yr": 0.6878952999658499,
+      "avg_preboom_land_support_score": 0.4739238077352861,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.04,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.24
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "theme": "corporate anchor growth, logistics, affordability, regional spillover",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "rows": 20,
+      "counties": 4,
+      "valid_fwd_5yr": 20,
+      "any_signal_share": 0.05,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.6972290128212366,
+      "avg_preboom_prior_momentum_rank_pct": 0.6044025392521563,
+      "avg_future_growth_residual_rank_pct_5yr": 0.7389688985500631,
+      "avg_preboom_land_support_score": 0.5581283354468474,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.05,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.25
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "theme": "corporate anchor growth, logistics, affordability, regional spillover",
+      "window_start": 2014,
+      "window_end": 2018,
+      "window": "2014-2018",
+      "rows": 20,
+      "counties": 4,
+      "valid_fwd_5yr": 20,
+      "any_signal_share": 0.0,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.7347605210822374,
+      "avg_preboom_prior_momentum_rank_pct": 0.6749289327799957,
+      "avg_future_growth_residual_rank_pct_5yr": 0.8128247844335792,
+      "avg_preboom_land_support_score": 0.5581357137354621,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.45
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "theme": "jobs, amenity geography, high-growth metro spillover, constrained valleys",
+      "window_start": 2011,
+      "window_end": 2015,
+      "window": "2011-2015",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.32,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.9248650633396415,
+      "avg_preboom_prior_momentum_rank_pct": 0.6957742831478199,
+      "avg_future_growth_residual_rank_pct_5yr": 0.8783445719972685,
+      "avg_preboom_land_support_score": 0.6552135458682511,
+      "avg_pre_boom_breakout_5yr": 0.32,
+      "avg_underpriced_growth_5yr": 0.08,
+      "avg_preboom_residual_breakout_5yr": 0.2,
+      "avg_land_optionality_breakout_5yr": 0.08,
+      "avg_preboom_already_hot_flag": 0.68
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "theme": "jobs, amenity geography, high-growth metro spillover, constrained valleys",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.0,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.9203154101977671,
+      "avg_preboom_prior_momentum_rank_pct": 0.9302028672696122,
+      "avg_future_growth_residual_rank_pct_5yr": 0.8333405729169954,
+      "avg_preboom_land_support_score": 0.655218562984544,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 1.0
+    },
+    {
+      "analog_group": "phoenix_sun_corridor",
+      "theme": "Sun Belt migration, affordability spillover, logistics/manufacturing expansion",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "rows": 15,
+      "counties": 3,
+      "valid_fwd_5yr": 15,
+      "any_signal_share": 0.0,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.9075537126209241,
+      "avg_preboom_prior_momentum_rank_pct": 0.92714587678107,
+      "avg_future_growth_residual_rank_pct_5yr": 0.6326433906164219,
+      "avg_preboom_land_support_score": 0.7137511004133569,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 1.0
+    },
+    {
+      "analog_group": "phoenix_sun_corridor",
+      "theme": "Sun Belt migration, affordability spillover, logistics/manufacturing expansion",
+      "window_start": 2015,
+      "window_end": 2019,
+      "window": "2015-2019",
+      "rows": 15,
+      "counties": 3,
+      "valid_fwd_5yr": 15,
+      "any_signal_share": 0.0,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.8612827227005407,
+      "avg_preboom_prior_momentum_rank_pct": 0.891586654733577,
+      "avg_future_growth_residual_rank_pct_5yr": 0.7651319942684137,
+      "avg_preboom_land_support_score": 0.7137525631319755,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 1.0
+    },
+    {
+      "analog_group": "inland_empire_logistics",
+      "theme": "logistics, affordability spillover from coastal California, warehouse/job growth",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "rows": 10,
+      "counties": 2,
+      "valid_fwd_5yr": 10,
+      "any_signal_share": 0.1,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.8677282833243437,
+      "avg_preboom_prior_momentum_rank_pct": 0.9128097802114608,
+      "avg_future_growth_residual_rank_pct_5yr": 0.4990175051512919,
+      "avg_preboom_land_support_score": 0.732517933902292,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.1,
+      "avg_preboom_residual_breakout_5yr": 0.1,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.9
+    },
+    {
+      "analog_group": "inland_empire_logistics",
+      "theme": "logistics, affordability spillover from coastal California, warehouse/job growth",
+      "window_start": 2014,
+      "window_end": 2018,
+      "window": "2014-2018",
+      "rows": 10,
+      "counties": 2,
+      "valid_fwd_5yr": 10,
+      "any_signal_share": 0.0,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.7498423093618979,
+      "avg_preboom_prior_momentum_rank_pct": 0.9174245958273248,
+      "avg_future_growth_residual_rank_pct_5yr": 0.4288561326910494,
+      "avg_preboom_land_support_score": 0.7325218846135932,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 1.0
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "theme": "Florida migration, coastal/space-economy growth, retiree and amenity demand",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.0,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.6948594286287165,
+      "avg_preboom_prior_momentum_rank_pct": 0.9253286639979514,
+      "avg_future_growth_residual_rank_pct_5yr": 0.37311676529981425,
+      "avg_preboom_land_support_score": 0.5759506991504909,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.96
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "theme": "Florida migration, coastal/space-economy growth, retiree and amenity demand",
+      "window_start": 2015,
+      "window_end": 2019,
+      "window": "2015-2019",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.12,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.7289210708992784,
+      "avg_preboom_prior_momentum_rank_pct": 0.750256458146007,
+      "avg_future_growth_residual_rank_pct_5yr": 0.5137269664541914,
+      "avg_preboom_land_support_score": 0.5759522576698953,
+      "avg_pre_boom_breakout_5yr": 0.12,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.08,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.64
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "theme": "finance/job-center spillover, affordability gradient, Southeast migration",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "rows": 30,
+      "counties": 6,
+      "valid_fwd_5yr": 30,
+      "any_signal_share": 0.2,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.7820359296325778,
+      "avg_preboom_prior_momentum_rank_pct": 0.5951797964304456,
+      "avg_future_growth_residual_rank_pct_5yr": 0.7585211474180784,
+      "avg_preboom_land_support_score": 0.4512238990663907,
+      "avg_pre_boom_breakout_5yr": 0.03333333333333333,
+      "avg_underpriced_growth_5yr": 0.16666666666666666,
+      "avg_preboom_residual_breakout_5yr": 0.03333333333333333,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.4
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "theme": "finance/job-center spillover, affordability gradient, Southeast migration",
+      "window_start": 2014,
+      "window_end": 2018,
+      "window": "2014-2018",
+      "rows": 30,
+      "counties": 6,
+      "valid_fwd_5yr": 30,
+      "any_signal_share": 0.0,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.7989224387636379,
+      "avg_preboom_prior_momentum_rank_pct": 0.7823265253024488,
+      "avg_future_growth_residual_rank_pct_5yr": 0.7672207434180118,
+      "avg_preboom_land_support_score": 0.45123058341341515,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.6666666666666666
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "theme": "Texas jobs, logistics, corporate relocation, exurban affordability spillover",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.12,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.698962947636171,
+      "avg_preboom_prior_momentum_rank_pct": 0.8543397016556099,
+      "avg_future_growth_residual_rank_pct_5yr": 0.528051686263545,
+      "avg_preboom_land_support_score": 0.635408139831794,
+      "avg_pre_boom_breakout_5yr": 0.04,
+      "avg_underpriced_growth_5yr": 0.12,
+      "avg_preboom_residual_breakout_5yr": 0.04,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.84
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "theme": "Texas jobs, logistics, corporate relocation, exurban affordability spillover",
+      "window_start": 2015,
+      "window_end": 2019,
+      "window": "2015-2019",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.0,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.5695755982832643,
+      "avg_preboom_prior_momentum_rank_pct": 0.8190987280459128,
+      "avg_future_growth_residual_rank_pct_5yr": 0.40287133978561895,
+      "avg_preboom_land_support_score": 0.6354103689566999,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.8
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "theme": "advanced manufacturing, interstate access, affordability, Southeast industrial growth",
+      "window_start": 2012,
+      "window_end": 2016,
+      "window": "2012-2016",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.04,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.6629473280873163,
+      "avg_preboom_prior_momentum_rank_pct": 0.5625240757931449,
+      "avg_future_growth_residual_rank_pct_5yr": 0.5780592355827765,
+      "avg_preboom_land_support_score": 0.5527610620649566,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.04,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.2
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "theme": "advanced manufacturing, interstate access, affordability, Southeast industrial growth",
+      "window_start": 2014,
+      "window_end": 2018,
+      "window": "2014-2018",
+      "rows": 25,
+      "counties": 5,
+      "valid_fwd_5yr": 25,
+      "any_signal_share": 0.04,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.6616178777655695,
+      "avg_preboom_prior_momentum_rank_pct": 0.6561000752626902,
+      "avg_future_growth_residual_rank_pct_5yr": 0.597025738878803,
+      "avg_preboom_land_support_score": 0.5527685223583586,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.04,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.36
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "theme": "port/logistics growth, coastal Southeast migration, manufacturing/logistics spillover",
+      "window_start": 2013,
+      "window_end": 2017,
+      "window": "2013-2017",
+      "rows": 30,
+      "counties": 6,
+      "valid_fwd_5yr": 30,
+      "any_signal_share": 0.0,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.539657685125378,
+      "avg_preboom_prior_momentum_rank_pct": 0.6299320671107507,
+      "avg_future_growth_residual_rank_pct_5yr": 0.4317209590774926,
+      "avg_preboom_land_support_score": 0.41570454604918194,
+      "avg_pre_boom_breakout_5yr": 0.0,
+      "avg_underpriced_growth_5yr": 0.0,
+      "avg_preboom_residual_breakout_5yr": 0.0,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.43333333333333335
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "theme": "port/logistics growth, coastal Southeast migration, manufacturing/logistics spillover",
+      "window_start": 2015,
+      "window_end": 2019,
+      "window": "2015-2019",
+      "rows": 30,
+      "counties": 6,
+      "valid_fwd_5yr": 30,
+      "any_signal_share": 0.16666666666666666,
+      "avg_preboom_future_growth_rank_pct_5yr": 0.6248931292529897,
+      "avg_preboom_prior_momentum_rank_pct": 0.6069435993978691,
+      "avg_future_growth_residual_rank_pct_5yr": 0.5462043780095894,
+      "avg_preboom_land_support_score": 0.415704959215064,
+      "avg_pre_boom_breakout_5yr": 0.06666666666666667,
+      "avg_underpriced_growth_5yr": 0.06666666666666667,
+      "avg_preboom_residual_breakout_5yr": 0.06666666666666667,
+      "avg_land_optionality_breakout_5yr": 0.0,
+      "avg_preboom_already_hot_flag": 0.3333333333333333
+    }
+  ],
+  "county_timelines": [
+    {
+      "analog_group": "boise_treasure_valley",
+      "window": "2011-2015",
+      "fips": "16001",
+      "county": "Ada County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9929217459693276,
+      "avg_future_growth_rank_pct_5yr": 0.9655085601333677,
+      "avg_prior_momentum_rank_pct": 0.6610154150465728,
+      "avg_residual_rank_pct_5yr": 0.9025748466462584,
+      "avg_land_support_score": 0.8331755565004808,
+      "pre_boom_breakout_years": [
+        2011,
+        2012
+      ],
+      "underpriced_growth_years": [
+        2011,
+        2012
+      ],
+      "residual_breakout_years": [
+        2011
+      ],
+      "land_breakout_years": [
+        2011,
+        2012
+      ]
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "window": "2011-2015",
+      "fips": "16015",
+      "county": "Boise County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9964608729846638,
+      "avg_future_growth_rank_pct_5yr": 0.9573652568846894,
+      "avg_prior_momentum_rank_pct": 0.615461532460092,
+      "avg_residual_rank_pct_5yr": 0.8945123551428493,
+      "avg_land_support_score": 0.7638520397712023,
+      "pre_boom_breakout_years": [
+        2011,
+        2012
+      ],
+      "underpriced_growth_years": [
+        2011,
+        2012
+      ],
+      "residual_breakout_years": [],
+      "land_breakout_years": [
+        2011,
+        2012
+      ]
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "window": "2011-2015",
+      "fips": "16027",
+      "county": "Canyon County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9980338183248132,
+      "avg_future_growth_rank_pct_5yr": 0.9934000463241371,
+      "avg_prior_momentum_rank_pct": 0.6260306499159364,
+      "avg_residual_rank_pct_5yr": 0.9609700861543745,
+      "avg_land_support_score": 0.7284072340488287,
+      "pre_boom_breakout_years": [
+        2011,
+        2012
+      ],
+      "underpriced_growth_years": [
+        2011,
+        2012
+      ],
+      "residual_breakout_years": [
+        2011,
+        2012
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "window": "2011-2015",
+      "fips": "16039",
+      "county": "Elmore County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2013,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": true,
+      "signal_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.9972473456547385,
+      "avg_future_growth_rank_pct_5yr": 0.7989711710033556,
+      "avg_prior_momentum_rank_pct": 0.23286732098417287,
+      "avg_residual_rank_pct_5yr": 0.6523119396398858,
+      "avg_land_support_score": 0.7894187018310992,
+      "pre_boom_breakout_years": [
+        2014,
+        2015
+      ],
+      "underpriced_growth_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "residual_breakout_years": [
+        2014,
+        2015
+      ],
+      "land_breakout_years": [
+        2013,
+        2014,
+        2015
+      ]
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "window": "2011-2015",
+      "fips": "16045",
+      "county": "Gem County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": null,
+      "avg_future_growth_rank_pct_5yr": null,
+      "avg_prior_momentum_rank_pct": 0.3903954435676739,
+      "avg_residual_rank_pct_5yr": null,
+      "avg_land_support_score": 0.6815081799463069,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "window": "2013-2017",
+      "fips": "16001",
+      "county": "Ada County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9942780208683945,
+      "avg_future_growth_rank_pct_5yr": 0.9795600647012147,
+      "avg_prior_momentum_rank_pct": 0.9320854051244,
+      "avg_residual_rank_pct_5yr": 0.9369433139577428,
+      "avg_land_support_score": 0.8331800132078829,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "window": "2013-2017",
+      "fips": "16015",
+      "county": "Boise County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.998653651969034,
+      "avg_future_growth_rank_pct_5yr": 0.9869006763458058,
+      "avg_prior_momentum_rank_pct": 0.9117084292786644,
+      "avg_residual_rank_pct_5yr": 0.973896084441936,
+      "avg_land_support_score": 0.7638566138731273,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "window": "2013-2017",
+      "fips": "16027",
+      "county": "Canyon County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.999326825984517,
+      "avg_future_growth_rank_pct_5yr": 0.9952197432168187,
+      "avg_prior_momentum_rank_pct": 0.9767403837396991,
+      "avg_residual_rank_pct_5yr": 0.9726385240263312,
+      "avg_land_support_score": 0.7284166838794823,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "window": "2013-2017",
+      "fips": "16039",
+      "county": "Elmore County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2013,
+      "earliest_already_hot_year": 2017,
+      "signal_before_hot": true,
+      "signal_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "already_hot_years": [
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9989902389767755,
+      "avg_future_growth_rank_pct_5yr": 0.9689215508593223,
+      "avg_prior_momentum_rank_pct": 0.48564357630349103,
+      "avg_residual_rank_pct_5yr": 0.9144352112846376,
+      "avg_land_support_score": 0.7894231585385013,
+      "pre_boom_breakout_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "underpriced_growth_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "residual_breakout_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "land_breakout_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ]
+    },
+    {
+      "analog_group": "boise_treasure_valley",
+      "window": "2013-2017",
+      "fips": "16045",
+      "county": "Gem County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 1.0,
+      "avg_future_growth_rank_pct_5yr": 0.9983215844243034,
+      "avg_prior_momentum_rank_pct": 0.7609792112083819,
+      "avg_residual_rank_pct_5yr": 0.9953004363880497,
+      "avg_land_support_score": 0.6815165055316017,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2010-2014",
+      "fips": "47037",
+      "county": "Davidson County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": 2010,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2010,
+        2011,
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9838514331853048,
+      "avg_future_growth_rank_pct_5yr": 0.9528945150481223,
+      "avg_prior_momentum_rank_pct": 0.5035361310208228,
+      "avg_residual_rank_pct_5yr": 0.9525583524587373,
+      "avg_land_support_score": 0.7230303789218306,
+      "pre_boom_breakout_years": [
+        2010,
+        2011,
+        2012
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2011,
+        2012,
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2010-2014",
+      "fips": "47119",
+      "county": "Maury County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9777247414478918,
+      "avg_future_growth_rank_pct_5yr": 0.9402832635099585,
+      "avg_prior_momentum_rank_pct": 0.5321515640656811,
+      "avg_residual_rank_pct_5yr": 0.9281934092281178,
+      "avg_land_support_score": 0.42378722203260255,
+      "pre_boom_breakout_years": [
+        2011,
+        2012
+      ],
+      "underpriced_growth_years": [
+        2011
+      ],
+      "residual_breakout_years": [
+        2011,
+        2012,
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2010-2014",
+      "fips": "47149",
+      "county": "Rutherford County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9689140088817118,
+      "avg_future_growth_rank_pct_5yr": 0.9110602882135563,
+      "avg_prior_momentum_rank_pct": 0.4985705117073995,
+      "avg_residual_rank_pct_5yr": 0.9106458641788091,
+      "avg_land_support_score": 0.4601358094167348,
+      "pre_boom_breakout_years": [
+        2011,
+        2012,
+        2013
+      ],
+      "underpriced_growth_years": [
+        2012
+      ],
+      "residual_breakout_years": [
+        2011,
+        2012,
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2010-2014",
+      "fips": "47165",
+      "county": "Sumner County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013,
+        2014
+      ],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.9419252187748608,
+      "avg_future_growth_rank_pct_5yr": 0.8611505749025238,
+      "avg_prior_momentum_rank_pct": 0.4981354662799962,
+      "avg_residual_rank_pct_5yr": 0.8690235975261998,
+      "avg_land_support_score": 0.6677378904103046,
+      "pre_boom_breakout_years": [
+        2012,
+        2013
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2012,
+        2013,
+        2014
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2010-2014",
+      "fips": "47187",
+      "county": "Williamson County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8976945244956772,
+      "avg_future_growth_rank_pct_5yr": 0.8517866045805885,
+      "avg_prior_momentum_rank_pct": 0.6695048538199639,
+      "avg_residual_rank_pct_5yr": 0.857794908959524,
+      "avg_land_support_score": 0.34938977964830353,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2010-2014",
+      "fips": "47189",
+      "county": "Wilson County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9265240209931369,
+      "avg_future_growth_rank_pct_5yr": 0.8902018810137754,
+      "avg_prior_momentum_rank_pct": 0.5663259280558637,
+      "avg_residual_rank_pct_5yr": 0.8970174458688996,
+      "avg_land_support_score": 0.6344938557458955,
+      "pre_boom_breakout_years": [
+        2012,
+        2013
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2011,
+        2012,
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2012-2016",
+      "fips": "47037",
+      "county": "Davidson County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9838514331853048,
+      "avg_future_growth_rank_pct_5yr": 0.8991751514186574,
+      "avg_prior_momentum_rank_pct": 0.7720323613606476,
+      "avg_residual_rank_pct_5yr": 0.7569041245637111,
+      "avg_land_support_score": 0.7230391706576402,
+      "pre_boom_breakout_years": [
+        2012
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2012,
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2012-2016",
+      "fips": "47119",
+      "county": "Maury County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9777247414478918,
+      "avg_future_growth_rank_pct_5yr": 0.9620223678018809,
+      "avg_prior_momentum_rank_pct": 0.8157623372728574,
+      "avg_residual_rank_pct_5yr": 0.9475187828068146,
+      "avg_land_support_score": 0.4237953668131941,
+      "pre_boom_breakout_years": [
+        2012
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2012,
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2012-2016",
+      "fips": "47149",
+      "county": "Rutherford County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9689140088817118,
+      "avg_future_growth_rank_pct_5yr": 0.9282574856453689,
+      "avg_prior_momentum_rank_pct": 0.7185183833570965,
+      "avg_residual_rank_pct_5yr": 0.8509309345675842,
+      "avg_land_support_score": 0.4601407956848318,
+      "pre_boom_breakout_years": [
+        2012,
+        2013
+      ],
+      "underpriced_growth_years": [
+        2012
+      ],
+      "residual_breakout_years": [
+        2012,
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2012-2016",
+      "fips": "47165",
+      "county": "Sumner County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013,
+        2014
+      ],
+      "already_hot_years": [
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9419252187748608,
+      "avg_future_growth_rank_pct_5yr": 0.8996693228691381,
+      "avg_prior_momentum_rank_pct": 0.669420597905201,
+      "avg_residual_rank_pct_5yr": 0.8432398097328969,
+      "avg_land_support_score": 0.6677459340773654,
+      "pre_boom_breakout_years": [
+        2012,
+        2013
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2012,
+        2013,
+        2014
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2012-2016",
+      "fips": "47187",
+      "county": "Williamson County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8709810387469085,
+      "avg_future_growth_rank_pct_5yr": 0.8130479003200101,
+      "avg_prior_momentum_rank_pct": 0.8547270172463678,
+      "avg_residual_rank_pct_5yr": 0.7644710045255874,
+      "avg_land_support_score": 0.34939574534661794,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "nashville_middle_tennessee",
+      "window": "2012-2016",
+      "fips": "47189",
+      "county": "Wilson County, Tennessee",
+      "state_abbr": "TN",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9265240209931369,
+      "avg_future_growth_rank_pct_5yr": 0.8253616530758008,
+      "avg_prior_momentum_rank_pct": 0.7693070424500256,
+      "avg_residual_rank_pct_5yr": 0.6977743618612576,
+      "avg_land_support_score": 0.6345007563159222,
+      "pre_boom_breakout_years": [
+        2012,
+        2013
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2012,
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2010-2014",
+      "fips": "08001",
+      "county": "Adams County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": 2010,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": true,
+      "signal_years": [
+        2010,
+        2011
+      ],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9931368591037545,
+      "avg_future_growth_rank_pct_5yr": 0.9824939965759206,
+      "avg_prior_momentum_rank_pct": 0.6995558177523595,
+      "avg_residual_rank_pct_5yr": 0.9762150521769932,
+      "avg_land_support_score": 0.7011164575352251,
+      "pre_boom_breakout_years": [
+        2010,
+        2011
+      ],
+      "underpriced_growth_years": [
+        2010,
+        2011
+      ],
+      "residual_breakout_years": [
+        2010,
+        2011
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2010-2014",
+      "fips": "08005",
+      "county": "Arapahoe County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": 2010,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": true,
+      "signal_years": [
+        2010,
+        2011
+      ],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9836829836829837,
+      "avg_future_growth_rank_pct_5yr": 0.9705652744234176,
+      "avg_prior_momentum_rank_pct": 0.7007869802886759,
+      "avg_residual_rank_pct_5yr": 0.9572775754572163,
+      "avg_land_support_score": 0.7036247937797911,
+      "pre_boom_breakout_years": [
+        2010,
+        2011
+      ],
+      "underpriced_growth_years": [
+        2010,
+        2011
+      ],
+      "residual_breakout_years": [
+        2010,
+        2011
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2010-2014",
+      "fips": "08031",
+      "county": "Denver County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": 2010,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": true,
+      "signal_years": [
+        2010,
+        2011
+      ],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9831892411143132,
+      "avg_future_growth_rank_pct_5yr": 0.9688546222087566,
+      "avg_prior_momentum_rank_pct": 0.7514838255479361,
+      "avg_residual_rank_pct_5yr": 0.9629470450801451,
+      "avg_land_support_score": 0.7310947238998707,
+      "pre_boom_breakout_years": [
+        2010,
+        2011
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2010,
+        2011
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2010-2014",
+      "fips": "08035",
+      "county": "Douglas County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": 2010,
+      "earliest_already_hot_year": 2011,
+      "signal_before_hot": true,
+      "signal_years": [
+        2010
+      ],
+      "already_hot_years": [
+        2011,
+        2012,
+        2013,
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9442843419788665,
+      "avg_future_growth_rank_pct_5yr": 0.8684639321810972,
+      "avg_prior_momentum_rank_pct": 0.8734842127854021,
+      "avg_residual_rank_pct_5yr": 0.8084643054959845,
+      "avg_land_support_score": 0.6586732297147109,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2010
+      ],
+      "residual_breakout_years": [
+        2010
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2010-2014",
+      "fips": "08041",
+      "county": "El Paso County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": 2014,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": true,
+      "signal_years": [
+        2014
+      ],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.905727923627685,
+      "avg_future_growth_rank_pct_5yr": 0.8156687430530278,
+      "avg_prior_momentum_rank_pct": 0.5668080538062863,
+      "avg_residual_rank_pct_5yr": 0.7875086070673062,
+      "avg_land_support_score": 0.6831906748714298,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2014
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2010-2014",
+      "fips": "08059",
+      "county": "Jefferson County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": 2010,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2010,
+        2011,
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.964876867178038,
+      "avg_future_growth_rank_pct_5yr": 0.9546748784791849,
+      "avg_prior_momentum_rank_pct": 0.7207013637685142,
+      "avg_residual_rank_pct_5yr": 0.9499671881790128,
+      "avg_land_support_score": 0.7198721032745399,
+      "pre_boom_breakout_years": [
+        2010,
+        2011,
+        2012
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2010,
+        2011,
+        2012
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2010-2014",
+      "fips": "08069",
+      "county": "Larimer County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": 2010,
+      "earliest_already_hot_year": 2011,
+      "signal_before_hot": true,
+      "signal_years": [
+        2010
+      ],
+      "already_hot_years": [
+        2011,
+        2012,
+        2013,
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9434800161485668,
+      "avg_future_growth_rank_pct_5yr": 0.9270490031387286,
+      "avg_prior_momentum_rank_pct": 0.7510664404070817,
+      "avg_residual_rank_pct_5yr": 0.9300656875187929,
+      "avg_land_support_score": 0.6354463884820439,
+      "pre_boom_breakout_years": [
+        2010
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2010
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2010-2014",
+      "fips": "08123",
+      "county": "Weld County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": 2010,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": true,
+      "signal_years": [
+        2010,
+        2011
+      ],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9927331449333872,
+      "avg_future_growth_rank_pct_5yr": 0.9845699647787598,
+      "avg_prior_momentum_rank_pct": 0.7065750531850269,
+      "avg_residual_rank_pct_5yr": 0.9779433454724782,
+      "avg_land_support_score": 0.7255968763392915,
+      "pre_boom_breakout_years": [
+        2010,
+        2011
+      ],
+      "underpriced_growth_years": [
+        2010,
+        2011
+      ],
+      "residual_breakout_years": [
+        2010,
+        2011
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2012-2016",
+      "fips": "08001",
+      "county": "Adams County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9931368591037545,
+      "avg_future_growth_rank_pct_5yr": 0.9095767229961295,
+      "avg_prior_momentum_rank_pct": 0.9290702653930859,
+      "avg_residual_rank_pct_5yr": 0.6543040039289184,
+      "avg_land_support_score": 0.7011254737773487,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2012-2016",
+      "fips": "08005",
+      "county": "Arapahoe County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9756801319043693,
+      "avg_future_growth_rank_pct_5yr": 0.8594012002139719,
+      "avg_prior_momentum_rank_pct": 0.9530863413742487,
+      "avg_residual_rank_pct_5yr": 0.6172659354515455,
+      "avg_land_support_score": 0.703633403854003,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2012-2016",
+      "fips": "08031",
+      "county": "Denver County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9781994348001615,
+      "avg_future_growth_rank_pct_5yr": 0.8109845104534109,
+      "avg_prior_momentum_rank_pct": 0.9466300715513801,
+      "avg_residual_rank_pct_5yr": 0.6237617215203256,
+      "avg_land_support_score": 0.7310993288499916,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2012-2016",
+      "fips": "08035",
+      "county": "Douglas County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8973619126133553,
+      "avg_future_growth_rank_pct_5yr": 0.705031150714549,
+      "avg_prior_momentum_rank_pct": 0.9311378807455541,
+      "avg_residual_rank_pct_5yr": 0.45559526897692953,
+      "avg_land_support_score": 0.6586765716025916,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2012-2016",
+      "fips": "08041",
+      "county": "El Paso County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": 2014,
+      "earliest_already_hot_year": 2016,
+      "signal_before_hot": true,
+      "signal_years": [
+        2014,
+        2015
+      ],
+      "already_hot_years": [
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.905727923627685,
+      "avg_future_growth_rank_pct_5yr": 0.8777282507772153,
+      "avg_prior_momentum_rank_pct": 0.6913868837291305,
+      "avg_residual_rank_pct_5yr": 0.71477810801476,
+      "avg_land_support_score": 0.6831945685992581,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2015
+      ],
+      "residual_breakout_years": [
+        2014
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2012-2016",
+      "fips": "08059",
+      "county": "Jefferson County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.964876867178038,
+      "avg_future_growth_rank_pct_5yr": 0.8768189291432422,
+      "avg_prior_momentum_rank_pct": 0.877713768409879,
+      "avg_residual_rank_pct_5yr": 0.6539939810545479,
+      "avg_land_support_score": 0.7198754057452815,
+      "pre_boom_breakout_years": [
+        2012
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2012
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2012-2016",
+      "fips": "08069",
+      "county": "Larimer County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9434800161485668,
+      "avg_future_growth_rank_pct_5yr": 0.7756150753887379,
+      "avg_prior_momentum_rank_pct": 0.8942590310512258,
+      "avg_residual_rank_pct_5yr": 0.5955722567152915,
+      "avg_land_support_score": 0.6354537714835775,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "colorado_front_range",
+      "window": "2012-2016",
+      "fips": "08123",
+      "county": "Weld County, Colorado",
+      "state_abbr": "CO",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9927331449333872,
+      "avg_future_growth_rank_pct_5yr": 0.907169949092071,
+      "avg_prior_momentum_rank_pct": 0.962061773522788,
+      "avg_residual_rank_pct_5yr": 0.6651435079572694,
+      "avg_land_support_score": 0.7256051753608622,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "window": "2011-2015",
+      "fips": "16005",
+      "county": "Bannock County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2014,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": true,
+      "signal_years": [
+        2014,
+        2015
+      ],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.9563507668108533,
+      "avg_future_growth_rank_pct_5yr": 0.63952545909888,
+      "avg_prior_momentum_rank_pct": 0.30096273282272146,
+      "avg_residual_rank_pct_5yr": 0.5614463370613636,
+      "avg_land_support_score": 0.7504946184627286,
+      "pre_boom_breakout_years": [
+        2015
+      ],
+      "underpriced_growth_years": [
+        2014,
+        2015
+      ],
+      "residual_breakout_years": [
+        2015
+      ],
+      "land_breakout_years": [
+        2014,
+        2015
+      ]
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "window": "2011-2015",
+      "fips": "16019",
+      "county": "Bonneville County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013,
+        2014,
+        2015
+      ],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.9901690916240661,
+      "avg_future_growth_rank_pct_5yr": 0.8672514946515493,
+      "avg_prior_momentum_rank_pct": 0.22246303348532695,
+      "avg_residual_rank_pct_5yr": 0.7445485180048728,
+      "avg_land_support_score": 0.6692932736011326,
+      "pre_boom_breakout_years": [
+        2014,
+        2015
+      ],
+      "underpriced_growth_years": [
+        2012,
+        2013,
+        2014,
+        2015
+      ],
+      "residual_breakout_years": [
+        2014,
+        2015
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "window": "2011-2015",
+      "fips": "16055",
+      "county": "Kootenai County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9913488006291782,
+      "avg_future_growth_rank_pct_5yr": 0.9609345682272673,
+      "avg_prior_momentum_rank_pct": 0.5985407445105055,
+      "avg_residual_rank_pct_5yr": 0.9114876686273033,
+      "avg_land_support_score": 0.688289825937607,
+      "pre_boom_breakout_years": [
+        2011,
+        2012
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2011
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "window": "2011-2015",
+      "fips": "16065",
+      "county": "Madison County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2015,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": true,
+      "signal_years": [
+        2015
+      ],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.9551710578057413,
+      "avg_future_growth_rank_pct_5yr": 0.8240395139780128,
+      "avg_prior_momentum_rank_pct": 0.27348114905280785,
+      "avg_residual_rank_pct_5yr": 0.6808472354196435,
+      "avg_land_support_score": 0.6761896772331901,
+      "pre_boom_breakout_years": [
+        2015
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2015
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "window": "2011-2015",
+      "fips": "16083",
+      "county": "Twin Falls County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.962642548171451,
+      "avg_future_growth_rank_pct_5yr": 0.8997980588136038,
+      "avg_prior_momentum_rank_pct": 0.6000813634309492,
+      "avg_residual_rank_pct_5yr": 0.8043165982199041,
+      "avg_land_support_score": 0.7767772607121552,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2011,
+        2012
+      ],
+      "residual_breakout_years": [],
+      "land_breakout_years": [
+        2011,
+        2012
+      ]
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "window": "2013-2017",
+      "fips": "16005",
+      "county": "Bannock County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2014,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": true,
+      "signal_years": [
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.9835072366206664,
+      "avg_future_growth_rank_pct_5yr": 0.8820715720538324,
+      "avg_prior_momentum_rank_pct": 0.35854284054590646,
+      "avg_residual_rank_pct_5yr": 0.8110819005631686,
+      "avg_land_support_score": 0.7504989500635587,
+      "pre_boom_breakout_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "underpriced_growth_years": [
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "residual_breakout_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "land_breakout_years": [
+        2014,
+        2015,
+        2016,
+        2017
+      ]
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "window": "2013-2017",
+      "fips": "16019",
+      "county": "Bonneville County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2013,
+      "earliest_already_hot_year": 2016,
+      "signal_before_hot": true,
+      "signal_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "already_hot_years": [
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.99326825984517,
+      "avg_future_growth_rank_pct_5yr": 0.9677414072442503,
+      "avg_prior_momentum_rank_pct": 0.5546824231868642,
+      "avg_residual_rank_pct_5yr": 0.9137231268926884,
+      "avg_land_support_score": 0.6693013472594949,
+      "pre_boom_breakout_years": [
+        2014,
+        2015
+      ],
+      "underpriced_growth_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "residual_breakout_years": [
+        2014,
+        2015
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "window": "2013-2017",
+      "fips": "16055",
+      "county": "Kootenai County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.994614607876136,
+      "avg_future_growth_rank_pct_5yr": 0.981208000843892,
+      "avg_prior_momentum_rank_pct": 0.9150226063901823,
+      "avg_residual_rank_pct_5yr": 0.956220244351336,
+      "avg_land_support_score": 0.6882984051636231,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "window": "2013-2017",
+      "fips": "16065",
+      "county": "Madison County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": 2015,
+      "earliest_already_hot_year": 2017,
+      "signal_before_hot": true,
+      "signal_years": [
+        2015,
+        2016
+      ],
+      "already_hot_years": [
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9814877145742175,
+      "avg_future_growth_rank_pct_5yr": 0.9164826214436994,
+      "avg_prior_momentum_rank_pct": 0.49879373717770725,
+      "avg_residual_rank_pct_5yr": 0.8539354143862926,
+      "avg_land_support_score": 0.6761974252717077,
+      "pre_boom_breakout_years": [
+        2015,
+        2016
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2015,
+        2016
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "idaho_beyond_boise",
+      "window": "2013-2017",
+      "fips": "16083",
+      "county": "Twin Falls County, Idaho",
+      "state_abbr": "ID",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.98653651969034,
+      "avg_future_growth_rank_pct_5yr": 0.9464001392219364,
+      "avg_prior_momentum_rank_pct": 0.8457899437630683,
+      "avg_residual_rank_pct_5yr": 0.8950899445167007,
+      "avg_land_support_score": 0.7767766823084835,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "window": "2012-2016",
+      "fips": "48021",
+      "county": "Bastrop County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9511505853855471,
+      "avg_future_growth_rank_pct_5yr": 0.8897437864152196,
+      "avg_prior_momentum_rank_pct": 0.7571176001088309,
+      "avg_residual_rank_pct_5yr": 0.8244066796899668,
+      "avg_land_support_score": 0.5942492484352636,
+      "pre_boom_breakout_years": [
+        2012,
+        2013
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2012,
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "window": "2012-2016",
+      "fips": "48055",
+      "county": "Caldwell County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9447096260938743,
+      "avg_future_growth_rank_pct_5yr": 0.9323025062560394,
+      "avg_prior_momentum_rank_pct": 0.7933321081216343,
+      "avg_residual_rank_pct_5yr": 0.9203138210337458,
+      "avg_land_support_score": 0.42936477529999406,
+      "pre_boom_breakout_years": [
+        2012
+      ],
+      "underpriced_growth_years": [
+        2012,
+        2013
+      ],
+      "residual_breakout_years": [
+        2012,
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "window": "2012-2016",
+      "fips": "48209",
+      "county": "Hays County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012
+      ],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8652102225886232,
+      "avg_future_growth_rank_pct_5yr": 0.6912395931687991,
+      "avg_prior_momentum_rank_pct": 0.7278095664912463,
+      "avg_residual_rank_pct_5yr": 0.5737194670500851,
+      "avg_land_support_score": 0.6085720981423157,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2012
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "window": "2012-2016",
+      "fips": "48453",
+      "county": "Travis County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9225061830173125,
+      "avg_future_growth_rank_pct_5yr": 0.7816722228852706,
+      "avg_prior_momentum_rank_pct": 0.9286416793599713,
+      "avg_residual_rank_pct_5yr": 0.6587619909536938,
+      "avg_land_support_score": 0.6995330985053472,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "window": "2012-2016",
+      "fips": "48491",
+      "county": "Williamson County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8944765045342127,
+      "avg_future_growth_rank_pct_5yr": 0.703521794651848,
+      "avg_prior_momentum_rank_pct": 0.8560060014409192,
+      "avg_residual_rank_pct_5yr": 0.557159996754715,
+      "avg_land_support_score": 0.6959426916317843,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2012
+      ],
+      "residual_breakout_years": [
+        2012
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "window": "2014-2018",
+      "fips": "48021",
+      "county": "Bastrop County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9154078549848943,
+      "avg_future_growth_rank_pct_5yr": 0.8208057491323475,
+      "avg_prior_momentum_rank_pct": 0.9026698221364982,
+      "avg_residual_rank_pct_5yr": 0.7013125647153544,
+      "avg_land_support_score": 0.594256777108833,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "window": "2014-2018",
+      "fips": "48055",
+      "county": "Caldwell County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9447096260938743,
+      "avg_future_growth_rank_pct_5yr": 0.9072367535171946,
+      "avg_prior_momentum_rank_pct": 0.9020263309102784,
+      "avg_residual_rank_pct_5yr": 0.8442081587440258,
+      "avg_land_support_score": 0.42937172814057484,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "window": "2014-2018",
+      "fips": "48209",
+      "county": "Hays County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.846852911477617,
+      "avg_future_growth_rank_pct_5yr": 0.6253592818373694,
+      "avg_prior_momentum_rank_pct": 0.8013980012844104,
+      "avg_residual_rank_pct_5yr": 0.5147620048380501,
+      "avg_land_support_score": 0.6085816679381754,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "window": "2014-2018",
+      "fips": "48453",
+      "county": "Travis County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8865701783911141,
+      "avg_future_growth_rank_pct_5yr": 0.703068480063932,
+      "avg_prior_momentum_rank_pct": 0.8552914674429257,
+      "avg_residual_rank_pct_5yr": 0.6050447103264412,
+      "avg_land_support_score": 0.6995370727812423,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "austin_hill_country",
+      "window": "2014-2018",
+      "fips": "48491",
+      "county": "Williamson County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8922921575227196,
+      "avg_future_growth_rank_pct_5yr": 0.6551731299921448,
+      "avg_prior_momentum_rank_pct": 0.8236750202862109,
+      "avg_residual_rank_pct_5yr": 0.5192033568609796,
+      "avg_land_support_score": 0.6959459683956962,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "window": "2011-2015",
+      "fips": "37037",
+      "county": "Chatham County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.6842539159109645,
+      "avg_future_growth_rank_pct_5yr": 0.5776934211315845,
+      "avg_prior_momentum_rank_pct": 0.5504755559815399,
+      "avg_residual_rank_pct_5yr": 0.62463585529117,
+      "avg_land_support_score": 0.5537949844051724,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "window": "2011-2015",
+      "fips": "37063",
+      "county": "Durham County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": 2014,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": true,
+      "signal_years": [
+        2014
+      ],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.8723150357995226,
+      "avg_future_growth_rank_pct_5yr": 0.7968675583042769,
+      "avg_prior_momentum_rank_pct": 0.3404795137697806,
+      "avg_residual_rank_pct_5yr": 0.809949445783124,
+      "avg_land_support_score": 0.5492522893440899,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2014
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "window": "2011-2015",
+      "fips": "37101",
+      "county": "Johnston County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.7742823436885569,
+      "avg_future_growth_rank_pct_5yr": 0.707308834826122,
+      "avg_prior_momentum_rank_pct": 0.42481952331514117,
+      "avg_residual_rank_pct_5yr": 0.7231439609241814,
+      "avg_land_support_score": 0.20990068289187952,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "window": "2011-2015",
+      "fips": "37135",
+      "county": "Orange County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.5724666935809447,
+      "avg_future_growth_rank_pct_5yr": 0.476675818617427,
+      "avg_prior_momentum_rank_pct": 0.27295448463964045,
+      "avg_residual_rank_pct_5yr": 0.5150782065797692,
+      "avg_land_support_score": 0.5009793981683037,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "window": "2011-2015",
+      "fips": "37183",
+      "county": "Wake County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.7778235779060181,
+      "avg_future_growth_rank_pct_5yr": 0.6736707657113705,
+      "avg_prior_momentum_rank_pct": 0.5303284433569451,
+      "avg_residual_rank_pct_5yr": 0.6635750134436199,
+      "avg_land_support_score": 0.5556700764195995,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "window": "2013-2017",
+      "fips": "37037",
+      "county": "Chatham County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.6686807653575025,
+      "avg_future_growth_rank_pct_5yr": 0.5455452194090641,
+      "avg_prior_momentum_rank_pct": 0.6738175485018633,
+      "avg_residual_rank_pct_5yr": 0.5769850247976928,
+      "avg_land_support_score": 0.553801827563279,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "window": "2013-2017",
+      "fips": "37063",
+      "county": "Durham County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": 2014,
+      "earliest_already_hot_year": 2016,
+      "signal_before_hot": true,
+      "signal_years": [
+        2014
+      ],
+      "already_hot_years": [
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8982880161127895,
+      "avg_future_growth_rank_pct_5yr": 0.8717880777498204,
+      "avg_prior_momentum_rank_pct": 0.5851706087138141,
+      "avg_residual_rank_pct_5yr": 0.8724990570898721,
+      "avg_land_support_score": 0.5492571128022645,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2014
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "window": "2013-2017",
+      "fips": "37101",
+      "county": "Johnston County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2017,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8929170862705605,
+      "avg_future_growth_rank_pct_5yr": 0.8052840335094018,
+      "avg_prior_momentum_rank_pct": 0.562887780862526,
+      "avg_residual_rank_pct_5yr": 0.8290154036517361,
+      "avg_land_support_score": 0.20990317988195248,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "window": "2013-2017",
+      "fips": "37135",
+      "county": "Orange County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.6364551863041289,
+      "avg_future_growth_rank_pct_5yr": 0.5363118968687072,
+      "avg_prior_momentum_rank_pct": 0.4042983774013007,
+      "avg_residual_rank_pct_5yr": 0.5509742128846358,
+      "avg_land_support_score": 0.5009816629400138,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "raleigh_triangle_spillover",
+      "window": "2013-2017",
+      "fips": "37183",
+      "county": "Wake County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.7472749293500202,
+      "avg_future_growth_rank_pct_5yr": 0.6539787454599301,
+      "avg_prior_momentum_rank_pct": 0.7127979462806155,
+      "avg_residual_rank_pct_5yr": 0.6100028014053123,
+      "avg_land_support_score": 0.5556752554889205,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "window": "2012-2016",
+      "fips": "05007",
+      "county": "Benton County, Arkansas",
+      "state_abbr": "AR",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8269942780208684,
+      "avg_future_growth_rank_pct_5yr": 0.786305646770758,
+      "avg_prior_momentum_rank_pct": 0.7261263058022931,
+      "avg_residual_rank_pct_5yr": 0.783334845205728,
+      "avg_land_support_score": 0.6584006944042277,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2012
+      ],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "window": "2012-2016",
+      "fips": "05015",
+      "county": "Carroll County, Arkansas",
+      "state_abbr": "AR",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012
+      ],
+      "max_future_growth_rank_pct_5yr": 0.725345001682935,
+      "avg_future_growth_rank_pct_5yr": 0.4954897700796632,
+      "avg_prior_momentum_rank_pct": 0.502783182457625,
+      "avg_residual_rank_pct_5yr": 0.6190861288351818,
+      "avg_land_support_score": 0.5394340130258619,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "window": "2012-2016",
+      "fips": "05087",
+      "county": "Madison County, Arkansas",
+      "state_abbr": "AR",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.8216088858970044,
+      "avg_future_growth_rank_pct_5yr": 0.7616494247740404,
+      "avg_prior_momentum_rank_pct": 0.6266520095998717,
+      "avg_residual_rank_pct_5yr": 0.8003386611971107,
+      "avg_land_support_score": 0.562799894991166,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "window": "2012-2016",
+      "fips": "05143",
+      "county": "Washington County, Arkansas",
+      "state_abbr": "AR",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2016,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.7526085493099967,
+      "avg_future_growth_rank_pct_5yr": 0.7454712096604844,
+      "avg_prior_momentum_rank_pct": 0.5620486591488352,
+      "avg_residual_rank_pct_5yr": 0.7531159589622314,
+      "avg_land_support_score": 0.47187873936613406,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "window": "2014-2018",
+      "fips": "05007",
+      "county": "Benton County, Arkansas",
+      "state_abbr": "AR",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9430867090726481,
+      "avg_future_growth_rank_pct_5yr": 0.8368107177146491,
+      "avg_prior_momentum_rank_pct": 0.8074577461924577,
+      "avg_residual_rank_pct_5yr": 0.8705884999855211,
+      "avg_land_support_score": 0.6584084938564048,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "window": "2014-2018",
+      "fips": "05015",
+      "county": "Carroll County, Arkansas",
+      "state_abbr": "AR",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.725345001682935,
+      "avg_future_growth_rank_pct_5yr": 0.6059977982488195,
+      "avg_prior_momentum_rank_pct": 0.4333938862823172,
+      "avg_residual_rank_pct_5yr": 0.7563052725101536,
+      "avg_land_support_score": 0.53944260253461,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "window": "2014-2018",
+      "fips": "05087",
+      "county": "Madison County, Arkansas",
+      "state_abbr": "AR",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2017,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8216088858970044,
+      "avg_future_growth_rank_pct_5yr": 0.7278832561791555,
+      "avg_prior_momentum_rank_pct": 0.7159670311003807,
+      "avg_residual_rank_pct_5yr": 0.7854035365547731,
+      "avg_land_support_score": 0.5628073996716942,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "northwest_arkansas",
+      "window": "2014-2018",
+      "fips": "05143",
+      "county": "Washington County, Arkansas",
+      "state_abbr": "AR",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2016,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8302644794107801,
+      "avg_future_growth_rank_pct_5yr": 0.768350312186325,
+      "avg_prior_momentum_rank_pct": 0.7428970675448273,
+      "avg_residual_rank_pct_5yr": 0.8390018286838693,
+      "avg_land_support_score": 0.47188435887913976,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "window": "2011-2015",
+      "fips": "49035",
+      "county": "Salt Lake County, Utah",
+      "state_abbr": "UT",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9314685314685315,
+      "avg_future_growth_rank_pct_5yr": 0.9175205623664894,
+      "avg_prior_momentum_rank_pct": 0.6473756374733751,
+      "avg_residual_rank_pct_5yr": 0.839035991219759,
+      "avg_land_support_score": 0.6386283146215531,
+      "pre_boom_breakout_years": [
+        2011,
+        2012
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2011
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "window": "2011-2015",
+      "fips": "49043",
+      "county": "Summit County, Utah",
+      "state_abbr": "UT",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011
+      ],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.951981351981352,
+      "avg_future_growth_rank_pct_5yr": 0.8986305869969078,
+      "avg_prior_momentum_rank_pct": 0.7740722735552842,
+      "avg_residual_rank_pct_5yr": 0.8632504945570381,
+      "avg_land_support_score": 0.5317934778773517,
+      "pre_boom_breakout_years": [
+        2011
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2011
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "window": "2011-2015",
+      "fips": "49049",
+      "county": "Utah County, Utah",
+      "state_abbr": "UT",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.938927738927739,
+      "avg_future_growth_rank_pct_5yr": 0.9273602920615207,
+      "avg_prior_momentum_rank_pct": 0.6349614970050019,
+      "avg_residual_rank_pct_5yr": 0.8595383363173072,
+      "avg_land_support_score": 0.6491636478569495,
+      "pre_boom_breakout_years": [
+        2011,
+        2012
+      ],
+      "underpriced_growth_years": [
+        2011,
+        2012
+      ],
+      "residual_breakout_years": [
+        2011
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "window": "2011-2015",
+      "fips": "49051",
+      "county": "Wasatch County, Utah",
+      "state_abbr": "UT",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011,
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9590294351630867,
+      "avg_future_growth_rank_pct_5yr": 0.9475053352960693,
+      "avg_prior_momentum_rank_pct": 0.6621071052564864,
+      "avg_residual_rank_pct_5yr": 0.9247072453381928,
+      "avg_land_support_score": 0.7585069724779805,
+      "pre_boom_breakout_years": [
+        2011,
+        2012
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2012
+      ],
+      "land_breakout_years": [
+        2011,
+        2012
+      ]
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "window": "2011-2015",
+      "fips": "49053",
+      "county": "Washington County, Utah",
+      "state_abbr": "UT",
+      "earliest_signal_year": 2011,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": true,
+      "signal_years": [
+        2011
+      ],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9547785547785548,
+      "avg_future_growth_rank_pct_5yr": 0.9333085399772199,
+      "avg_prior_momentum_rank_pct": 0.7603549024489513,
+      "avg_residual_rank_pct_5yr": 0.905190792554045,
+      "avg_land_support_score": 0.6979753165074206,
+      "pre_boom_breakout_years": [
+        2011
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2011
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "window": "2013-2017",
+      "fips": "49035",
+      "county": "Salt Lake County, Utah",
+      "state_abbr": "UT",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9333557724671828,
+      "avg_future_growth_rank_pct_5yr": 0.8994562499262688,
+      "avg_prior_momentum_rank_pct": 0.9072783370570585,
+      "avg_residual_rank_pct_5yr": 0.7525408434143708,
+      "avg_land_support_score": 0.638634297457754,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "window": "2013-2017",
+      "fips": "49043",
+      "county": "Summit County, Utah",
+      "state_abbr": "UT",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9414614452967299,
+      "avg_future_growth_rank_pct_5yr": 0.8918588139213032,
+      "avg_prior_momentum_rank_pct": 0.9514262747782295,
+      "avg_residual_rank_pct_5yr": 0.8108760604148262,
+      "avg_land_support_score": 0.5317988514616852,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "window": "2013-2017",
+      "fips": "49049",
+      "county": "Utah County, Utah",
+      "state_abbr": "UT",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9384045775833053,
+      "avg_future_growth_rank_pct_5yr": 0.914517052885864,
+      "avg_prior_momentum_rank_pct": 0.9226271954197548,
+      "avg_residual_rank_pct_5yr": 0.7925113521270858,
+      "avg_land_support_score": 0.6491709725896687,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "window": "2013-2017",
+      "fips": "49051",
+      "county": "Wasatch County, Utah",
+      "state_abbr": "UT",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9727364523729384,
+      "avg_future_growth_rank_pct_5yr": 0.9575823862543033,
+      "avg_prior_momentum_rank_pct": 0.9330592173035651,
+      "avg_residual_rank_pct_5yr": 0.9238504139717897,
+      "avg_land_support_score": 0.7585098910600632,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "utah_wasatch_spillover",
+      "window": "2013-2017",
+      "fips": "49053",
+      "county": "Washington County, Utah",
+      "state_abbr": "UT",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9747559744193874,
+      "avg_future_growth_rank_pct_5yr": 0.9381625480010966,
+      "avg_prior_momentum_rank_pct": 0.936623311789452,
+      "avg_residual_rank_pct_5yr": 0.8869241946569042,
+      "avg_land_support_score": 0.6979788023535486,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "phoenix_sun_corridor",
+      "window": "2013-2017",
+      "fips": "04013",
+      "county": "Maricopa County, Arizona",
+      "state_abbr": "AZ",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9461460787613598,
+      "avg_future_growth_rank_pct_5yr": 0.886221723480282,
+      "avg_prior_momentum_rank_pct": 0.9321866834353566,
+      "avg_residual_rank_pct_5yr": 0.5654583080301296,
+      "avg_land_support_score": 0.7400494020230185,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "phoenix_sun_corridor",
+      "window": "2013-2017",
+      "fips": "04021",
+      "county": "Pinal County, Arizona",
+      "state_abbr": "AZ",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9882194547290475,
+      "avg_future_growth_rank_pct_5yr": 0.9478578857513351,
+      "avg_prior_momentum_rank_pct": 0.9146670461662936,
+      "avg_residual_rank_pct_5yr": 0.7266483972915176,
+      "avg_land_support_score": 0.6831835573419991,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "phoenix_sun_corridor",
+      "window": "2013-2017",
+      "fips": "04025",
+      "county": "Yavapai County, Arizona",
+      "state_abbr": "AZ",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9220831651190957,
+      "avg_future_growth_rank_pct_5yr": 0.8885815286311555,
+      "avg_prior_momentum_rank_pct": 0.9345839007415592,
+      "avg_residual_rank_pct_5yr": 0.6058234665276183,
+      "avg_land_support_score": 0.718020341875053,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "phoenix_sun_corridor",
+      "window": "2015-2019",
+      "fips": "04013",
+      "county": "Maricopa County, Arizona",
+      "state_abbr": "AZ",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017,
+        2018,
+        2019
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9461460787613598,
+      "avg_future_growth_rank_pct_5yr": 0.8623230605218237,
+      "avg_prior_momentum_rank_pct": 0.8645752600148487,
+      "avg_residual_rank_pct_5yr": 0.7558850594313061,
+      "avg_land_support_score": 0.7400492195045265,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "phoenix_sun_corridor",
+      "window": "2015-2019",
+      "fips": "04021",
+      "county": "Pinal County, Arizona",
+      "state_abbr": "AZ",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017,
+        2018,
+        2019
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9882194547290475,
+      "avg_future_growth_rank_pct_5yr": 0.9272031868940301,
+      "avg_prior_momentum_rank_pct": 0.9005452747371336,
+      "avg_residual_rank_pct_5yr": 0.8512978922542074,
+      "avg_land_support_score": 0.6831858709566857,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "phoenix_sun_corridor",
+      "window": "2015-2019",
+      "fips": "04025",
+      "county": "Yavapai County, Arizona",
+      "state_abbr": "AZ",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017,
+        2018,
+        2019
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9185459441265568,
+      "avg_future_growth_rank_pct_5yr": 0.7943219206857682,
+      "avg_prior_momentum_rank_pct": 0.9096394294487489,
+      "avg_residual_rank_pct_5yr": 0.6882130311197272,
+      "avg_land_support_score": 0.7180225989347141,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "inland_empire_logistics",
+      "window": "2012-2016",
+      "fips": "06065",
+      "county": "Riverside County, California",
+      "state_abbr": "CA",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2012,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2012,
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9798021434460017,
+      "avg_future_growth_rank_pct_5yr": 0.8036844976658898,
+      "avg_prior_momentum_rank_pct": 0.9276962314459445,
+      "avg_residual_rank_pct_5yr": 0.3812884934092472,
+      "avg_land_support_score": 0.750648641096461,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "inland_empire_logistics",
+      "window": "2012-2016",
+      "fips": "06071",
+      "county": "San Bernardino County, California",
+      "state_abbr": "CA",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9925803792250618,
+      "avg_future_growth_rank_pct_5yr": 0.9317720689827977,
+      "avg_prior_momentum_rank_pct": 0.8979233289769775,
+      "avg_residual_rank_pct_5yr": 0.6167465168933365,
+      "avg_land_support_score": 0.714387226708123,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2012
+      ],
+      "residual_breakout_years": [
+        2012
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "inland_empire_logistics",
+      "window": "2014-2018",
+      "fips": "06065",
+      "county": "Riverside County, California",
+      "state_abbr": "CA",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8458431504543925,
+      "avg_future_growth_rank_pct_5yr": 0.7032579189355082,
+      "avg_prior_momentum_rank_pct": 0.8899018589502304,
+      "avg_residual_rank_pct_5yr": 0.3889841253177786,
+      "avg_land_support_score": 0.7506524679865317,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "inland_empire_logistics",
+      "window": "2014-2018",
+      "fips": "06071",
+      "county": "San Bernardino County, California",
+      "state_abbr": "CA",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9340289464826658,
+      "avg_future_growth_rank_pct_5yr": 0.7964266997882878,
+      "avg_prior_momentum_rank_pct": 0.9449473327044192,
+      "avg_residual_rank_pct_5yr": 0.4687281400643203,
+      "avg_land_support_score": 0.7143913012406546,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "window": "2013-2017",
+      "fips": "12009",
+      "county": "Brevard County, Florida",
+      "state_abbr": "FL",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9810254339927331,
+      "avg_future_growth_rank_pct_5yr": 0.9140158345011283,
+      "avg_prior_momentum_rank_pct": 0.9261032357638965,
+      "avg_residual_rank_pct_5yr": 0.5984991931190885,
+      "avg_land_support_score": 0.5128830036440757,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "window": "2013-2017",
+      "fips": "12021",
+      "county": "Collier County, Florida",
+      "state_abbr": "FL",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8851963746223565,
+      "avg_future_growth_rank_pct_5yr": 0.49913246069580924,
+      "avg_prior_momentum_rank_pct": 0.873538018206547,
+      "avg_residual_rank_pct_5yr": 0.24469938527434168,
+      "avg_land_support_score": 0.630981960788501,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "window": "2013-2017",
+      "fips": "12071",
+      "county": "Lee County, Florida",
+      "state_abbr": "FL",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8915743538100034,
+      "avg_future_growth_rank_pct_5yr": 0.664535835481979,
+      "avg_prior_momentum_rank_pct": 0.9593912498142407,
+      "avg_residual_rank_pct_5yr": 0.33746048838027926,
+      "avg_land_support_score": 0.5607048919318338,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "window": "2013-2017",
+      "fips": "12081",
+      "county": "Manatee County, Florida",
+      "state_abbr": "FL",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9318563276267203,
+      "avg_future_growth_rank_pct_5yr": 0.7290540234579519,
+      "avg_prior_momentum_rank_pct": 0.9367405426897684,
+      "avg_residual_rank_pct_5yr": 0.37310786468243373,
+      "avg_land_support_score": 0.5373085146764087,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "window": "2013-2017",
+      "fips": "12115",
+      "county": "Sarasota County, Florida",
+      "state_abbr": "FL",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9090298757972474,
+      "avg_future_growth_rank_pct_5yr": 0.667558989006714,
+      "avg_prior_momentum_rank_pct": 0.9308702735153052,
+      "avg_residual_rank_pct_5yr": 0.3118168950429281,
+      "avg_land_support_score": 0.6378751247116352,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "window": "2015-2019",
+      "fips": "12009",
+      "county": "Brevard County, Florida",
+      "state_abbr": "FL",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017,
+        2018,
+        2019
+      ],
+      "max_future_growth_rank_pct_5yr": 0.895399134880063,
+      "avg_future_growth_rank_pct_5yr": 0.8344459297807649,
+      "avg_prior_momentum_rank_pct": 0.949574517559584,
+      "avg_residual_rank_pct_5yr": 0.45009092237384574,
+      "avg_land_support_score": 0.5128837482852471,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "window": "2015-2019",
+      "fips": "12021",
+      "county": "Collier County, Florida",
+      "state_abbr": "FL",
+      "earliest_signal_year": 2018,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": false,
+      "signal_years": [
+        2018,
+        2019
+      ],
+      "already_hot_years": [
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9400736524941413,
+      "avg_future_growth_rank_pct_5yr": 0.6486662597811673,
+      "avg_prior_momentum_rank_pct": 0.5875746793971967,
+      "avg_residual_rank_pct_5yr": 0.5591012662004373,
+      "avg_land_support_score": 0.6309837834027375,
+      "pre_boom_breakout_years": [
+        2018,
+        2019
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2018,
+        2019
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "window": "2015-2019",
+      "fips": "12071",
+      "county": "Lee County, Florida",
+      "state_abbr": "FL",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8998995647807164,
+      "avg_future_growth_rank_pct_5yr": 0.6963771264726172,
+      "avg_prior_momentum_rank_pct": 0.7239962439785977,
+      "avg_residual_rank_pct_5yr": 0.4987216789559093,
+      "avg_land_support_score": 0.5607065131759031,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "window": "2015-2019",
+      "fips": "12081",
+      "county": "Manatee County, Florida",
+      "state_abbr": "FL",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9318563276267203,
+      "avg_future_growth_rank_pct_5yr": 0.7534562499217634,
+      "avg_prior_momentum_rank_pct": 0.7743538613977623,
+      "avg_residual_rank_pct_5yr": 0.5429871842166806,
+      "avg_land_support_score": 0.5373098574298214,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "florida_space_gulf_growth",
+      "window": "2015-2019",
+      "fips": "12115",
+      "county": "Sarasota County, Florida",
+      "state_abbr": "FL",
+      "earliest_signal_year": 2018,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": false,
+      "signal_years": [
+        2018
+      ],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9090298757972474,
+      "avg_future_growth_rank_pct_5yr": 0.7116597885400792,
+      "avg_prior_momentum_rank_pct": 0.7157829883968948,
+      "avg_residual_rank_pct_5yr": 0.517733780524084,
+      "avg_land_support_score": 0.6378773860557679,
+      "pre_boom_breakout_years": [
+        2018
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2012-2016",
+      "fips": "37025",
+      "county": "Cabarrus County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8815213732749916,
+      "avg_future_growth_rank_pct_5yr": 0.8572178020094399,
+      "avg_prior_momentum_rank_pct": 0.5374048084584911,
+      "avg_residual_rank_pct_5yr": 0.8704151677839395,
+      "avg_land_support_score": 0.3283906145154978,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2012,
+        2013
+      ],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2012-2016",
+      "fips": "37097",
+      "county": "Iredell County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.7381353079771121,
+      "avg_future_growth_rank_pct_5yr": 0.6129702115571013,
+      "avg_prior_momentum_rank_pct": 0.4660347173627821,
+      "avg_residual_rank_pct_5yr": 0.6024733107179484,
+      "avg_land_support_score": 0.4517935020119026,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2012-2016",
+      "fips": "37119",
+      "county": "Mecklenburg County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9101401483924155,
+      "avg_future_growth_rank_pct_5yr": 0.8880153457359137,
+      "avg_prior_momentum_rank_pct": 0.6924610350014586,
+      "avg_residual_rank_pct_5yr": 0.8795929921157993,
+      "avg_land_support_score": 0.5656752440218835,
+      "pre_boom_breakout_years": [
+        2012
+      ],
+      "underpriced_growth_years": [
+        2012
+      ],
+      "residual_breakout_years": [
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2012-2016",
+      "fips": "37179",
+      "county": "Union County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012,
+        2013
+      ],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8631492168178071,
+      "avg_future_growth_rank_pct_5yr": 0.8091574239287963,
+      "avg_prior_momentum_rank_pct": 0.6012825094173663,
+      "avg_residual_rank_pct_5yr": 0.7836067048588096,
+      "avg_land_support_score": 0.4334703155254487,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2012,
+        2013
+      ],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2012-2016",
+      "fips": "45057",
+      "county": "Lancaster County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.7724649629018961,
+      "avg_future_growth_rank_pct_5yr": 0.7429626564667151,
+      "avg_prior_momentum_rank_pct": 0.633004378537802,
+      "avg_residual_rank_pct_5yr": 0.7021210115812052,
+      "avg_land_support_score": 0.4299641557595054,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2012-2016",
+      "fips": "45091",
+      "county": "York County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8322341302555647,
+      "avg_future_growth_rank_pct_5yr": 0.781892138097501,
+      "avg_prior_momentum_rank_pct": 0.6408913298047739,
+      "avg_residual_rank_pct_5yr": 0.7129176974507693,
+      "avg_land_support_score": 0.4980495625641061,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2014-2018",
+      "fips": "37025",
+      "county": "Cabarrus County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.909701242027526,
+      "avg_future_growth_rank_pct_5yr": 0.8795013178551168,
+      "avg_prior_momentum_rank_pct": 0.7968766740941956,
+      "avg_residual_rank_pct_5yr": 0.863329572086472,
+      "avg_land_support_score": 0.32839657421555185,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2014-2018",
+      "fips": "37097",
+      "county": "Iredell County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.8267875125881168,
+      "avg_future_growth_rank_pct_5yr": 0.6946401813898967,
+      "avg_prior_momentum_rank_pct": 0.6260895372798794,
+      "avg_residual_rank_pct_5yr": 0.7060157520910866,
+      "avg_land_support_score": 0.4518010752439771,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2014-2018",
+      "fips": "37119",
+      "county": "Mecklenburg County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8894192521877486,
+      "avg_future_growth_rank_pct_5yr": 0.8618588927816125,
+      "avg_prior_momentum_rank_pct": 0.897416295047989,
+      "avg_residual_rank_pct_5yr": 0.8167660193831576,
+      "avg_land_support_score": 0.565683561038235,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2014-2018",
+      "fips": "37179",
+      "county": "Union County, North Carolina",
+      "state_abbr": "NC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8345082242363209,
+      "avg_future_growth_rank_pct_5yr": 0.7994377397673288,
+      "avg_prior_momentum_rank_pct": 0.8383529140916641,
+      "avg_residual_rank_pct_5yr": 0.7506559516974135,
+      "avg_land_support_score": 0.433477228091996,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2014-2018",
+      "fips": "45057",
+      "county": "Lancaster County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8074991630398393,
+      "avg_future_growth_rank_pct_5yr": 0.7614454681830852,
+      "avg_prior_momentum_rank_pct": 0.7492739894184763,
+      "avg_residual_rank_pct_5yr": 0.7268880359543473,
+      "avg_land_support_score": 0.42996949592496003,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "charlotte_piedmont_spillover",
+      "window": "2014-2018",
+      "fips": "45091",
+      "county": "York County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8697689989956479,
+      "avg_future_growth_rank_pct_5yr": 0.7966510326047876,
+      "avg_prior_momentum_rank_pct": 0.785949741882488,
+      "avg_residual_rank_pct_5yr": 0.7396691292955947,
+      "avg_land_support_score": 0.4980555659657709,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "window": "2013-2017",
+      "fips": "48085",
+      "county": "Collin County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8837303189341946,
+      "avg_future_growth_rank_pct_5yr": 0.5510429032520268,
+      "avg_prior_momentum_rank_pct": 0.9404201941145356,
+      "avg_residual_rank_pct_5yr": 0.3610424338894946,
+      "avg_land_support_score": 0.7643574011672702,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "window": "2013-2017",
+      "fips": "48121",
+      "county": "Denton County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.887363746467501,
+      "avg_future_growth_rank_pct_5yr": 0.6228197615722374,
+      "avg_prior_momentum_rank_pct": 0.9271679448162768,
+      "avg_residual_rank_pct_5yr": 0.4375753870849792,
+      "avg_land_support_score": 0.7704656309765054,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "window": "2013-2017",
+      "fips": "48139",
+      "county": "Ellis County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9580137262817925,
+      "avg_future_growth_rank_pct_5yr": 0.8579463355876289,
+      "avg_prior_momentum_rank_pct": 0.9059061893622882,
+      "avg_residual_rank_pct_5yr": 0.7501813212666869,
+      "avg_land_support_score": 0.5231557675657492,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "window": "2013-2017",
+      "fips": "48257",
+      "county": "Kaufman County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": 2013,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": true,
+      "signal_years": [
+        2013,
+        2014
+      ],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9370205894226887,
+      "avg_future_growth_rank_pct_5yr": 0.8112870421820213,
+      "avg_prior_momentum_rank_pct": 0.7066454672973836,
+      "avg_residual_rank_pct_5yr": 0.6527268434991236,
+      "avg_land_support_score": 0.4505322966802076,
+      "pre_boom_breakout_years": [
+        2013
+      ],
+      "underpriced_growth_years": [
+        2013,
+        2014
+      ],
+      "residual_breakout_years": [
+        2013
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "window": "2013-2017",
+      "fips": "48397",
+      "county": "Rockwall County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": 2013,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": true,
+      "signal_years": [
+        2013
+      ],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8720226079935406,
+      "avg_future_growth_rank_pct_5yr": 0.6517186955869407,
+      "avg_prior_momentum_rank_pct": 0.7915587126875657,
+      "avg_residual_rank_pct_5yr": 0.43873244557744095,
+      "avg_land_support_score": 0.6685296027692377,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2013
+      ],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "window": "2015-2019",
+      "fips": "48085",
+      "county": "Collin County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.7277870216306156,
+      "avg_future_growth_rank_pct_5yr": 0.5319109179127158,
+      "avg_prior_momentum_rank_pct": 0.7282611446598126,
+      "avg_residual_rank_pct_5yr": 0.4211712458713288,
+      "avg_land_support_score": 0.7643591158128215,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "window": "2015-2019",
+      "fips": "48121",
+      "county": "Denton County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.6119503188989593,
+      "avg_future_growth_rank_pct_5yr": 0.5247381284587128,
+      "avg_prior_momentum_rank_pct": 0.7786957122835103,
+      "avg_residual_rank_pct_5yr": 0.37120205603258744,
+      "avg_land_support_score": 0.7704676301109735,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "window": "2015-2019",
+      "fips": "48139",
+      "county": "Ellis County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017,
+        2018,
+        2019
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8639402280770743,
+      "avg_future_growth_rank_pct_5yr": 0.6696869945911977,
+      "avg_prior_momentum_rank_pct": 0.9224792390819211,
+      "avg_residual_rank_pct_5yr": 0.4804358608462899,
+      "avg_land_support_score": 0.5231586707237339,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "window": "2015-2019",
+      "fips": "48257",
+      "county": "Kaufman County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8004039044092898,
+      "avg_future_growth_rank_pct_5yr": 0.5909701427867057,
+      "avg_prior_momentum_rank_pct": 0.8858874707344591,
+      "avg_residual_rank_pct_5yr": 0.3945585032797889,
+      "avg_land_support_score": 0.4505350738747261,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "dallas_fort_worth_exurbs",
+      "window": "2015-2019",
+      "fips": "48397",
+      "county": "Rockwall County, Texas",
+      "state_abbr": "TX",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.6270560590802282,
+      "avg_future_growth_rank_pct_5yr": 0.5305718076669897,
+      "avg_prior_momentum_rank_pct": 0.7801700734698601,
+      "avg_residual_rank_pct_5yr": 0.3469890328980998,
+      "avg_land_support_score": 0.6685313542612449,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "window": "2012-2016",
+      "fips": "45007",
+      "county": "Anderson County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.6528058134840533,
+      "avg_future_growth_rank_pct_5yr": 0.6115116923728975,
+      "avg_prior_momentum_rank_pct": 0.4562319082402314,
+      "avg_residual_rank_pct_5yr": 0.5245753213292209,
+      "avg_land_support_score": 0.6893260118956002,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "window": "2012-2016",
+      "fips": "45021",
+      "county": "Cherokee County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": 2012,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": true,
+      "signal_years": [
+        2012
+      ],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8413025556471558,
+      "avg_future_growth_rank_pct_5yr": 0.541289266310659,
+      "avg_prior_momentum_rank_pct": 0.842189521872682,
+      "avg_residual_rank_pct_5yr": 0.3773562171618169,
+      "avg_land_support_score": 0.4175503417145321,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2012
+      ],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "window": "2012-2016",
+      "fips": "45045",
+      "county": "Greenville County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2016,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.7775534921275736,
+      "avg_future_growth_rank_pct_5yr": 0.6950714024763942,
+      "avg_prior_momentum_rank_pct": 0.6023970708231017,
+      "avg_residual_rank_pct_5yr": 0.6043840091189882,
+      "avg_land_support_score": 0.5126215421110942,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "window": "2012-2016",
+      "fips": "45077",
+      "county": "Pickens County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.7967382657120128,
+      "avg_future_growth_rank_pct_5yr": 0.7445239251495833,
+      "avg_prior_momentum_rank_pct": 0.4114222075165278,
+      "avg_residual_rank_pct_5yr": 0.7109757567096369,
+      "avg_land_support_score": 0.6364135655375699,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "window": "2012-2016",
+      "fips": "45083",
+      "county": "Spartanburg County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.7892253244199764,
+      "avg_future_growth_rank_pct_5yr": 0.7223403541270467,
+      "avg_prior_momentum_rank_pct": 0.5003796705131812,
+      "avg_residual_rank_pct_5yr": 0.6730048735942192,
+      "avg_land_support_score": 0.5078938490659868,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "window": "2014-2018",
+      "fips": "45007",
+      "county": "Anderson County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.8747907599598259,
+      "avg_future_growth_rank_pct_5yr": 0.6786960027535178,
+      "avg_prior_momentum_rank_pct": 0.6201887758802108,
+      "avg_residual_rank_pct_5yr": 0.6096078203988148,
+      "avg_land_support_score": 0.6893345731268353,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "window": "2014-2018",
+      "fips": "45021",
+      "county": "Cherokee County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016
+      ],
+      "max_future_growth_rank_pct_5yr": 0.5238663484486874,
+      "avg_future_growth_rank_pct_5yr": 0.39973809030630686,
+      "avg_prior_momentum_rank_pct": 0.6766597529596343,
+      "avg_residual_rank_pct_5yr": 0.36883631100165565,
+      "avg_land_support_score": 0.41755801434634865,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "window": "2014-2018",
+      "fips": "45045",
+      "county": "Greenville County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2016,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.737867939538584,
+      "avg_future_growth_rank_pct_5yr": 0.6534117498077137,
+      "avg_prior_momentum_rank_pct": 0.7318360917564278,
+      "avg_residual_rank_pct_5yr": 0.5463833570668006,
+      "avg_land_support_score": 0.5126272644514194,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "window": "2014-2018",
+      "fips": "45077",
+      "county": "Pickens County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2017,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8145296283896887,
+      "avg_future_growth_rank_pct_5yr": 0.7861751268264803,
+      "avg_prior_momentum_rank_pct": 0.61797951974478,
+      "avg_residual_rank_pct_5yr": 0.7266760858843254,
+      "avg_land_support_score": 0.6364213461380719,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "greenville_upstate_manufacturing",
+      "window": "2014-2018",
+      "fips": "45083",
+      "county": "Spartanburg County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": 2017,
+      "earliest_already_hot_year": 2018,
+      "signal_before_hot": true,
+      "signal_years": [
+        2017
+      ],
+      "already_hot_years": [
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.823766364551863,
+      "avg_future_growth_rank_pct_5yr": 0.7900684191338296,
+      "avg_prior_momentum_rank_pct": 0.6338362359723975,
+      "avg_residual_rank_pct_5yr": 0.7336251200424184,
+      "avg_land_support_score": 0.5079014137291179,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2017
+      ],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2013-2017",
+      "fips": "13029",
+      "county": "Bryan County, Georgia",
+      "state_abbr": "GA",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.486404833836858,
+      "avg_future_growth_rank_pct_5yr": 0.26048325887379037,
+      "avg_prior_momentum_rank_pct": 0.3568737602841004,
+      "avg_residual_rank_pct_5yr": 0.17425603894551278,
+      "avg_land_support_score": 0.4642243743306104,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2013-2017",
+      "fips": "13051",
+      "county": "Chatham County, Georgia",
+      "state_abbr": "GA",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.7740852635112454,
+      "avg_future_growth_rank_pct_5yr": 0.5444702533196283,
+      "avg_prior_momentum_rank_pct": 0.5575178242443877,
+      "avg_residual_rank_pct_5yr": 0.42853894888775257,
+      "avg_land_support_score": 0.515982831167156,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2013-2017",
+      "fips": "13103",
+      "county": "Effingham County, Georgia",
+      "state_abbr": "GA",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.733467606579389,
+      "avg_future_growth_rank_pct_5yr": 0.48540820415347874,
+      "avg_prior_momentum_rank_pct": 0.4875904048318679,
+      "avg_residual_rank_pct_5yr": 0.34900344156751867,
+      "avg_land_support_score": 0.23788769840817622,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2013-2017",
+      "fips": "45015",
+      "county": "Berkeley County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.7505046427129592,
+      "avg_future_growth_rank_pct_5yr": 0.6891566970743032,
+      "avg_prior_momentum_rank_pct": 0.7455814448536303,
+      "avg_residual_rank_pct_5yr": 0.5870336483764238,
+      "avg_land_support_score": 0.550085951675213,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2013-2017",
+      "fips": "45019",
+      "county": "Charleston County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2013,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2013,
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.8518368994751716,
+      "avg_future_growth_rank_pct_5yr": 0.6098293737752467,
+      "avg_prior_momentum_rank_pct": 0.9142325933077722,
+      "avg_residual_rank_pct_5yr": 0.523242270553302,
+      "avg_land_support_score": 0.4893787763786669,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2013-2017",
+      "fips": "45035",
+      "county": "Dorchester County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2014,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2014,
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.7743237787646347,
+      "avg_future_growth_rank_pct_5yr": 0.648598323555821,
+      "avg_prior_momentum_rank_pct": 0.7177963751427452,
+      "avg_residual_rank_pct_5yr": 0.5282514061344459,
+      "avg_land_support_score": 0.23666764433526888,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2015-2019",
+      "fips": "13029",
+      "county": "Bryan County, Georgia",
+      "state_abbr": "GA",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.8515806988352745,
+      "avg_future_growth_rank_pct_5yr": 0.4836730719418208,
+      "avg_prior_momentum_rank_pct": 0.32486009181391806,
+      "avg_residual_rank_pct_5yr": 0.419089417574048,
+      "avg_land_support_score": 0.4642246468230068,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2015-2019",
+      "fips": "13051",
+      "county": "Chatham County, Georgia",
+      "state_abbr": "GA",
+      "earliest_signal_year": 2019,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": true,
+      "signal_years": [
+        2019
+      ],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.9204658901830283,
+      "avg_future_growth_rank_pct_5yr": 0.6935851195936503,
+      "avg_prior_momentum_rank_pct": 0.5726409002861359,
+      "avg_residual_rank_pct_5yr": 0.6234550010665487,
+      "avg_land_support_score": 0.5159835149688302,
+      "pre_boom_breakout_years": [
+        2019
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2015-2019",
+      "fips": "13103",
+      "county": "Effingham County, Georgia",
+      "state_abbr": "GA",
+      "earliest_signal_year": 2018,
+      "earliest_already_hot_year": null,
+      "signal_before_hot": true,
+      "signal_years": [
+        2018,
+        2019
+      ],
+      "already_hot_years": [],
+      "max_future_growth_rank_pct_5yr": 0.8728785357737104,
+      "avg_future_growth_rank_pct_5yr": 0.6583431557901434,
+      "avg_prior_momentum_rank_pct": 0.4818303453107413,
+      "avg_residual_rank_pct_5yr": 0.5886822018806896,
+      "avg_land_support_score": 0.23788797261436131,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [
+        2018,
+        2019
+      ],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2015-2019",
+      "fips": "45015",
+      "county": "Berkeley County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.7191161700703047,
+      "avg_future_growth_rank_pct_5yr": 0.6688073611419598,
+      "avg_prior_momentum_rank_pct": 0.7487073476295704,
+      "avg_residual_rank_pct_5yr": 0.5849942403872137,
+      "avg_land_support_score": 0.5500866611837169,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2015-2019",
+      "fips": "45019",
+      "county": "Charleston County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": 2018,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": false,
+      "signal_years": [
+        2018,
+        2019
+      ],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017
+      ],
+      "max_future_growth_rank_pct_5yr": 0.9540765391014975,
+      "avg_future_growth_rank_pct_5yr": 0.6669207358978652,
+      "avg_prior_momentum_rank_pct": 0.7543153196187851,
+      "avg_residual_rank_pct_5yr": 0.6031849716022394,
+      "avg_land_support_score": 0.48937912342086987,
+      "pre_boom_breakout_years": [
+        2019
+      ],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [
+        2018,
+        2019
+      ],
+      "land_breakout_years": []
+    },
+    {
+      "analog_group": "savannah_charleston_logistics",
+      "window": "2015-2019",
+      "fips": "45035",
+      "county": "Dorchester County, South Carolina",
+      "state_abbr": "SC",
+      "earliest_signal_year": null,
+      "earliest_already_hot_year": 2015,
+      "signal_before_hot": null,
+      "signal_years": [],
+      "already_hot_years": [
+        2015,
+        2016,
+        2017,
+        2018
+      ],
+      "max_future_growth_rank_pct_5yr": 0.6092648539778449,
+      "avg_future_growth_rank_pct_5yr": 0.5780293311524985,
+      "avg_prior_momentum_rank_pct": 0.7593075917280637,
+      "avg_residual_rank_pct_5yr": 0.4578204355467972,
+      "avg_land_support_score": 0.23666783627959842,
+      "pre_boom_breakout_years": [],
+      "underpriced_growth_years": [],
+      "residual_breakout_years": [],
+      "land_breakout_years": []
+    }
+  ]
+}

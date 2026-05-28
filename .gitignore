@@ -6,3 +6,5 @@ data/
 notebooks/
 *.duckdb
 dashboard_user_data.json
+dashboard_user_data.sqlite3
+dashboard_user_data.sqlite3-*

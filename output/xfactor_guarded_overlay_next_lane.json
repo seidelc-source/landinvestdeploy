@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-05-27T22:19:28.127637+00:00",
+  "status": "report_only_next_lane",
+  "year": 2024,
+  "decision": "pass_guardrails",
+  "blockers": [],
+  "metrics": {
+    "rows": 3144,
+    "cap_points": 1.0,
+    "top25_churn": 0.040000000000000036,
+    "top100_churn": 0.030000000000000027,
+    "mean_abs_rank_shift": 24.580788804071247,
+    "median_abs_rank_shift": 22.0,
+    "p95_abs_rank_shift": 64.0,
+    "max_abs_rank_shift": 101.0,
+    "mean_adjustment": 0.25652656308943284,
+    "p95_adjustment": 0.9999812732445273
+  },
+  "candidate_source_gate": {
+    "production_promotion_status": "no_default_interaction_promotion",
+    "default_promotion_count": 0,
+    "completed_blocked_count": 2
+  },
+  "guardrails": {
+    "top25_churn_max": 0.1,
+    "top100_churn_max": 0.15,
+    "mean_abs_rank_shift_max": 25.0,
+    "p95_abs_rank_shift_max": 75.0
+  },
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_guarded_overlay_next_lane.csv",
+    "top_movers_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_guarded_overlay_top_movers.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_guarded_overlay_next_lane.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_guarded_overlay_next_lane.md"
+  }
+}

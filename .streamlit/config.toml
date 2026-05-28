@@ -5,4 +5,18 @@ headless = true
 gatherUsageStats = false
 
 [theme]
-base = "light"
+primaryColor = "#0f766e"
+linkColor = "#0f766e"
+
+[theme.light]
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f8fafc"
+textColor = "#0f172a"
+linkColor = "#0f766e"
+
+[theme.dark]
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#262730"
+textColor = "#fafafa"
+primaryColor = "#0f766e"
+linkColor = "#5eead4"

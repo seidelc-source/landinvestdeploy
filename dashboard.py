@@ -4,9 +4,13 @@ LandInvest Interactive Dashboard
 Launch:  streamlit run dashboard.py
 """
 
+import html
 import json
+import re
+import sqlite3
 from pathlib import Path
 from datetime import datetime
+from urllib.parse import urlencode
 
 import numpy as np
 import pandas as pd
@@ -19,6 +23,10 @@ import streamlit as st
 # ---------------------------------------------------------------------------
 
 DATA_PATH = Path(__file__).resolve().parent / "output" / "county_rankings_2024.parquet"
+ASSETS_PATH = Path(__file__).resolve().parent / "assets"
+BRAND_LOGO_PATH = ASSETS_PATH / "landinvest-logo.svg"
+COUNTY_GEOJSON_PATH = ASSETS_PATH / "geojson-counties-fips.json"
+COUNTY_GEOJSON_URL = "https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json"
 EVAL_PATH = Path(__file__).resolve().parent / "output" / "evaluation_report.json"
 CONFORMAL_DIAG_PATH = Path(__file__).resolve().parent / "models" / "artifacts" / "quantile" / "conformal_diagnostics.json"
 RUNS_PATH = Path(__file__).resolve().parent / "output" / "runs"
@@ -45,7 +53,15 @@ PREBOOM_RESIDUAL_AUDIT_PATH = OUTPUT_PATH / "investable_residual_guardrail_top10
 PREBOOM_BLEND_REPORT_PATH = OUTPUT_PATH / "preboom_two_score_blend_sweep_2024.json"
 PREBOOM_ANALOG_REPORT_PATH = OUTPUT_PATH / "preboom_surface_analog_overlap.json"
 PREBOOM_PROMOTION_GATE_PATH = OUTPUT_PATH / "preboom_residual_promotion_gate.json"
+P0_REPEATABLE_RESIDUAL_GUARDRAIL_PATH = OUTPUT_PATH / "p0_repeatable_residual_guardrail.json"
+P0_REPEATABLE_RESIDUAL_GUARDRAIL_TOP_CANDIDATES_PATH = OUTPUT_PATH / "p0_repeatable_residual_guardrail_top_candidates.csv"
+KNOWN_ANALOG_SUITE_PATH = OUTPUT_PATH / "known_boom_analog_suite.json"
+XFACTOR_INTERACTION_SCOREBOARD_PATH = OUTPUT_PATH / "xfactor_interaction_validation_scoreboard.json"
+XFACTOR_INTERACTION_ABLATION_QUEUE_PATH = OUTPUT_PATH / "xfactor_interaction_ablation_queue.json"
+XFACTOR_INTERACTION_PROMOTION_GATE_PATH = OUTPUT_PATH / "xfactor_interaction_promotion_gate.json"
+DEMO_READINESS_REPORT_PATH = OUTPUT_PATH / "demo_readiness_report.json"
 USER_DATA_PATH = OUTPUT_PATH / "dashboard_user_data.json"
+USER_DATA_DB_PATH = OUTPUT_PATH / "dashboard_user_data.sqlite3"
 HORIZONS = [1, 3, 5]
 MIN_CAL_SHIFT = {1: 0.05, 3: 0.10, 5: 0.15}
 MAX_CAL_SHIFT = {1: 0.20, 3: 0.40, 5: 0.70}
@@ -60,6 +76,40 @@ def _fmt_pct(x) -> str:
 
 def _fmt_score(x) -> str:
     return f"{x:.1f}" if pd.notna(x) else "—"
+
+
+STATUS_LABELS = {
+    "needs_stabilization_but_has_promising_specialist_lane": "Needs stabilization",
+    "no_default_interaction_promotion": "Report-only: no default X-factor promotion",
+    "report_only_product_review_lane": "Report-only product review lane",
+    "research gates active": "Research gates active",
+    "unknown": "Unknown",
+    "n/a": "n/a",
+}
+
+
+def _humanize_status_label(value) -> str:
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return "n/a"
+    raw = str(value).strip()
+    if not raw:
+        return "n/a"
+    return STATUS_LABELS.get(raw, raw.replace("_", " ").replace("-", " ").title())
+
+
+def _slider_step_precision(step: float) -> int:
+    if step <= 0:
+        return 2
+    if step >= 1:
+        return 2
+    return min(6, max(2, int(np.ceil(-np.log10(step))) + 2))
+
+
+def _align_slider_bound(value: float, step: float, *, direction: str) -> float:
+    precision = _slider_step_precision(step)
+    scaled = value / step
+    aligned = np.floor(scaled) * step if direction == "down" else np.ceil(scaled) * step
+    return round(float(aligned), precision)
 
 
 def _risk_color(v: float) -> str:
@@ -556,6 +606,7 @@ def _default_user_data() -> dict:
         "county_feedback": {},
         "preboom_feedback": {},
         "diligence_evidence": {},
+        "parcel_checklists": {},
         "watchlist_alert_state": {},
         "watchlist_settings": {
             "top_rank_strong": 25,
@@ -573,8 +624,32 @@ def _default_user_data() -> dict:
     }
 
 
-def _load_user_data() -> dict:
-    data = _safe_json_load(USER_DATA_PATH)
+def _normalize_user_id(raw: str | None) -> str:
+    text = (raw or "demo").strip().lower()
+    text = re.sub(r"[^a-z0-9_.@-]+", "-", text).strip("-")
+    return text[:80] or "demo"
+
+
+def _current_user_id() -> str:
+    return _normalize_user_id(st.session_state.get("dashboard_user_id", "demo"))
+
+
+def _init_user_data_db() -> None:
+    USER_DATA_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with sqlite3.connect(USER_DATA_DB_PATH) as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS user_state (
+                user_id TEXT PRIMARY KEY,
+                payload TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+            """
+        )
+        conn.commit()
+
+
+def _coerce_user_data(data: dict | None) -> dict:
     if not isinstance(data, dict):
         return _default_user_data()
     base = _default_user_data()
@@ -587,14 +662,53 @@ def _load_user_data() -> dict:
     base["county_feedback"] = base.get("county_feedback") or {}
     base["preboom_feedback"] = base.get("preboom_feedback") if isinstance(base.get("preboom_feedback"), dict) else {}
     base["diligence_evidence"] = base.get("diligence_evidence") or {}
+    base["parcel_checklists"] = base.get("parcel_checklists") or {}
     base["watchlist_alert_state"] = base.get("watchlist_alert_state") or {}
     base["watchlist_settings"] = {**_default_user_data()["watchlist_settings"], **(base.get("watchlist_settings") or {})}
     return base
 
 
-def _save_user_data(data: dict) -> None:
-    USER_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
-    USER_DATA_PATH.write_text(json.dumps(data, indent=2))
+def _load_user_data(user_id: str | None = None) -> dict:
+    resolved_user = _normalize_user_id(user_id or _current_user_id())
+    try:
+        _init_user_data_db()
+        with sqlite3.connect(USER_DATA_DB_PATH) as conn:
+            row = conn.execute(
+                "SELECT payload FROM user_state WHERE user_id = ?",
+                (resolved_user,),
+            ).fetchone()
+        if row:
+            return _coerce_user_data(json.loads(row[0]))
+    except (OSError, sqlite3.Error, json.JSONDecodeError):
+        pass
+    if resolved_user == "demo":
+        return _coerce_user_data(_safe_json_load(USER_DATA_PATH))
+    return _default_user_data()
+
+
+def _save_user_data(data: dict, user_id: str | None = None) -> None:
+    resolved_user = _normalize_user_id(user_id or _current_user_id())
+    _init_user_data_db()
+    payload = json.dumps(data, indent=2)
+    with sqlite3.connect(USER_DATA_DB_PATH) as conn:
+        conn.execute(
+            """
+            INSERT INTO user_state (user_id, payload, updated_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
+                payload = excluded.payload,
+                updated_at = excluded.updated_at
+            """,
+            (resolved_user, payload, datetime.now().isoformat()),
+        )
+        conn.commit()
+
+
+def _user_storage_status() -> str:
+    user_id = _current_user_id()
+    if USER_DATA_DB_PATH.exists():
+        return f"SQLite user store: `{USER_DATA_DB_PATH.name}` / user `{user_id}`"
+    return f"SQLite user store will be created on first save / user `{user_id}`"
 
 
 def _save_current_user_state() -> None:
@@ -608,6 +722,7 @@ def _save_current_user_state() -> None:
             "county_feedback": st.session_state.county_feedback,
             "preboom_feedback": st.session_state.preboom_feedback,
             "diligence_evidence": st.session_state.diligence_evidence,
+            "parcel_checklists": st.session_state.parcel_checklists,
             "watchlist_alert_state": st.session_state.watchlist_alert_state,
             "watchlist_settings": st.session_state.watchlist_settings,
         }
@@ -756,12 +871,14 @@ def _apply_watchlist_import_payload(
             imported_notes = payload.get("county_notes") or {}
             imported_compare_sets = payload.get("saved_compare_sets") or {}
             imported_alert_state = payload.get("watchlist_alert_state") or {}
+            imported_parcel_checklists = payload.get("parcel_checklists") or {}
             imported_settings = payload.get("watchlist_settings") or {}
             if mode_replace:
                 saved = imported_saved
                 notes = imported_notes
                 compare_sets = imported_compare_sets
                 alert_state = imported_alert_state
+                parcel_checklists = imported_parcel_checklists
                 watchlist_settings = {**_default_user_data()["watchlist_settings"], **imported_settings}
                 first_watch = next(iter(imported_saved.values()), {})
                 watch_fips = [
@@ -776,10 +893,13 @@ def _apply_watchlist_import_payload(
                 compare_sets.update(imported_compare_sets)
                 alert_state = dict(st.session_state.watchlist_alert_state)
                 alert_state.update(imported_alert_state)
+                parcel_checklists = dict(st.session_state.parcel_checklists)
+                parcel_checklists.update(imported_parcel_checklists)
                 watchlist_settings = {**st.session_state.watchlist_settings, **imported_settings}
                 msg = f"Merged dashboard user-data bundle with `{len(imported_saved)}` saved watchlists."
             st.session_state.saved_compare_sets = compare_sets
             st.session_state.watchlist_alert_state = alert_state
+            st.session_state.parcel_checklists = parcel_checklists
             st.session_state.watchlist_settings = watchlist_settings
             return sorted(set(watch_fips)), saved, notes, msg
 
@@ -1637,6 +1757,13 @@ def _safe_json_load(path: Path):
         return None
 
 
+@st.cache_data
+def load_county_geojson(_mtime: float):
+    """Prefer bundled county GeoJSON so deployed maps do not depend on GitHub at runtime."""
+    payload = _safe_json_load(COUNTY_GEOJSON_PATH)
+    return payload if payload else COUNTY_GEOJSON_URL
+
+
 def _dynamic_calibration_cap(raw: pd.Series, horizon: int) -> float:
     vals = raw.astype(float).to_numpy()
     vals = vals[np.isfinite(vals)]
@@ -1684,7 +1811,12 @@ def compute_calibration_diagnostics(df: pd.DataFrame) -> pd.DataFrame:
 
 @st.cache_data
 def load_data(_mtime: float) -> pd.DataFrame:
-    df = pd.read_parquet(DATA_PATH)
+    if not DATA_PATH.exists():
+        return pd.DataFrame()
+    try:
+        df = pd.read_parquet(DATA_PATH)
+    except Exception:
+        return pd.DataFrame()
     # Parse JSON driver columns back to dicts
     for col in df.columns:
         if "drivers" in col:
@@ -1780,6 +1912,31 @@ def load_preboom_surface_df(path_str: str, _mtime: float) -> pd.DataFrame | None
     if not path.exists():
         return None
     return pd.read_csv(path, dtype={"fips": str})
+
+
+@st.cache_data
+def load_known_analog_suite(_mtime: float) -> dict | None:
+    return _safe_json_load(KNOWN_ANALOG_SUITE_PATH)
+
+
+@st.cache_data
+def load_xfactor_interaction_scoreboard(_mtime: float) -> dict | None:
+    return _safe_json_load(XFACTOR_INTERACTION_SCOREBOARD_PATH)
+
+
+@st.cache_data
+def load_xfactor_interaction_ablation_queue(_mtime: float) -> dict | None:
+    return _safe_json_load(XFACTOR_INTERACTION_ABLATION_QUEUE_PATH)
+
+
+@st.cache_data
+def load_xfactor_interaction_promotion_gate(_mtime: float) -> dict | None:
+    return _safe_json_load(XFACTOR_INTERACTION_PROMOTION_GATE_PATH)
+
+
+@st.cache_data
+def load_demo_readiness_report(_mtime: float) -> dict | None:
+    return _safe_json_load(DEMO_READINESS_REPORT_PATH)
 
 
 @st.cache_data
@@ -2023,7 +2180,7 @@ def _product_table(df: pd.DataFrame, limit: int = 25) -> pd.DataFrame:
         "county_name": "County",
         "state": "State",
         "sim_score": "Strategy Score",
-        "opportunity_score": "Prod Score",
+        "opportunity_score": "Production Score",
         "pred_avg_5yr": "5yr",
         "pred_policy_3yr": "3yr",
         "composite_risk": "Risk",
@@ -2032,7 +2189,7 @@ def _product_table(df: pd.DataFrame, limit: int = 25) -> pd.DataFrame:
         "opportunity_archetype": "Archetype",
     }
     show = show.rename(columns=rename)
-    for col in ["Strategy Score", "Prod Score", "Risk", "Thesis Fit"]:
+    for col in ["Strategy Score", "Production Score", "Risk", "Thesis Fit"]:
         if col in show.columns:
             show[col] = show[col].map(_fmt_score)
     for col in ["5yr", "3yr"]:
@@ -2070,8 +2227,8 @@ def _numeric_slider_filter(
             return df
         selected = st.slider(label, min_val, max_val, (min_val, max_val), step=1, key=key)
     else:
-        min_val = float(vals.min())
-        max_val = float(vals.max())
+        min_val = _align_slider_bound(float(vals.min()), step, direction="down")
+        max_val = _align_slider_bound(float(vals.max()), step, direction="up")
         if np.isclose(min_val, max_val):
             return df
         selected = st.slider(
@@ -2745,13 +2902,13 @@ def _apply_natural_language_query(df: pd.DataFrame, query: str) -> tuple[pd.Data
             out = out[out["state"].isin(state_list)]
             notes.append(f"Filtered to {label}.")
 
-    if "low risk" in q or "lower risk" in q or "safe" in q:
+    if "low risk" in q or "low-risk" in q or "lower risk" in q or "lower-risk" in q or "safe" in q:
         out = out[out["composite_risk"] <= 45]
         notes.append("Applied low-risk filter.")
     if "high risk" in q:
         out = out[out["composite_risk"] >= 55]
         notes.append("Applied high-risk filter.")
-    if "strong 5" in q or "5yr upside" in q or "5 year upside" in q or "high upside" in q:
+    if "strong 5" in q or "5yr upside" in q or "5 year upside" in q or "5-year upside" in q or "high upside" in q:
         out = out[out["pred_avg_5yr"] >= out["pred_avg_5yr"].quantile(0.75)]
         notes.append("Kept upper-quartile 5yr signal.")
     if "confidence" in q or "high conviction" in q:
@@ -2774,7 +2931,8 @@ def _apply_natural_language_query(df: pd.DataFrame, query: str) -> tuple[pd.Data
                 out = peer_sets.get("Most similar profile", next(iter(peer_sets.values()))).copy()
                 notes.append(f"Showing counties similar to {matches.iloc[0].get('county_name')}.")
 
-    state_hits = [s for s in sorted(df["state"].dropna().unique()) if s.lower() in q.split()]
+    explicit_state_tokens = set(re.findall(r"\b[A-Z]{2}\b", query))
+    state_hits = [s for s in sorted(df["state"].dropna().astype(str).unique()) if s in explicit_state_tokens]
     if state_hits:
         out = out[out["state"].isin(state_hits)]
         notes.append(f"Filtered to states: {', '.join(state_hits)}.")
@@ -2963,12 +3121,12 @@ def _promotion_readiness_rows(status_bundle: dict | None) -> pd.DataFrame:
     rows = [
         {
             "Gate": "3yr health",
-            "Status": (model_health.get("assessment") or {}).get("health_status", "unknown"),
+            "Status": _humanize_status_label((model_health.get("assessment") or {}).get("health_status", "unknown")),
             "Read": "Blocks direct 3yr promotion until stabilized.",
         },
         {
             "Gate": "Wave 3 closeout",
-            "Status": wave3_closeout.get("status", "unknown"),
+            "Status": _humanize_status_label(wave3_closeout.get("status", "unknown")),
             "Read": "Product/overlay-first posture remains preferred.",
         },
         {
@@ -3033,11 +3191,637 @@ def _selected_county_row(df: pd.DataFrame, fips: str | None) -> pd.Series | None
     return match.iloc[0]
 
 
+def _rank_text(value) -> str:
+    if pd.isna(value):
+        return "—"
+    try:
+        return f"#{int(float(value))}"
+    except (TypeError, ValueError):
+        return "—"
+
+
+def _confidence_read(row: pd.Series) -> tuple[str, list[str]]:
+    conf = str(row.get("confidence", "UNKNOWN")).upper()
+    model_disagreement = _product_numeric(row, "model_disagreement", 0.0)
+    horizon_spread = _product_numeric(row, "rank_stability_spread", 0.0)
+    interval = _product_numeric(row, "quantile_interval_width_mean", np.nan)
+    pred5 = _product_numeric(row, "pred_avg_5yr", 0.0)
+    fallback = bool(row.get("use_stable_3yr_fallback", False))
+
+    if conf == "HIGH" and model_disagreement <= 0.035 and horizon_spread <= 0.25 and pd.notna(interval) and interval <= 0.48:
+        label = "High Consensus"
+    elif pred5 >= 0.12 and (model_disagreement >= 0.055 or horizon_spread >= 0.45 or pd.notna(interval) and interval >= 0.52):
+        label = "High Upside / High Uncertainty"
+    elif fallback or horizon_spread >= 0.45 or model_disagreement >= 0.06:
+        label = "Mixed Signal"
+    elif conf == "LOW" or pd.notna(interval) and interval >= 0.54:
+        label = "Data Fragile"
+    else:
+        label = "Moderate Consensus"
+
+    bullets = [
+        f"Model-confidence bucket is `{conf}`.",
+        f"XGBoost/LightGBM disagreement is `{model_disagreement:.3f}`.",
+        f"Cross-horizon rank spread is `{horizon_spread:.3f}`.",
+    ]
+    if pd.notna(interval):
+        bullets.append(f"Mean prediction interval width is `{interval:.3f}`.")
+    if fallback:
+        bullets.append("3yr policy uses the stabilized fallback path.")
+    return label, bullets
+
+
+def _preboom_signal_rows_for_county(
+    row: pd.Series,
+    preboom_surfaces: dict[str, pd.DataFrame | None] | None,
+) -> pd.DataFrame:
+    if not preboom_surfaces:
+        return pd.DataFrame()
+    fips = str(row.get("fips", "")).zfill(5)
+    labels = _preboom_surface_label_map()
+    rows: list[dict[str, object]] = []
+    for key in ["guarded_blend", "residual_guardrail", "balanced", "raw", "unguarded_blend"]:
+        surface = preboom_surfaces.get(key)
+        if surface is None or surface.empty or "fips" not in surface.columns:
+            continue
+        work = surface.copy()
+        work["fips"] = work["fips"].astype(str).str.zfill(5)
+        match = work[work["fips"].eq(fips)]
+        if match.empty:
+            continue
+        rec = match.iloc[0]
+        rank_col = _preboom_surface_rank_col(work)
+        rows.append(
+            {
+                "Surface": labels.get(key, key),
+                "Review Rank": _rank_text(rec.get(rank_col)),
+                "Breakout Prob": _fmt_score(rec.get("preboom_classifier_score")),
+                "Residual Upside": _fmt_score(
+                    rec.get("investable_residual_model_score", rec.get("guarded_residual_score", rec.get("residual_model_score")))
+                ),
+                "Prior Momentum": _fmt_score(rec.get("preboom_prior_momentum_rank_pct")),
+                "QA": rec.get("qa_status", rec.get("qa_flags", "research-only")),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _aggregate_analog_summaries(analog_suite: dict | None) -> pd.DataFrame:
+    if not analog_suite:
+        return pd.DataFrame()
+    summaries = pd.DataFrame(analog_suite.get("window_summaries") or [])
+    if summaries.empty:
+        return summaries
+    grouped = (
+        summaries.groupby(["analog_group", "theme"], as_index=False)
+        .agg(
+            windows=("window", "count"),
+            avg_future_rank=("avg_preboom_future_growth_rank_pct_5yr", "mean"),
+            avg_prior_momentum=("avg_preboom_prior_momentum_rank_pct", "mean"),
+            avg_signal_share=("any_signal_share", "mean"),
+            avg_already_hot_share=("avg_preboom_already_hot_flag", "mean"),
+        )
+        .sort_values(["avg_future_rank", "avg_signal_share"], ascending=[False, False])
+    )
+    return grouped
+
+
+def _analog_rows_for_county(row: pd.Series, analog_suite: dict | None, limit: int = 3) -> pd.DataFrame:
+    if not analog_suite:
+        return pd.DataFrame()
+    fips = str(row.get("fips", "")).zfill(5)
+    timelines = pd.DataFrame(analog_suite.get("county_timelines") or [])
+    exact_rows: list[dict[str, object]] = []
+    if not timelines.empty and "fips" in timelines.columns:
+        exact = timelines[timelines["fips"].astype(str).str.zfill(5).eq(fips)].copy()
+        for _, rec in exact.head(limit).iterrows():
+            exact_rows.append(
+                {
+                    "Analog Family": str(rec.get("analog_group", "")).replace("_", " ").title(),
+                    "Why Relevant": "Exact county appears in the known-boom analog library.",
+                    "Historical Window": rec.get("window", "n/a"),
+                    "Historical Read": f"future rank pct {_fmt_score(rec.get('avg_future_growth_rank_pct_5yr'))}",
+                    "Before-Hot Signal": "yes" if bool(rec.get("signal_before_hot")) else "no",
+                }
+            )
+    if exact_rows:
+        return pd.DataFrame(exact_rows)
+
+    grouped = _aggregate_analog_summaries(analog_suite)
+    if grouped.empty:
+        return pd.DataFrame()
+    archetype = str(row.get("opportunity_archetype", "")).lower()
+    recreation = _product_numeric(row, "recreation_access_score", 0.0)
+    structure = _product_numeric(row, "sim_structure_score", 50.0)
+    risk = _product_numeric(row, "composite_risk", 50.0)
+    pred5 = _product_numeric(row, "pred_avg_5yr", 0.0)
+
+    preferred: list[str] = []
+    if "amenity" in archetype or recreation >= 0.66:
+        preferred.extend(["boise_treasure_valley", "colorado_front_range", "utah_wasatch_spillover"])
+    if "buildable" in archetype or "scarcity" in archetype or structure >= 70:
+        preferred.extend(["boise_treasure_valley", "colorado_front_range", "austin_hill_country"])
+    if "low-risk" in archetype or pred5 >= 0.12 and risk <= 45:
+        preferred.extend(["nashville_middle_tennessee", "raleigh_triangle_spillover", "charlotte_piedmont_spillover"])
+    if "fragile" in archetype or risk >= 55:
+        preferred.extend(["phoenix_sun_corridor", "florida_space_gulf_growth"])
+    if not preferred:
+        preferred.extend(["boise_treasure_valley", "nashville_middle_tennessee", "northwest_arkansas"])
+
+    preferred = list(dict.fromkeys(preferred))
+    ranked = pd.concat(
+        [
+            grouped[grouped["analog_group"].isin(preferred)],
+            grouped[~grouped["analog_group"].isin(preferred)].head(limit),
+        ],
+        ignore_index=True,
+    ).drop_duplicates("analog_group").head(limit)
+
+    rows = []
+    for _, rec in ranked.iterrows():
+        rows.append(
+            {
+                "Analog Family": str(rec.get("analog_group", "")).replace("_", " ").title(),
+                "Why Relevant": rec.get("theme", "historical growth setup"),
+                "Historical Window": f"{int(rec.get('windows', 0))} windows",
+                "Historical Read": f"avg future rank pct {_fmt_score(rec.get('avg_future_rank'))}",
+                "Before-Hot Signal": f"signal share {_fmt_pct(rec.get('avg_signal_share'))}",
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _top_xfactor_scoreboard_rows(scoreboard: dict | None, limit: int = 3) -> pd.DataFrame:
+    if not scoreboard:
+        return pd.DataFrame()
+    rows = scoreboard.get("summary") or scoreboard.get("scoreboard") or []
+    if not rows:
+        return pd.DataFrame()
+    frame = pd.DataFrame(rows)
+    sort_col = "validation_score" if "validation_score" in frame.columns else "frontier_score" if "frontier_score" in frame.columns else None
+    if sort_col:
+        frame = frame.sort_values(sort_col, ascending=False)
+    cols = [
+        "label",
+        "fold_count",
+        "avg_preboom_rate_lift",
+        "already_hot_top_decile_share",
+        "analog_top_decile_capture_share",
+        "decision",
+    ]
+    view = frame[[c for c in cols if c in frame.columns]].head(limit).copy()
+    if view.empty:
+        return view
+    view = view.rename(
+        columns={
+            "label": "Interaction",
+            "fold_count": "Folds",
+            "avg_preboom_rate_lift": "Quiet Lift",
+            "already_hot_top_decile_share": "Already-Hot Share",
+            "analog_top_decile_capture_share": "Analog Capture",
+            "decision": "Decision",
+        }
+    )
+    for col in ["Quiet Lift", "Already-Hot Share", "Analog Capture"]:
+        if col in view.columns:
+            view[col] = view[col].map(_fmt_pct)
+    return view
+
+
+def _score_glossary_table() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {
+                "Term": "Strategy Rank",
+                "Plain-English Read": "Product Mode simulation rank using the current sidebar strategy settings.",
+                "Production Status": "UI overlay",
+            },
+            {
+                "Term": "Production Rank",
+                "Plain-English Read": "Unchanged county rank from the current scoring artifact.",
+                "Production Status": "Production artifact",
+            },
+            {
+                "Term": "Opportunity Score",
+                "Plain-English Read": "Current production ranking score after growth, risk, uncertainty, and stability policy.",
+                "Production Status": "Production artifact",
+            },
+            {
+                "Term": "Risk",
+                "Plain-English Read": "Composite county-level risk; higher values need more caution before diligence.",
+                "Production Status": "Production artifact",
+            },
+            {
+                "Term": "Confidence",
+                "Plain-English Read": "Coarse confidence bucket from model agreement, uncertainty, and stability signals.",
+                "Production Status": "Production artifact",
+            },
+            {
+                "Term": "X-Factor / Pre-Boom",
+                "Plain-English Read": "Research surfaces looking for structurally supported counties before momentum is obvious.",
+                "Production Status": "Report-only",
+            },
+            {
+                "Term": "Wave 3 / Land Thesis",
+                "Plain-English Read": "Structural context for support, brakes, buildability, optionality, amenity, and fragility.",
+                "Production Status": "Overlay / narrative first",
+            },
+        ]
+    )
+
+
+def _format_export_frame(df: pd.DataFrame, limit: int) -> pd.DataFrame:
+    cols = [
+        "sim_rank",
+        "overall_rank",
+        "fips",
+        "county_name",
+        "state",
+        "sim_score",
+        "opportunity_score",
+        "pred_avg_5yr",
+        "pred_policy_3yr",
+        "composite_risk",
+        "confidence",
+        "opportunity_archetype",
+        "sim_structure_score",
+        "model_disagreement",
+        "quantile_interval_width_mean",
+        "rank_stability_spread",
+    ]
+    out = df[[c for c in cols if c in df.columns]].sort_values("sim_rank").head(limit).copy()
+    if "fips" in out.columns:
+        out["fips"] = out["fips"].astype(str).str.zfill(5)
+    return out
+
+
+def _compare_export_frame(compare_df: pd.DataFrame) -> pd.DataFrame:
+    cols = [
+        "sim_rank",
+        "overall_rank",
+        "fips",
+        "county_name",
+        "state",
+        "sim_score",
+        "opportunity_score",
+        "pred_avg_5yr",
+        "pred_policy_3yr",
+        "composite_risk",
+        "confidence",
+        "opportunity_archetype",
+        "sim_structure_score",
+        "model_disagreement",
+        "quantile_interval_width_mean",
+        "rank_stability_spread",
+    ]
+    out = compare_df[[c for c in cols if c in compare_df.columns]].sort_values("sim_rank").copy()
+    if "fips" in out.columns:
+        out["fips"] = out["fips"].astype(str).str.zfill(5)
+    return out
+
+
+def _top_report_markdown(
+    df: pd.DataFrame,
+    cfg: dict,
+    latest_run: dict | None,
+    *,
+    limit: int,
+    title: str,
+) -> str:
+    run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
+    generated = datetime.now().isoformat()
+    lines = [
+        f"# {title}",
+        "",
+        f"- Generated at: `{generated}`",
+        f"- Ranking run: `{run_id}`",
+        f"- Strategy preset: `{cfg.get('preset_name', 'Active strategy')}`",
+        f"- Horizon mix: 1yr `{cfg.get('h1')}`, 3yr `{cfg.get('h3')}`, 5yr `{cfg.get('h5')}`",
+        f"- Score mix: growth `{cfg.get('growth')}`, risk `{cfg.get('risk')}`, land thesis `{cfg.get('structure')}`, confidence `{cfg.get('confidence')}`",
+        "- Use: county-level screening and discussion; not investment advice or parcel-level diligence.",
+        "",
+        "## County List",
+        "",
+        "| Strategy Rank | Production Rank | County | State | 5yr | Risk | Confidence | Archetype | First Diligence Check |",
+        "|---:|---:|---|---|---:|---:|---|---|---|",
+    ]
+    for _, row in df.sort_values("sim_rank").head(limit).iterrows():
+        _, actions = _parcel_readiness(row)
+        lines.append(
+            f"| {_rank_text(row.get('sim_rank'))} | {_rank_text(row.get('overall_rank'))} | "
+            f"{row.get('county_name', '')} | {row.get('state', '')} | {_fmt_pct(row.get('pred_avg_5yr'))} | "
+            f"{_fmt_score(row.get('composite_risk'))} | {row.get('confidence', 'n/a')} | "
+            f"{row.get('opportunity_archetype', 'n/a')} | {actions[0] if actions else 'n/a'} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Read Before Sharing",
+            "",
+            "- `Strategy Rank` is a Product Mode simulation, not a saved model artifact.",
+            "- `Production Rank` is the current scoring artifact.",
+            "- X-factor/pre-boom and Wave 3 structural fields are decision-support context unless explicitly promoted by a model gate.",
+            "- Every county still needs parcel, zoning, transaction, insurance, and local-market diligence.",
+        ]
+    )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _compare_set_markdown(compare_df: pd.DataFrame, cfg: dict, latest_run: dict | None) -> str:
+    run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
+    lines = [
+        "# LandInvest Compare Set Summary",
+        "",
+        f"- Generated at: `{datetime.now().isoformat()}`",
+        f"- Ranking run: `{run_id}`",
+        f"- Strategy preset: `{cfg.get('preset_name', 'Active strategy')}`",
+        "- Use: side-by-side county-level screening; not investment advice.",
+        "",
+        "## Counties",
+        "",
+        "| Strategy Rank | Production Rank | County | State | 5yr | 3yr | Risk | Confidence | Best Read | Main Brake |",
+        "|---:|---:|---|---|---:|---:|---:|---|---|---|",
+    ]
+    for _, row in compare_df.sort_values("sim_rank").iterrows():
+        narrative = _build_county_narrative(row)
+        support = narrative["positives"][0] if narrative["positives"] else "n/a"
+        brake = narrative["cautions"][0] if narrative["cautions"] else "n/a"
+        lines.append(
+            f"| {_rank_text(row.get('sim_rank'))} | {_rank_text(row.get('overall_rank'))} | "
+            f"{row.get('county_name', '')} | {row.get('state', '')} | {_fmt_pct(row.get('pred_avg_5yr'))} | "
+            f"{_fmt_pct(row.get('pred_policy_3yr'))} | {_fmt_score(row.get('composite_risk'))} | "
+            f"{row.get('confidence', 'n/a')} | {support} | {brake} |"
+        )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _render_trust_banner(latest_run: dict | None, df: pd.DataFrame, xfactor_gate: dict | None = None) -> None:
+    run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
+    run_year = latest_run.get("year", df["year"].max() if "year" in df.columns else "n/a") if latest_run else "n/a"
+    gate_status = (xfactor_gate or {}).get("production_promotion_status", "research gates active")
+    st.info(
+        "County-level model screening only. Outputs are estimates, not investment advice or parcel-specific diligence. "
+        f"Ranking run `{run_id}`, year `{run_year}`, rows `{len(df):,}`. "
+        f"X-factor status: `{_humanize_status_label(gate_status)}`."
+    )
+
+
+def _demo_checklist_table(demo_readiness_report: dict | None) -> pd.DataFrame:
+    if not demo_readiness_report:
+        return pd.DataFrame(
+            [
+                {
+                    "Area": "Demo readiness",
+                    "Status": "missing",
+                    "Detail": "Run scripts/build_demo_readiness_bundle.py to generate the checklist.",
+                }
+            ]
+        )
+    rows = []
+    for item in demo_readiness_report.get("checklist") or []:
+        rows.append(
+            {
+                "Area": item.get("area", "Unknown"),
+                "Status": item.get("status", "unknown"),
+                "Detail": item.get("detail", ""),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _source_attribution_table() -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {"Family": "Home values and price history", "Examples": "FHFA, Zillow-derived ZHVI artifacts", "Use": "Targets, trend context, ranking inputs"},
+            {"Family": "Labor, income, and establishments", "Examples": "BLS, BEA, Census CBP/QCEW", "Use": "Growth context, economic anchors, affordability"},
+            {"Family": "Population and migration", "Examples": "U.S. Census, IRS-style migration-derived features where staged", "Use": "Demand and demographic context"},
+            {"Family": "Credit, lending, and housing activity", "Examples": "HMDA and project-staged housing indicators", "Use": "Liquidity, market depth, and risk context"},
+            {"Family": "Climate, terrain, water, and land constraints", "Examples": "NOAA, USGS, FCC, PAD-US/wetlands-derived project artifacts", "Use": "Risk, buildability, and land-thesis overlays"},
+            {"Family": "Corporate-anchor evidence", "Examples": "SEC EDGAR proof lanes and staged anchor diagnostics", "Use": "Report-only X-factor and analog context"},
+        ]
+    )
+
+
+def _artifact_status_table() -> pd.DataFrame:
+    rows = []
+    for label, path, required in [
+        ("County rankings", DATA_PATH, True),
+        ("County map GeoJSON", COUNTY_GEOJSON_PATH, False),
+        ("Project status bundle", STATUS_BUNDLE_PATH, False),
+        ("Demo readiness report", DEMO_READINESS_REPORT_PATH, False),
+        ("X-factor promotion gate", XFACTOR_INTERACTION_PROMOTION_GATE_PATH, False),
+        ("X-factor ablation queue", XFACTOR_INTERACTION_ABLATION_QUEUE_PATH, False),
+        ("Known analog suite", KNOWN_ANALOG_SUITE_PATH, False),
+        ("Source health", SOURCE_HEALTH_PATH, False),
+    ]:
+        rows.append(
+            {
+                "Artifact": label,
+                "Status": "present" if path.exists() else "missing",
+                "Required": "yes" if required else "optional",
+                "Path": str(path.relative_to(Path(__file__).resolve().parent)) if path.is_absolute() else str(path),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _render_missing_artifact_help() -> None:
+    st.error("The demo cannot load county rankings because the required ranking artifact is missing or unreadable.")
+    st.dataframe(_artifact_status_table(), width="stretch", hide_index=True, height=260)
+    st.info(
+        "Regenerate local rankings with `python scoring_pipeline.py`, then run "
+        "`./.venv/bin/python scripts/build_demo_readiness_bundle.py` to rebuild the demo package."
+    )
+
+
+def _render_demo_footer(
+    latest_run: dict | None,
+    status_bundle: dict | None,
+    demo_readiness_report: dict | None,
+) -> None:
+    latest = latest_run or {}
+    run_id = latest.get("run_id") or ((status_bundle or {}).get("latest_run") or {}).get("run_dir") or "unknown"
+    readiness = (demo_readiness_report or {}).get("overall_status", "not generated")
+    generated = (demo_readiness_report or {}).get("generated_at", "n/a")
+    source_summary = (status_bundle or {}).get("source_health_summary") or {}
+    healthy = source_summary.get("healthy_sources")
+    total = source_summary.get("n_sources")
+    source_read = f"{healthy}/{total} healthy" if healthy is not None and total is not None else "source summary unavailable"
+    st.divider()
+    st.caption(
+        f"Demo status `{readiness}` · ranking run `{run_id}` · readiness generated `{generated}` · "
+        f"sources `{source_read}` · user store `{_current_user_id()}`"
+    )
+    with st.expander("Trust, Privacy, And Sources", expanded=False):
+        st.markdown(
+            "- LandInvest is a county-level screening and research tool. It is not investment, legal, tax, valuation, or parcel-specific advice.\n"
+            "- Rankings are model estimates and research overlays; every county still needs parcel, zoning, title, transaction, insurance, and local-market diligence.\n"
+            "- Demo notes, watchlists, saved strategies, and compare sets are stored in a local SQLite file keyed by demo user id. This separates tester state but is not authentication or secure multi-tenant storage.\n"
+            "- Research-only X-factor, pre-boom, analog, and Wave 3 signals are labeled as overlays unless a promotion gate explicitly changes their production status."
+        )
+        st.dataframe(_source_attribution_table(), width="stretch", hide_index=True, height=260)
+        with st.expander("Artifact Status", expanded=False):
+            st.dataframe(_artifact_status_table(), width="stretch", hide_index=True, height=260)
+
+
+def _render_start_here_tab(
+    filtered: pd.DataFrame,
+    cfg: dict,
+    latest_run: dict | None,
+    xfactor_scoreboard: dict | None,
+    xfactor_gate: dict | None,
+    demo_readiness_report: dict | None = None,
+) -> None:
+    st.header("Start Here")
+    st.markdown(
+        "LandInvest ranks U.S. counties for land and home-value growth review, then explains the thesis, the brakes, "
+        "and the remaining diligence. Start with the highest strategy-fit counties, open a county memo, then export a shortlist."
+    )
+    if filtered.empty:
+        st.warning("No counties match the active strategy filters.")
+        return
+
+    s1, s2, s3 = st.columns(3)
+    s1.metric("View Top Opportunities", f"{min(len(filtered), 25)} counties")
+    s2.metric("Explore Map", f"{filtered['state'].nunique()} states")
+    s3.metric("Open County Memo", str(filtered.iloc[0].get("county_name", "Top county")))
+
+    st.subheader("Investor Review Workflow")
+    r1, r2, r3, r4 = st.columns(4)
+    r1.markdown("**1. Discover**\n\nScreen top counties, search, and compare strategy lenses.")
+    r2.markdown("**2. Open County Memo**\n\nRead the thesis, brakes, confidence, and what would break the case.")
+    r3.markdown("**3. Build Watchlist**\n\nSave counties, stage diligence, and monitor rank or risk drift.")
+    r4.markdown("**4. Export Reports**\n\nDownload shortlist, compare-set, and memo packages for review.")
+
+    st.subheader("Top Opportunities")
+    st.dataframe(_product_table(filtered.sort_values("sim_rank"), limit=10), width="stretch", hide_index=True, height=360)
+    top_row = filtered.sort_values("sim_rank").iloc[0]
+    if st.button("Set top county as memo selection", key="start_set_top_memo", type="primary"):
+        st.session_state.product_selected_fips = str(top_row.get("fips")).zfill(5)
+        st.success(f"County Memo selection set to {top_row.get('county_name')}, {top_row.get('state')}.")
+
+    g1, g2 = st.columns(2)
+    with g1:
+        st.subheader("Score Glossary")
+        st.dataframe(_score_glossary_table(), width="stretch", hide_index=True, height=310)
+    with g2:
+        st.subheader("Current Research Gate")
+        gate = xfactor_gate or {}
+        if gate:
+            st.markdown(
+                f"- Production promotion status: `{_humanize_status_label(gate.get('production_promotion_status', 'n/a'))}`\n"
+                f"- Ablation-ready candidates: `{gate.get('ablation_ready_count', 'n/a')}`\n"
+                f"- Default-promotion candidates: `{gate.get('default_promotion_count', 'n/a')}`"
+            )
+        score_rows = _top_xfactor_scoreboard_rows(xfactor_scoreboard, limit=5)
+        if not score_rows.empty:
+            st.dataframe(score_rows, width="stretch", hide_index=True, height=220)
+        st.caption("X-factor rows are research validation context; they do not alter production scoring.")
+
+    st.subheader("Demo Checklist")
+    checklist = _demo_checklist_table(demo_readiness_report)
+    st.dataframe(checklist, width="stretch", hide_index=True, height=260)
+    if demo_readiness_report:
+        st.caption(
+            f"Demo readiness status: `{demo_readiness_report.get('overall_status', 'unknown')}`. "
+            "Refresh with `./.venv/bin/python scripts/build_demo_readiness_bundle.py`."
+        )
+
+    st.download_button(
+        "Export Top 25 report (Markdown)",
+        data=_top_report_markdown(filtered, cfg, latest_run, limit=25, title="LandInvest Top 25 Opportunity Report").encode("utf-8"),
+        file_name="landinvest_top25_opportunity_report.md",
+        mime="text/markdown",
+    )
+
+
+def _build_county_memo_markdown(
+    row: pd.Series,
+    history_row: pd.Series | None,
+    wave3_status: dict | None,
+    cfg: dict,
+    preboom_surfaces: dict[str, pd.DataFrame | None] | None,
+    analog_suite: dict | None,
+    xfactor_scoreboard: dict | None,
+) -> str:
+    fips = str(row.get("fips", "")).zfill(5)
+    narrative = _build_county_narrative(row, history_row=history_row)
+    decision = _build_wave3_decision_narrative(row)
+    wave3_note = _build_wave3_narrative(row)
+    confidence_label, confidence_bullets = _confidence_read(row)
+    preboom_rows = _preboom_signal_rows_for_county(row, preboom_surfaces)
+    analog_rows = _analog_rows_for_county(row, analog_suite)
+    readiness, actions = _parcel_readiness(row)
+
+    lines = [
+        f"# LandInvest County Memo: {row.get('county_name', 'County')}, {row.get('state', '')}",
+        "",
+        f"- FIPS: `{fips}`",
+        f"- Generated at: `{datetime.now().isoformat()}`",
+        "- Use: county-level screening memo, not investment advice or parcel-level diligence.",
+        "",
+        "## Summary Thesis",
+        "",
+        narrative["summary"],
+        "",
+        "## Score Snapshot",
+        "",
+        f"- Strategy rank: `{_rank_text(row.get('sim_rank'))}`",
+        f"- Production rank: `{_rank_text(row.get('overall_rank'))}`",
+        f"- Strategy score: `{_fmt_score(row.get('sim_score'))}`",
+        f"- 5yr signal: `{_fmt_pct(row.get('pred_avg_5yr'))}`",
+        f"- Risk: `{_fmt_score(row.get('composite_risk'))}`",
+        f"- Confidence read: `{confidence_label}`",
+        "",
+        "## Key Supports",
+        "",
+    ]
+    lines.extend(f"- {item}" for item in narrative["positives"][:5])
+    lines.extend(["", "## Key Brakes", ""])
+    lines.extend(f"- {item}" for item in narrative["cautions"][:5])
+    lines.extend(["", "## X-Factor / Pre-Boom Signals", ""])
+    if preboom_rows.empty:
+        lines.append("- This county is not currently present in the loaded top pre-boom review surfaces.")
+    else:
+        for _, rec in preboom_rows.iterrows():
+            lines.append(
+                f"- `{rec['Surface']}`: rank `{rec['Review Rank']}`, breakout `{rec['Breakout Prob']}`, "
+                f"residual upside `{rec['Residual Upside']}`, prior momentum `{rec['Prior Momentum']}`."
+            )
+    score_rows = _top_xfactor_scoreboard_rows(xfactor_scoreboard)
+    if not score_rows.empty:
+        lines.append("- Current validated interaction themes remain report-only:")
+        for _, rec in score_rows.iterrows():
+            lines.append(f"  - {rec['Interaction']}: quiet lift `{rec.get('Quiet Lift', 'n/a')}`, decision `{rec.get('Decision', 'report-only')}`.")
+    lines.extend(["", "## Structural Land Context", "", wave3_note["summary"], f"- Decision thesis: {decision['thesis']}"])
+    lines.extend(["", "## Risk And Uncertainty", ""])
+    lines.extend(f"- {item}" for item in confidence_bullets)
+    lines.extend(["", "## Similar Historical Analogs", ""])
+    if analog_rows.empty:
+        lines.append("- No analog library context is currently available for this county.")
+    else:
+        for _, rec in analog_rows.iterrows():
+            lines.append(
+                f"- `{rec['Analog Family']}` ({rec['Historical Window']}): {rec['Why Relevant']} "
+                f"Historical read: {rec['Historical Read']}; before-hot signal: {rec['Before-Hot Signal']}."
+            )
+    lines.extend(["", "## Diligence Checklist", "", f"- Parcel readiness: `{readiness}`"])
+    lines.extend(f"- {item}" for item in actions)
+    lines.extend(["", "## What Would Make This Thesis Wrong", ""])
+    lines.extend(f"- {item}" for item in _why_not_bullets(row))
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _render_product_county_memo(
     row: pd.Series,
     history_row: pd.Series | None,
     wave3_status: dict | None,
     cfg: dict,
+    preboom_surfaces: dict[str, pd.DataFrame | None] | None = None,
+    analog_suite: dict | None = None,
+    xfactor_scoreboard: dict | None = None,
+    xfactor_ablation_queue: dict | None = None,
+    xfactor_promotion_gate: dict | None = None,
 ) -> None:
     fips = str(row.get("fips", "")).zfill(5)
     st.subheader(f"{row.get('county_name', 'County')}, {row.get('state', '')}")
@@ -3051,6 +3835,29 @@ def _render_product_county_memo(
     narrative = _build_county_narrative(row, history_row=history_row)
     decision = _build_wave3_decision_narrative(row)
     wave3_note = _build_wave3_narrative(row)
+    confidence_label, confidence_bullets = _confidence_read(row)
+    memo_md = _build_county_memo_markdown(
+        row=row,
+        history_row=history_row,
+        wave3_status=wave3_status,
+        cfg=cfg,
+        preboom_surfaces=preboom_surfaces,
+        analog_suite=analog_suite,
+        xfactor_scoreboard=xfactor_scoreboard,
+    )
+    with st.expander("How To Read This County Memo", expanded=True):
+        st.markdown(
+            "- `Strategy Rank` is the active Product Mode simulation under the sidebar settings; `Production Rank` is the unchanged scoring artifact.\n"
+            "- `Upside` and `Cautions` summarize model drivers, risk, uncertainty, and run-history clues.\n"
+            "- `X-Factor / Pre-Boom` entries are report-only discovery surfaces unless explicitly labeled as production.\n"
+            "- `What Would Break The Thesis` is the first diligence queue, not a final rejection."
+        )
+    st.download_button(
+        "Export county memo (Markdown)",
+        data=memo_md.encode("utf-8"),
+        file_name=f"landinvest_county_memo_{fips}.md",
+        mime="text/markdown",
+    )
     st.info(narrative["summary"])
 
     c1, c2, c3 = st.columns(3)
@@ -3090,9 +3897,38 @@ def _render_product_county_memo(
         for item in bear:
             st.markdown(f"- {item}")
     with bb3:
-        st.caption("Why Not Higher?")
+        st.caption("What Would Break The Thesis?")
         for item in _why_not_bullets(row):
             st.markdown(f"- {item}")
+
+    confidence_rows = pd.DataFrame(
+        [{"Signal": "Confidence Label", "Read": confidence_label}]
+        + [{"Signal": f"Check {idx + 1}", "Read": item} for idx, item in enumerate(confidence_bullets)]
+    )
+    st.caption("Model disagreement and confidence")
+    st.dataframe(confidence_rows, width="stretch", hide_index=True, height=210)
+
+    preboom_rows = _preboom_signal_rows_for_county(row, preboom_surfaces)
+    analog_rows = _analog_rows_for_county(row, analog_suite)
+    score_rows = _top_xfactor_scoreboard_rows(xfactor_scoreboard)
+    xf1, xf2 = st.columns(2)
+    with xf1:
+        st.caption("X-Factor / Pre-Boom Signals")
+        if preboom_rows.empty:
+            st.info("This county is not currently present in the loaded top pre-boom review surfaces.")
+        else:
+            st.dataframe(preboom_rows, width="stretch", hide_index=True, height=220)
+        if not score_rows.empty:
+            with st.expander("Current validated interaction themes", expanded=False):
+                st.dataframe(score_rows, width="stretch", hide_index=True, height=180)
+                st.caption("These interaction themes are report-only validation context, not production scoring columns.")
+    with xf2:
+        st.caption("Similar Historical Analogs")
+        if analog_rows.empty:
+            st.info("No analog library context is currently available for this county.")
+        else:
+            st.dataframe(analog_rows, width="stretch", hide_index=True, height=260)
+            st.caption("Analogs are historical reference patterns; they are not a forecast or comparable transaction set.")
 
     st.caption("Structural land thesis")
     st.write(wave3_note["summary"])
@@ -3568,11 +4404,130 @@ def _render_preboom_residual_overlay(
             st.dataframe(compare, width="stretch", hide_index=True, height=320)
 
 
+def _format_p0_repeatable_guardrail_table(candidates: pd.DataFrame, limit: int = 100) -> pd.DataFrame:
+    if candidates is None or candidates.empty:
+        return pd.DataFrame()
+    show = candidates.head(limit).copy()
+    if "fips" in show.columns:
+        show["fips"] = show["fips"].astype(str).str.zfill(5)
+    if "guardrail_candidate_flag" in show.columns or "guardrail_preserved_flag" in show.columns:
+        candidate = pd.to_numeric(show.get("guardrail_candidate_flag", pd.Series(0, index=show.index)), errors="coerce").fillna(0)
+        preserved = pd.to_numeric(show.get("guardrail_preserved_flag", pd.Series(0, index=show.index)), errors="coerce").fillna(0)
+        show["queue_role"] = np.select(
+            [candidate.gt(0), preserved.gt(0)],
+            ["Repeatable insert", "Preserved residual top"],
+            default="Context",
+        )
+    cols = [
+        "review_rank",
+        "fips",
+        "county",
+        "state_abbr",
+        "year",
+        "queue_role",
+        "_base_rank",
+        "investable_residual_model_score",
+        "p0_repeatable_treatment_score",
+        "p0_repeatable_anchor_mix_support",
+        "p0_repeatable_jobs_affordability_support",
+        "p0_repeatable_migration_pop_support",
+        "p0_repeatable_land_optionality_support",
+        "preboom_prior_momentum_rank_pct",
+        "emerging_market_depth_adequacy",
+        "total_population",
+        "qa_severity",
+    ]
+    show = show[[c for c in cols if c in show.columns]].copy()
+    show = show.rename(
+        columns={
+            "review_rank": "Review Rank",
+            "fips": "FIPS",
+            "county": "County",
+            "state_abbr": "State",
+            "year": "Year",
+            "queue_role": "Queue Role",
+            "_base_rank": "Base Residual Rank",
+            "investable_residual_model_score": "Residual Upside",
+            "p0_repeatable_treatment_score": "Repeatable P0",
+            "p0_repeatable_anchor_mix_support": "Anchor Mix",
+            "p0_repeatable_jobs_affordability_support": "Jobs/Afford",
+            "p0_repeatable_migration_pop_support": "Migration/Pop",
+            "p0_repeatable_land_optionality_support": "Land Optionality",
+            "preboom_prior_momentum_rank_pct": "Prior Momentum",
+            "emerging_market_depth_adequacy": "Market Depth",
+            "total_population": "Population",
+            "qa_severity": "QA Severity",
+        }
+    )
+    for col in ["Review Rank", "Base Residual Rank"]:
+        if col in show.columns:
+            show[col] = show[col].map(lambda x: f"#{int(float(x))}" if pd.notna(x) else "—")
+    for col in [
+        "Residual Upside",
+        "Repeatable P0",
+        "Anchor Mix",
+        "Jobs/Afford",
+        "Migration/Pop",
+        "Land Optionality",
+        "Prior Momentum",
+        "Market Depth",
+    ]:
+        if col in show.columns:
+            show[col] = show[col].map(lambda x: f"{float(x):.3f}" if pd.notna(x) else "—")
+    if "Population" in show.columns:
+        show["Population"] = show["Population"].map(lambda x: f"{int(float(x)):,}" if pd.notna(x) else "—")
+    return show
+
+
+def _render_p0_repeatable_residual_guardrail(
+    guardrail_report: dict | None,
+    candidates: pd.DataFrame | None,
+) -> None:
+    if not guardrail_report and (candidates is None or candidates.empty):
+        return
+    with st.expander("Repeatable P0 Residual Review Queue Gate", expanded=False):
+        decision = (guardrail_report or {}).get("decision") or {}
+        best_policy = (guardrail_report or {}).get("best_policy_row") or {}
+        st.caption(
+            "Report-only residual review queue evidence. This gate preserves the top residual names, then lets "
+            "historical/repeatable P0 support compete for lower review slots. It is not a production rank."
+        )
+        g1, g2, g3, g4, g5 = st.columns(5)
+        g1.metric("Status", decision.get("status", "report-only"))
+        g2.metric(
+            "Top-100 P0 Capture",
+            f"{decision.get('baseline_top100_p0_capture', 'n/a')} -> {decision.get('best_top100_p0_capture', 'n/a')}",
+        )
+        g3.metric("NDCG@25 Delta", _fmt_score(decision.get("best_delta_residual_ndcg_at_25")))
+        g4.metric("Top-100 Churn", _fmt_pct(decision.get("best_guarded_top100_churn")))
+        g5.metric("Severe QA", _fmt_pct(decision.get("best_severe_qa_share")))
+
+        st.markdown(
+            f"- Best policy: `{decision.get('best_policy', 'n/a')}`\n"
+            f"- Policy shape: keep top `{best_policy.get('preserve_top', 'n/a')}` residual names; source candidates up to base residual rank `{best_policy.get('max_source_rank', 'n/a')}`; require repeatable P0 score `{_fmt_score(best_policy.get('treatment_min'))}` and prior momentum `{_fmt_score(best_policy.get('prior_momentum_max'))}`.\n"
+            "- Boundary: Product Mode/report-only review queue candidate; no scoring, model, or default dashboard-rank change."
+        )
+        if candidates is not None and not candidates.empty:
+            st.caption("Historical validation preview from the latest guardrail artifact.")
+            st.dataframe(_format_p0_repeatable_guardrail_table(candidates, limit=100), width="stretch", hide_index=True, height=360)
+            st.download_button(
+                "Download repeatable residual guardrail preview CSV",
+                data=candidates.to_csv(index=False).encode("utf-8"),
+                file_name="p0_repeatable_residual_guardrail_top_candidates.csv",
+                mime="text/csv",
+                key="product_p0_repeatable_residual_guardrail_csv",
+            )
+        else:
+            st.info("No repeatable residual guardrail candidate table is available yet.")
+
+
 def _render_preboom_review_tab(
     surfaces: dict[str, pd.DataFrame | None],
     blend_report: dict | None,
     analog_report: dict | None,
     promotion_gate: dict | None = None,
+    p0_repeatable_residual_guardrail: dict | None = None,
+    p0_repeatable_residual_candidates: pd.DataFrame | None = None,
 ) -> None:
     st.header("Pre-Boom Review Lane")
     st.caption("Report-only quiet-breakout discovery. This does not change production rankings or model artifacts.")
@@ -3665,6 +4620,10 @@ def _render_preboom_review_tab(
             st.caption("Guarded blend is preferred because it preserves before-hot analog capture while cleaning thin-market exposure.")
 
     _render_preboom_residual_overlay(surfaces, promotion_gate)
+    _render_p0_repeatable_residual_guardrail(
+        p0_repeatable_residual_guardrail,
+        p0_repeatable_residual_candidates,
+    )
 
     search = st.text_input("Search pre-boom counties", key="product_preboom_search", placeholder="County, state, or FIPS")
     view_df = surface_df.copy()
@@ -3708,6 +4667,2244 @@ def _render_preboom_review_tab(
     )
 
 
+CUSTOMER_TIER_COLORS = {
+    "Prime": "#0f766e",
+    "Strong": "#15803d",
+    "Speculative": "#92400e",
+    "Watch": "#475569",
+}
+
+
+CUSTOMER_PRESET_CATALOG = {
+    "General Opportunity": {
+        "base_preset": "Long-term appreciation",
+        "risk_posture": "Balanced",
+        "description": "Matches the default Product Mode long-term appreciation strategy.",
+    },
+    "Low-Risk Growth": {
+        "base_preset": "Low-risk compounder",
+        "risk_posture": "Lower risk",
+        "description": "Favors durable upside, cleaner risk, and medium-or-better confidence.",
+    },
+    "Vacation Land": {
+        "base_preset": "Recreation amenity",
+        "risk_posture": "Balanced",
+        "description": "Highlights recreation/amenity access and long-horizon land demand.",
+    },
+    "Hidden Upside": {
+        "base_preset": "Distressed rebound",
+        "risk_posture": "More aggressive",
+        "description": "Looks for higher-upside counties where the thesis needs more diligence.",
+    },
+    "Buildable Scarcity": {
+        "base_preset": "Buildable scarcity",
+        "risk_posture": "Balanced",
+        "description": "Emphasizes developability, scarcity, and structural land fit.",
+    },
+    "Climate-Resilient Growth": {
+        "base_preset": "Climate-resilient growth",
+        "risk_posture": "Lower risk",
+        "description": "Rewards lower fragility and cleaner structural risk.",
+    },
+    "Land Optionality": {
+        "base_preset": "Land optionality",
+        "risk_posture": "Balanced",
+        "description": "Looks for counties with multiple plausible land-use paths.",
+    },
+}
+
+
+CUSTOMER_WORKSPACE_LABELS = {
+    "Radar": "Market Radar",
+    "Opportunities": "Opportunity Deck",
+    "County Story": "County Story",
+    "Compare": "Compare Set",
+    "Watchlist": "Watchlist",
+    "Packet": "Review Packet",
+}
+
+
+CUSTOMER_TERM_DEFINITIONS = {
+    "Strategy Score": "The active Product Mode strategy score for the selected thesis, risk posture, and state universe.",
+    "Customer Signal": "A presentation-only blend that makes the current opportunity easier to read. It does not rewrite production rank.",
+    "Prime / Strong": "Customer-facing signal tiers based on strategy score, risk, and confidence.",
+    "Composite Risk": "A 0-100 risk read where lower is cleaner for diligence.",
+    "Confidence": "Model confidence bucket from the current scored artifact. Higher confidence means the model has cleaner support, not a guarantee.",
+    "5yr Upside": "The current long-horizon predicted appreciation signal used by the strategy simulation.",
+    "Strategy Rank": "Rank after applying the active Customer/Product thesis weights. Lower rank number is better.",
+    "Parcel Readiness": "A customer workflow cue for how much parcel-level diligence is likely needed next.",
+    "Active Filter": "The county matches the current Customer preset, risk posture, confidence gate, and state filters.",
+    "Outside Filter": "The county exists in the scored universe, but does not match the active Customer filter.",
+    "Watchlist Health": "A workflow read combining rank, stability, upside, and risk to suggest whether to keep, watch, or review a county.",
+}
+
+
+def _customer_escape(value) -> str:
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return ""
+    return html.escape(str(value), quote=True)
+
+
+LANDINVEST_LOGO_SVG = """
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="#0f172a"/>
+  <path d="M13 45C20 36 27 39 34 30C41 21 47 23 54 14" fill="none" stroke="#2dd4bf" stroke-width="5" stroke-linecap="round"/>
+  <path d="M13 50C24 45 33 47 43 38C47 34 50 30 54 26" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" opacity="0.95"/>
+  <path d="M12 33C19 27 24 28 30 22C35 17 41 15 50 17" fill="none" stroke="#cbd5e1" stroke-width="2.4" stroke-linecap="round" opacity="0.86"/>
+  <path d="M16 23C22 18 29 18 36 13" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" opacity="0.76"/>
+  <circle cx="43" cy="25" r="5" fill="#fbbf24"/>
+  <path d="M43 18V32" stroke="#0f172a" stroke-width="2" stroke-linecap="round" opacity="0.48"/>
+  <path d="M36 25H50" stroke="#0f172a" stroke-width="2" stroke-linecap="round" opacity="0.48"/>
+</svg>
+""".strip()
+
+
+def _landinvest_logo_svg() -> str:
+    try:
+        return BRAND_LOGO_PATH.read_text(encoding="utf-8").strip()
+    except OSError:
+        return LANDINVEST_LOGO_SVG
+
+
+def _brand_chip_html(label: str, value: str | int | float | None) -> str:
+    if value is None or value == "":
+        return ""
+    return (
+        '<span class="landinvest-brand-chip">'
+        f"<b>{_customer_escape(label)}</b>"
+        f"<span>{_customer_escape(value)}</span>"
+        "</span>"
+    )
+
+
+def _brand_header_html(
+    *,
+    experience_mode: str,
+    run_id: str,
+    run_year: str | int,
+    data_ts: str,
+    churn_text: str,
+    health_text: str | None,
+) -> str:
+    mode_label = experience_mode.replace(" Mode", "")
+    meta = [
+        ("Mode", mode_label),
+        ("Run", run_id),
+        ("Year", run_year),
+        ("Data", data_ts),
+        ("Top-25 Churn", churn_text),
+    ]
+    if health_text:
+        meta.append(("3yr Health", health_text))
+    meta_html = "".join(_brand_chip_html(label, value) for label, value in meta)
+    return f"""
+<div class="landinvest-brand-header">
+  <div class="landinvest-brand-main">
+    <div class="landinvest-logo-wrap">{_landinvest_logo_svg()}</div>
+    <div class="landinvest-brand-copy">
+      <div class="landinvest-brand-kicker">County Growth Intelligence</div>
+      <h1>LandInvest</h1>
+      <p>Rank, explain, and monitor county-level land opportunities with risk context.</p>
+    </div>
+  </div>
+  <div class="landinvest-brand-meta">{meta_html}</div>
+</div>
+"""
+
+
+def _sidebar_brand_html() -> str:
+    return f"""
+<div class="landinvest-sidebar-brand">
+  <div class="landinvest-sidebar-logo">{_landinvest_logo_svg()}</div>
+  <div>
+    <b>LandInvest</b>
+    <span>County Growth Platform</span>
+  </div>
+</div>
+"""
+
+
+def _query_param_first(name: str, default: str | None = None) -> str | None:
+    try:
+        value = st.query_params.get(name, default)
+    except Exception:
+        return default
+    if isinstance(value, list):
+        return str(value[0]) if value else default
+    if value is None:
+        return default
+    return str(value)
+
+
+def _query_param_list(name: str) -> list[str]:
+    raw = _query_param_first(name, "")
+    if not raw:
+        return []
+    return [part.strip() for part in raw.split(",") if part.strip()]
+
+
+def _customer_share_url(
+    *,
+    customer_preset: str,
+    risk_posture: str,
+    workspace: str,
+    selected_states: list[str],
+    selected_fips: str | None,
+) -> str:
+    params = {
+        "experience": "customer",
+        "customer_preset": customer_preset,
+        "risk_posture": risk_posture,
+        "workspace": workspace,
+    }
+    if selected_states:
+        params["states"] = ",".join(selected_states)
+    if selected_fips:
+        params["fips"] = str(selected_fips).zfill(5)
+    return "?" + urlencode(params)
+
+
+def _set_customer_story_selection(fips: str) -> None:
+    st.session_state.customer_selected_fips = str(fips).zfill(5)
+    st.session_state.customer_workspace = "County Story"
+
+
+def _customer_workspace_label(workspace: str) -> str:
+    return CUSTOMER_WORKSPACE_LABELS.get(workspace, workspace)
+
+
+def _render_customer_term_guide(label: str = "Term Guide") -> None:
+    with st.popover(label, help="Definitions for the Customer Mode scores, tiers, and workflow labels."):
+        for term, body in CUSTOMER_TERM_DEFINITIONS.items():
+            st.markdown(f"**{term}**")
+            st.caption(body)
+
+
+def _render_customer_workspace_help(workspace: str) -> None:
+    help_text = {
+        "Radar": [
+            "Use the map to scout the full county universe under the active strategy.",
+            "Click any county to update the selected-county panel, then open its story or add it to the watchlist.",
+            "Switch the map signal layer to inspect score, risk, upside, parcel readiness, or land fit.",
+        ],
+        "Opportunities": [
+            "This deck is the active-filter shortlist. It is intentionally narrower than County Story search.",
+            "Use sorting lenses to move between strategy rank, customer signal, risk, upside, and land fit.",
+            "Open Story when a card deserves diligence context.",
+        ],
+        "County Story": [
+            "Search every scored county, including counties outside the active Customer filter.",
+            "Use the story page for provenance, peer counties, parcel checks, notes, and memo export.",
+        ],
+        "Compare": [
+            "Pick a small county set and compare the signal stack side by side.",
+            "Use it for short-list decisions, not broad discovery.",
+        ],
+        "Watchlist": [
+            "Treat this as the portfolio command center for saved counties.",
+            "Health, alerts, stages, and next actions are workflow aids. They do not change production ranking.",
+        ],
+        "Packet": [
+            "Export the current review packet, watchlist CSV, or print-ready HTML for handoff.",
+            "The packet reflects current Customer Mode artifacts and local profile state.",
+        ],
+    }.get(workspace, [])
+    with st.popover("How This Workspace Works", help="Short operating guide for the current Customer workspace."):
+        for item in help_text:
+            st.markdown(f"- {item}")
+
+
+def _saved_customer_views() -> dict:
+    profiles = st.session_state.get("saved_strategy_profiles", {}) or {}
+    return {
+        name: profile
+        for name, profile in profiles.items()
+        if isinstance(profile, dict) and profile.get("profile_type") == "customer_view"
+    }
+
+
+def _customer_default_view_name() -> str | None:
+    marker = (st.session_state.get("saved_strategy_profiles", {}) or {}).get("__customer_default_view__")
+    if isinstance(marker, dict):
+        name = str(marker.get("name") or "").strip()
+        return name or None
+    return None
+
+
+def _customer_default_view_profile() -> dict | None:
+    name = _customer_default_view_name()
+    if not name:
+        return None
+    return _saved_customer_views().get(name)
+
+
+def _customer_view_session_state(profile: dict) -> dict:
+    cfg = profile.get("cfg") if isinstance(profile.get("cfg"), dict) else {}
+    selected_fips = _normalize_fips_value(profile.get("selected_fips"))
+    updates = {
+        "customer_experience_preset": profile.get("customer_preset_name", "General Opportunity"),
+        "customer_preset": profile.get("base_preset") or cfg.get("preset_name") or "Long-term appreciation",
+        "customer_risk_posture": profile.get("risk_posture", "Balanced"),
+        "customer_states": profile.get("states", []),
+        "customer_card_limit": int(profile.get("card_limit", 12)),
+        "customer_workspace": profile.get("workspace", "Radar"),
+        "customer_radar_layer": profile.get("radar_layer", "sim_score"),
+    }
+    if selected_fips:
+        updates["customer_selected_fips"] = selected_fips
+    return updates
+
+
+def _customer_view_payload(
+    *,
+    customer_preset_name: str,
+    preset_name: str,
+    risk_posture: str,
+    selected_states: list[str],
+    card_limit: int,
+    workspace: str,
+    selected_fips: str | None,
+    radar_layer: str,
+    cfg: dict,
+) -> dict:
+    return {
+        "profile_type": "customer_view",
+        "customer_preset_name": customer_preset_name,
+        "base_preset": preset_name,
+        "risk_posture": risk_posture,
+        "states": list(selected_states),
+        "card_limit": int(card_limit),
+        "workspace": workspace,
+        "selected_fips": _normalize_fips_value(selected_fips),
+        "radar_layer": radar_layer,
+        "cfg": cfg.copy(),
+        "saved_at": datetime.now().isoformat(),
+    }
+
+
+def _customer_view_export_payload(name: str, profile: dict) -> dict:
+    return {
+        "kind": "landinvest_customer_view",
+        "exported_at": datetime.now().isoformat(),
+        "name": name,
+        "profile": profile,
+    }
+
+
+def _parse_customer_view_import(raw_bytes: bytes) -> tuple[str, dict]:
+    payload = json.loads(raw_bytes.decode("utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("Customer view import must be a JSON object.")
+    if payload.get("kind") == "landinvest_customer_view":
+        name = str(payload.get("name") or "Imported Customer View").strip()
+        profile = payload.get("profile")
+    else:
+        name = str(payload.get("name") or "Imported Customer View").strip()
+        profile = payload
+    if not isinstance(profile, dict) or profile.get("profile_type") != "customer_view":
+        raise ValueError("JSON does not contain a Customer View profile.")
+    return name or "Imported Customer View", profile
+
+
+def _customer_watchlist_command_rows(
+    watch_df: pd.DataFrame,
+    health_eval: pd.DataFrame,
+    alert_df: pd.DataFrame,
+) -> pd.DataFrame:
+    if watch_df.empty:
+        return pd.DataFrame()
+    health_lookup = {}
+    if health_eval is not None and not health_eval.empty:
+        health_lookup = health_eval.set_index(health_eval["fips"].astype(str).str.zfill(5)).to_dict("index")
+    alert_counts = {}
+    if alert_df is not None and not alert_df.empty:
+        alert_counts = alert_df.groupby(alert_df["fips"].astype(str).str.zfill(5)).size().to_dict()
+    rows = []
+    for _, row in watch_df.sort_values("sim_rank").iterrows():
+        fips = str(row.get("fips")).zfill(5)
+        stage = st.session_state.county_funnel.get(fips, {}).get("stage", "Interested")
+        health = health_lookup.get(fips, {})
+        status = _humanize_status_label(health.get("health_status", "watch_closely"))
+        rows.append(
+            {
+                "FIPS": fips,
+                "County": _customer_county_display(row),
+                "Stage": stage,
+                "Health": status,
+                "Alerts": int(alert_counts.get(fips, 0)),
+                "Strategy Rank": _rank_text(row.get("sim_rank")),
+                "Customer Signal": _fmt_score(row.get("customer_signal_score")),
+                "5yr": _fmt_pct(row.get("pred_avg_5yr")),
+                "Risk": _fmt_score(row.get("composite_risk")),
+                "Next Action": _customer_next_step(row),
+                "_strategy_rank": _product_numeric(row, "sim_rank", 99999.0),
+                "_signal_value": _product_numeric(row, "customer_signal_score", 0.0),
+                "_risk_value": _product_numeric(row, "composite_risk", 100.0),
+                "_alerts": int(alert_counts.get(fips, 0)),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _customer_watchlist_stage_summary(command_df: pd.DataFrame) -> pd.DataFrame:
+    if command_df.empty:
+        return pd.DataFrame()
+    rows = []
+    for stage, group in command_df.groupby("Stage", dropna=False):
+        rows.append(
+            {
+                "Stage": stage,
+                "Count": int(len(group)),
+                "Avg Customer Signal": _fmt_score(group["_signal_value"].mean()),
+                "Avg Risk": _fmt_score(group["_risk_value"].mean()),
+                "Alerts": int(group["_alerts"].sum()),
+            }
+        )
+    return pd.DataFrame(rows).sort_values(["Count", "Stage"], ascending=[False, True])
+
+
+def _customer_header_html(
+    *,
+    top_row: pd.Series,
+    customer_preset_name: str,
+    risk_posture: str,
+    run_id: str,
+    universe_count: int,
+    full_count: int,
+    prime_count: int,
+    churn: float | None,
+    health: str | None,
+) -> str:
+    churn_text = f"{100 * churn:.1f}%" if churn is not None else "n/a"
+    health_text = _humanize_status_label(health) if health else "n/a"
+    return f"""
+<div class="customer-command-header">
+  <div class="customer-command-copy">
+    <div class="customer-kicker">LandInvest Customer Mode</div>
+    <h1>Investment Command Center</h1>
+    <p>{_customer_escape(_customer_county_display(top_row))} leads the active thesis. {_customer_escape(_customer_thesis_read(top_row))}</p>
+  </div>
+  <div class="customer-command-grid">
+    <span><b>{_customer_escape(customer_preset_name)}</b><small>Preset</small></span>
+    <span><b>{_customer_escape(risk_posture)}</b><small>Risk posture</small></span>
+    <span><b>{universe_count:,} / {full_count:,}</b><small>Active universe</small></span>
+    <span><b>{prime_count}</b><small>Prime signals</small></span>
+    <span><b>{_customer_escape(churn_text)}</b><small>Top-25 churn</small></span>
+    <span><b>{_customer_escape(health_text)}</b><small>3yr health</small></span>
+    <span><b>{_customer_escape(run_id)}</b><small>Run</small></span>
+  </div>
+</div>
+"""
+
+
+def _customer_section_header(title: str, subtitle: str | None = None) -> None:
+    sub = f"<p>{_customer_escape(subtitle)}</p>" if subtitle else ""
+    st.markdown(
+        f"""
+<div class="customer-section-header">
+  <div>
+    <span class="customer-kicker">{_customer_escape(title)}</span>
+    {sub}
+  </div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+
+
+def _customer_map_selection_html(row: pd.Series) -> str:
+    return f"""
+<div class="customer-map-callout">
+  <div>
+    <span class="customer-kicker">Selected County | Map Highlight Active</span>
+    <h3>{_customer_escape(_customer_county_display(row))}</h3>
+    <p>{_customer_escape(_customer_thesis_read(row))}</p>
+  </div>
+  <div class="customer-map-stats">
+    <span><b>{_rank_text(row.get('sim_rank'))}</b><small>Strategy</small></span>
+    <span><b>{_fmt_score(row.get('sim_score'))}</b><small>Strategy score</small></span>
+    <span><b>{_fmt_score(row.get('composite_risk'))}</b><small>Risk</small></span>
+    <span><b>{_fmt_pct(row.get('pred_avg_5yr'))}</b><small>5yr</small></span>
+  </div>
+</div>
+"""
+
+
+def _current_user_state_payload() -> dict:
+    return {
+        "saved_watchlists": st.session_state.get("saved_watchlists", {}),
+        "county_notes": st.session_state.get("county_notes", {}),
+        "saved_compare_sets": st.session_state.get("saved_compare_sets", {}),
+        "saved_strategy_profiles": st.session_state.get("saved_strategy_profiles", {}),
+        "county_funnel": st.session_state.get("county_funnel", {}),
+        "county_feedback": st.session_state.get("county_feedback", {}),
+        "preboom_feedback": st.session_state.get("preboom_feedback", {}),
+        "diligence_evidence": st.session_state.get("diligence_evidence", {}),
+        "parcel_checklists": st.session_state.get("parcel_checklists", {}),
+        "watchlist_alert_state": st.session_state.get("watchlist_alert_state", {}),
+        "watchlist_settings": st.session_state.get("watchlist_settings", _default_user_data()["watchlist_settings"]),
+    }
+
+
+def _customer_signal_value(row: pd.Series, col: str, default: float = 50.0) -> float:
+    return float(np.clip(_product_numeric(row, col, default), 0.0, 100.0))
+
+
+def _customer_tier_label(row: pd.Series) -> str:
+    score = _product_numeric(row, "customer_signal_score", _product_numeric(row, "sim_score", 50.0))
+    risk = _product_numeric(row, "composite_risk", 50.0)
+    confidence = str(row.get("confidence", "")).upper()
+    if score >= 78 and risk <= 48 and confidence != "LOW":
+        return "Prime"
+    if score >= 68 and risk <= 58 and confidence != "LOW":
+        return "Strong"
+    if score >= 58 or _product_numeric(row, "pred_avg_5yr", 0.0) >= 0.12:
+        return "Speculative"
+    return "Watch"
+
+
+def _customer_risk_band(row: pd.Series) -> str:
+    risk = _product_numeric(row, "composite_risk", 50.0)
+    if risk <= 40:
+        return "Clean"
+    if risk <= 55:
+        return "Measured"
+    return "Needs Diligence"
+
+
+def _customer_county_display(row: pd.Series) -> str:
+    county = str(row.get("county_name", "County")).strip()
+    state = str(row.get("state", "")).strip()
+    if not state or "," in county:
+        return county
+    return f"{county}, {state}"
+
+
+def _customer_augment(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+    if out.empty:
+        return out
+    out["customer_signal_score"] = (
+        0.38 * _product_series(out, "sim_score", 50.0)
+        + 0.18 * _product_series(out, "sim_risk_fit", 50.0)
+        + 0.16 * _product_series(out, "lens_structure_minus_fragility", 50.0)
+        + 0.14 * _product_series(out, "lens_parcel_readiness", 50.0)
+        + 0.14 * _product_series(out, "sim_confidence_score", 50.0)
+    ).clip(0, 100)
+    out["customer_tier"] = out.apply(_customer_tier_label, axis=1)
+    out["customer_risk_band"] = out.apply(_customer_risk_band, axis=1)
+    return out
+
+
+def _customer_thesis_read(row: pd.Series) -> str:
+    archetype = str(row.get("opportunity_archetype", "Opportunity")).strip() or "Opportunity"
+    decision = _build_wave3_decision_narrative(row)
+    thesis = str(decision.get("thesis", "")).strip()
+    if thesis and thesis != "Current model and structural context are not complete enough for a confident thesis.":
+        return f"{archetype}: {thesis}"
+    pred5 = row.get("pred_avg_5yr")
+    risk = row.get("composite_risk")
+    return f"{archetype}: {_fmt_pct(pred5)} 5yr signal with {_fmt_score(risk)} risk."
+
+
+def _customer_next_step(row: pd.Series) -> str:
+    readiness, actions = _parcel_readiness(row)
+    first_action = actions[0] if actions else "Open the county story and confirm the local thesis."
+    return f"{readiness}: {first_action}"
+
+
+def _customer_signal_bar_html(label: str, value: float, color: str) -> str:
+    pct = float(np.clip(value, 0.0, 100.0))
+    return (
+        '<div class="customer-signal-row">'
+        f'<div><span>{_customer_escape(label)}</span><b>{pct:.0f}</b></div>'
+        '<div class="customer-meter">'
+        f'<span style="width:{pct:.1f}%; background:{color};"></span>'
+        "</div></div>"
+    )
+
+
+def _customer_card_html(row: pd.Series, *, compact: bool = False) -> str:
+    tier = str(row.get("customer_tier") or _customer_tier_label(row))
+    color = CUSTOMER_TIER_COLORS.get(tier, "#64748b")
+    county_title = _customer_escape(_customer_county_display(row))
+    thesis = _customer_escape(_customer_thesis_read(row))
+    next_step = _customer_escape(_customer_next_step(row))
+    rank = _rank_text(row.get("sim_rank"))
+    prod_rank = _rank_text(row.get("overall_rank"))
+    signal = _customer_signal_value(row, "customer_signal_score")
+    growth = _customer_signal_value(row, "sim_growth_score")
+    risk_fit = _customer_signal_value(row, "sim_risk_fit")
+    land_fit = _customer_signal_value(row, "sim_structure_score")
+    confidence = _customer_signal_value(row, "sim_confidence_score")
+    bars = "".join(
+        [
+            _customer_signal_bar_html("Signal", signal, color),
+            _customer_signal_bar_html("Upside", growth, "#38bdf8"),
+            _customer_signal_bar_html("Risk Control", risk_fit, "#22c55e"),
+            _customer_signal_bar_html("Land Fit", land_fit, "#a78bfa"),
+            _customer_signal_bar_html("Confidence", confidence, "#f59e0b"),
+        ][:3 if compact else 5]
+    )
+    compact_class = " customer-card-compact" if compact else ""
+    return f"""
+<div class="customer-card{compact_class}">
+  <div class="customer-card-top">
+    <span class="customer-tier" style="border-color:{color}; color:{color};">{_customer_escape(tier)}</span>
+    <span>{rank} strategy · {prod_rank} production</span>
+  </div>
+  <h3>{county_title}</h3>
+  <p class="customer-thesis">{thesis}</p>
+  {bars}
+  <p class="customer-next"><b>Next:</b> {next_step}</p>
+</div>
+"""
+
+
+def _render_customer_card(row: pd.Series, key_prefix: str, *, compact: bool = False) -> None:
+    fips = str(row.get("fips", "")).zfill(5)
+    st.markdown(_customer_card_html(row, compact=compact), unsafe_allow_html=True)
+    b1, b2 = st.columns(2)
+    b1.button(
+        "Open Story",
+        key=f"{key_prefix}_story_{fips}",
+        on_click=_set_customer_story_selection,
+        args=(fips,),
+    )
+    if fips in {str(x).zfill(5) for x in st.session_state.watchlist_fips}:
+        b2.caption("On watchlist")
+    elif b2.button("Watch", key=f"{key_prefix}_watch_{fips}"):
+        st.session_state.watchlist_fips = sorted(set(st.session_state.watchlist_fips + [fips]))
+        _save_current_user_state()
+        st.success("Added to watchlist.")
+
+
+def _customer_brief_table(df: pd.DataFrame, limit: int = 20) -> pd.DataFrame:
+    rows = []
+    for _, row in df.sort_values("sim_rank").head(limit).iterrows():
+        rows.append(
+            {
+                "Tier": row.get("customer_tier", _customer_tier_label(row)),
+                "County": _customer_county_display(row),
+                "Strategy Rank": _rank_text(row.get("sim_rank")),
+                "Production Rank": _rank_text(row.get("overall_rank")),
+                "Customer Signal": _fmt_score(row.get("customer_signal_score")),
+                "5yr": _fmt_pct(row.get("pred_avg_5yr")),
+                "Risk Band": row.get("customer_risk_band", _customer_risk_band(row)),
+                "Confidence": row.get("confidence", "n/a"),
+                "Thesis": _customer_thesis_read(row),
+                "Next Check": _customer_next_step(row),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _customer_signal_rows(row: pd.Series) -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {"Signal": "Upside", "Score": _customer_signal_value(row, "sim_growth_score"), "Read": _fmt_pct(row.get("pred_avg_5yr"))},
+            {"Signal": "Risk Control", "Score": _customer_signal_value(row, "sim_risk_fit"), "Read": _fmt_score(row.get("composite_risk"))},
+            {"Signal": "Land Fit", "Score": _customer_signal_value(row, "sim_structure_score"), "Read": row.get("opportunity_archetype", "n/a")},
+            {"Signal": "Confidence", "Score": _customer_signal_value(row, "sim_confidence_score"), "Read": row.get("confidence", "n/a")},
+            {"Signal": "Parcel Ready", "Score": _customer_signal_value(row, "lens_parcel_readiness"), "Read": _parcel_readiness(row)[0]},
+        ]
+    )
+
+
+def _customer_packet_markdown(
+    filtered: pd.DataFrame,
+    watch_df: pd.DataFrame,
+    cfg: dict,
+    latest_run: dict | None,
+    *,
+    customer_preset_name: str = "Customer view",
+    risk_posture: str = "Balanced",
+    selected_states: list[str] | None = None,
+    selected_fips: str | None = None,
+    full_df: pd.DataFrame | None = None,
+    health_eval: pd.DataFrame | None = None,
+    alert_df: pd.DataFrame | None = None,
+) -> str:
+    run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
+    story_source = full_df if full_df is not None and not full_df.empty else filtered
+    selected_row = _selected_county_row(story_source, selected_fips) if selected_fips else None
+    top_row = filtered.sort_values("sim_rank").iloc[0] if not filtered.empty else None
+    active_states = ", ".join(selected_states or []) if selected_states else "All states"
+    alert_count = int(len(alert_df)) if alert_df is not None and not alert_df.empty else 0
+    lines = [
+        "# LandInvest Customer Review Packet",
+        "",
+        f"- Generated at: `{datetime.now().isoformat()}`",
+        f"- Ranking run: `{run_id}`",
+        f"- Customer view: `{customer_preset_name}` / `{risk_posture}`",
+        f"- Customer thesis: `{cfg.get('preset_name', 'Active thesis')}`",
+        f"- Active states: `{active_states}`",
+        f"- Active universe: `{len(filtered):,}` counties",
+        f"- Watchlist: `{len(watch_df):,}` counties",
+        f"- Active alerts: `{alert_count}`",
+        "- Boundary: county-level screening only; production ranks and model artifacts are unchanged.",
+        "",
+        "## Executive Snapshot",
+        "",
+    ]
+    if top_row is not None:
+        lines.append(
+            f"- Lead active-filter county: `{_customer_county_display(top_row)}` at strategy `{_rank_text(top_row.get('sim_rank'))}`, "
+            f"5yr `{_fmt_pct(top_row.get('pred_avg_5yr'))}`, risk `{_fmt_score(top_row.get('composite_risk'))}`."
+        )
+    if selected_row is not None:
+        lines.append(
+            f"- Selected county: `{_customer_county_display(selected_row)}` with customer signal "
+            f"`{_fmt_score(selected_row.get('customer_signal_score'))}` and parcel read `{_parcel_readiness(selected_row)[0]}`."
+        )
+    if watch_df.empty:
+        lines.append("- Watchlist is empty; use Radar or Opportunity Deck to save review candidates.")
+    else:
+        lines.append(
+            f"- Watchlist average risk `{_fmt_score(watch_df.get('composite_risk', pd.Series(dtype=float)).mean())}` "
+            f"and average customer signal `{_fmt_score(watch_df.get('customer_signal_score', pd.Series(dtype=float)).mean())}`."
+        )
+    lines.extend(
+        [
+            "",
+            "## Active View",
+            "",
+            f"- Preset: `{customer_preset_name}`",
+            f"- Risk posture: `{risk_posture}`",
+            f"- Thesis config: `{cfg.get('preset_name', 'Active thesis')}`",
+            f"- State filter: `{active_states}`",
+            "",
+            "## Radar Shortlist",
+            "",
+        ]
+    )
+    for _, row in filtered.sort_values("sim_rank").head(12).iterrows():
+        lines.append(
+            f"- `{_customer_county_display(row)}`: "
+            f"{row.get('customer_tier', _customer_tier_label(row))} signal, strategy rank `{_rank_text(row.get('sim_rank'))}`, "
+            f"5yr `{_fmt_pct(row.get('pred_avg_5yr'))}`, risk `{_fmt_score(row.get('composite_risk'))}`. "
+            f"{_customer_thesis_read(row)}"
+        )
+        lines.append(f"  - Next check: {_customer_next_step(row)}")
+    lines.extend(["", "## Watchlist Command Center", ""])
+    if watch_df.empty:
+        lines.append("- No counties are currently on the watchlist.")
+    else:
+        health_lookup = {}
+        if health_eval is not None and not health_eval.empty:
+            health_lookup = health_eval.set_index(health_eval["fips"].astype(str).str.zfill(5)).to_dict("index")
+        for _, row in watch_df.sort_values("sim_rank").head(20).iterrows():
+            fips = str(row.get("fips")).zfill(5)
+            health = health_lookup.get(fips, {})
+            stage = st.session_state.county_funnel.get(fips, {}).get("stage", "Interested")
+            lines.append(
+                f"- `{_customer_county_display(row)}`: "
+                f"{row.get('customer_tier', _customer_tier_label(row))}, strategy rank `{_rank_text(row.get('sim_rank'))}`, "
+                f"stage `{stage}`, health `{_humanize_status_label(health.get('health_status', 'watch_closely'))}`, "
+                f"risk band `{row.get('customer_risk_band', _customer_risk_band(row))}`."
+            )
+            lines.append(f"  - Next action: {_customer_next_step(row)}")
+    lines.extend(["", "## Alerts And Review Items", ""])
+    if alert_df is None or alert_df.empty:
+        lines.append("- No watchlist alerts are currently firing.")
+    else:
+        alert_view = alert_df.copy().head(12)
+        for _, rec in alert_view.iterrows():
+            lines.append(
+                f"- `{rec.get('county_name')}, {rec.get('state')}`: "
+                f"`{rec.get('severity', 'n/a')}` / `{rec.get('alert_type', 'alert')}` - {rec.get('message', '')}"
+            )
+    lines.extend(["", "## Diligence Checklist", ""])
+    checklist: list[str] = []
+    source_df = watch_df if not watch_df.empty else filtered.head(8)
+    for _, row in source_df.head(8).iterrows():
+        _, actions = _parcel_readiness(row)
+        checklist.extend(actions)
+    for item in list(dict.fromkeys(checklist))[:10]:
+        lines.append(f"- {item}")
+    lines.extend(
+        [
+            "",
+            "## Review Notes",
+            "",
+            "- Customer Mode is a visual presentation layer over the current Product Mode strategy simulation.",
+            "- Production rank, scoring pipeline, feature eligibility, and model promotion gates are unchanged.",
+            "- Parcel, zoning, title, local-market, insurance, and transaction diligence remain required before underwriting.",
+        ]
+    )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _customer_packet_inline_html(text: str) -> str:
+    escaped = _customer_escape(text)
+    return re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
+
+
+def _customer_packet_html(packet_md: str, title: str = "LandInvest Customer Review Packet") -> str:
+    html_lines = []
+    in_list = False
+    for raw_line in packet_md.splitlines():
+        line = raw_line.rstrip()
+        if not line:
+            if in_list:
+                html_lines.append("</ul>")
+                in_list = False
+            continue
+        if line.startswith("# "):
+            if in_list:
+                html_lines.append("</ul>")
+                in_list = False
+            html_lines.append(f"<h1>{_customer_packet_inline_html(line[2:])}</h1>")
+        elif line.startswith("## "):
+            if in_list:
+                html_lines.append("</ul>")
+                in_list = False
+            html_lines.append(f"<h2>{_customer_packet_inline_html(line[3:])}</h2>")
+        elif line.startswith("- "):
+            if not in_list:
+                html_lines.append("<ul>")
+                in_list = True
+            html_lines.append(f"<li>{_customer_packet_inline_html(line[2:])}</li>")
+        elif line.startswith("  - "):
+            if not in_list:
+                html_lines.append("<ul>")
+                in_list = True
+            html_lines.append(f"<li class=\"subitem\">{_customer_packet_inline_html(line[4:])}</li>")
+        else:
+            if in_list:
+                html_lines.append("</ul>")
+                in_list = False
+            html_lines.append(f"<p>{_customer_packet_inline_html(line)}</p>")
+    if in_list:
+        html_lines.append("</ul>")
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{_customer_escape(title)}</title>
+  <style>
+    body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #0f172a; margin: 32px; line-height: 1.5; background: #f8fafc; }}
+    .packet {{ max-width: 980px; margin: 0 auto; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 28px 34px; box-shadow: 0 20px 48px rgba(15,23,42,.10); }}
+    h1 {{ margin-top: 0; font-size: 30px; letter-spacing: 0; }}
+    h2 {{ margin-top: 28px; padding-top: 14px; border-top: 1px solid #e2e8f0; color: #0f766e; }}
+    li {{ margin: 6px 0; }}
+    li.subitem {{ margin-left: 18px; color: #475569; }}
+    code {{ background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 5px; padding: 1px 5px; }}
+    @media print {{ body {{ margin: 18mm; }} }}
+  </style>
+</head>
+<body>
+  <main class="packet">
+    {"".join(html_lines)}
+  </main>
+</body>
+</html>
+"""
+
+
+def _customer_signal_provenance_table(row: pd.Series, wave3_status: dict | None = None) -> pd.DataFrame:
+    coastal = _coastal_lane_provenance(row, wave3_status)
+    rows = [
+        {
+            "Signal": "Production rank",
+            "Status": "Production artifact",
+            "What It Means": "Current saved scoring output; Customer Mode does not rewrite it.",
+        },
+        {
+            "Signal": "Customer signal",
+            "Status": "Presentation layer",
+            "What It Means": "Visual blend of existing Product Mode simulation components for browsing.",
+        },
+        {
+            "Signal": "X-factor / pre-boom",
+            "Status": "Report-only",
+            "What It Means": "Discovery context only until promotion gates pass.",
+        },
+        {
+            "Signal": "Wave 3 land context",
+            "Status": "Overlay / narrative",
+            "What It Means": "Structural support/brake explanation; not a production rank change.",
+        },
+        {
+            "Signal": "Coastal provenance",
+            "Status": coastal.get("label", "n/a"),
+            "What It Means": coastal.get("summary", "No coastal provenance summary available."),
+        },
+    ]
+    return pd.DataFrame(rows)
+
+
+def _customer_change_table(row: pd.Series, latest_compare_rank_df: pd.DataFrame | None) -> pd.DataFrame:
+    if latest_compare_rank_df is None or latest_compare_rank_df.empty:
+        return pd.DataFrame()
+    comp = latest_compare_rank_df.copy()
+    if "fips" not in comp.columns:
+        return pd.DataFrame()
+    fips = str(row.get("fips", "")).zfill(5)
+    match = comp[comp["fips"].astype(str).str.zfill(5).eq(fips)]
+    if match.empty:
+        return pd.DataFrame()
+    rec = match.iloc[0]
+    rows = []
+    for label, old_col, new_col, delta_col, fmt in [
+        ("Rank", "overall_rank_old", "overall_rank_new", "rank_shift", "rank"),
+        ("Opportunity score", None, None, "opportunity_score_delta", "score"),
+        ("3yr policy", None, None, "pred_policy_3yr_delta", "pct_delta"),
+        ("XGB 5yr", None, None, "pred_xgboost_5yr_delta", "pct_delta"),
+        ("LGB 5yr", None, None, "pred_lightgbm_5yr_delta", "pct_delta"),
+        ("Risk", None, None, "composite_risk_delta", "score"),
+    ]:
+        if delta_col not in rec.index or pd.isna(rec.get(delta_col)):
+            continue
+        if fmt == "rank":
+            read = (
+                f"{_rank_text(rec.get(old_col))} -> {_rank_text(rec.get(new_col))} "
+                f"({float(rec.get(delta_col)):+.0f})"
+            )
+        elif fmt == "pct_delta":
+            read = f"{float(rec.get(delta_col)):+.2%}"
+        else:
+            read = f"{float(rec.get(delta_col)):+.3f}"
+        rows.append({"Change": label, "Latest Read": read})
+    return pd.DataFrame(rows)
+
+
+def _customer_similar_counties(row: pd.Series, df: pd.DataFrame, limit: int = 6) -> pd.DataFrame:
+    peer_sets = _find_peer_sets(row, df)
+    frames = []
+    for label in ["Most similar profile", "Similar-risk alternatives", "Similar-growth alternatives"]:
+        peer_df = peer_sets.get(label)
+        if peer_df is not None and not peer_df.empty:
+            work = peer_df.head(limit).copy()
+            work["match_type"] = label
+            frames.append(work)
+    if not frames:
+        return pd.DataFrame()
+    peers = pd.concat(frames, ignore_index=True, sort=False)
+    if "fips" in peers.columns:
+        peers["fips"] = peers["fips"].astype(str).str.zfill(5)
+        peers = peers.drop_duplicates("fips")
+    rows = []
+    for _, rec in peers.sort_values("sim_rank").head(limit).iterrows():
+        rows.append(
+            {
+                "Match": rec.get("match_type"),
+                "County": _customer_county_display(rec),
+                "Tier": rec.get("customer_tier", _customer_tier_label(rec)),
+                "Strategy Rank": _rank_text(rec.get("sim_rank")),
+                "5yr": _fmt_pct(rec.get("pred_avg_5yr")),
+                "Risk": _fmt_score(rec.get("composite_risk")),
+                "Why Compare": _customer_thesis_read(rec),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def _customer_parcel_items(row: pd.Series) -> list[str]:
+    items = [
+        "Parcel supply and listing scan",
+        "Zoning and entitlement check",
+        "Road access and utility access",
+        "Wetlands, flood, slope, and protected-land screen",
+        "Comparable sale and pricing check",
+        "Title, easement, and legal access review",
+        "Insurance and hazard feasibility",
+        "Local broker or operator validation",
+    ]
+    if _product_numeric(row, "land_fragility_pressure", 0.5) >= 0.55:
+        items.append("Wildfire, climate, or fragility deep dive")
+    if _product_numeric(row, "land_constraint_pressure", 0.5) >= 0.55:
+        items.append("Constrained-acreage estimate")
+    return list(dict.fromkeys(items))
+
+
+def _render_customer_parcel_diligence(row: pd.Series) -> None:
+    fips = str(row.get("fips", "")).zfill(5)
+    current = st.session_state.parcel_checklists.get(fips, {})
+    checked = set(current.get("checked", []))
+    items = _customer_parcel_items(row)
+    st.subheader("Parcel Diligence")
+    st.caption("County-level signal becomes actionable only after parcel-level evidence clears these checks.")
+    c1, c2 = st.columns(2)
+    updated_checked: list[str] = []
+    for idx, item in enumerate(items):
+        target_col = c1 if idx % 2 == 0 else c2
+        if target_col.checkbox(item, value=item in checked, key=f"customer_parcel_{fips}_{idx}"):
+            updated_checked.append(item)
+    broker_note = st.text_input(
+        "Broker, listing, or parcel evidence link",
+        value=current.get("evidence_link", ""),
+        key=f"customer_parcel_link_{fips}",
+    )
+    diligence_note = st.text_area(
+        "Parcel diligence note",
+        value=current.get("note", ""),
+        height=100,
+        key=f"customer_parcel_note_{fips}",
+    )
+    progress = len(updated_checked) / max(len(items), 1)
+    st.progress(progress, text=f"{len(updated_checked)} of {len(items)} diligence checks complete")
+    if st.button("Save Parcel Diligence", key=f"customer_parcel_save_{fips}"):
+        st.session_state.parcel_checklists[fips] = {
+            "county_name": row.get("county_name"),
+            "state": row.get("state"),
+            "checked": updated_checked,
+            "evidence_link": broker_note.strip(),
+            "note": diligence_note.strip(),
+            "updated_at": datetime.now().isoformat(),
+        }
+        _save_current_user_state()
+        st.success("Parcel diligence saved.")
+
+
+def _customer_watchlist_health(
+    watch_df: pd.DataFrame,
+    latest_compare_rank_df: pd.DataFrame | None,
+    run_history_summary_df: pd.DataFrame | None,
+    wave3_status: dict | None,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    if watch_df.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    run_summary_df, _ = _build_watchlist_latest_run_summary(
+        watch_df,
+        latest_compare_rank_df=latest_compare_rank_df,
+        run_history_summary_df=run_history_summary_df,
+        notes=st.session_state.get("county_notes", {}),
+        watchlist_name="Customer Watchlist",
+    )
+    if run_summary_df.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    health_eval = run_summary_df.copy()
+    watch_lookup = watch_df.set_index(watch_df["fips"].astype(str).str.zfill(5))
+    for col in [
+        "composite_risk",
+        "site_thesis_support_index",
+        "land_developability_index",
+        "land_constraint_pressure",
+        "land_fragility_pressure",
+        "pred_avg_5yr",
+    ]:
+        if col in watch_df.columns:
+            health_eval[col] = watch_lookup[col].reindex(health_eval["fips"].astype(str).str.zfill(5)).values
+    health_eval["coastal_lane"] = [
+        _coastal_lane_provenance(
+            watch_lookup.loc[fips] if fips in watch_lookup.index else pd.Series(dtype=object),
+            wave3_status,
+        ).get("label")
+        for fips in health_eval["fips"].astype(str).str.zfill(5)
+    ]
+    health_eval["health_status"], health_eval["health_reasons"] = zip(
+        *health_eval.apply(lambda r: _classify_watchlist_health(r, settings=st.session_state.watchlist_settings), axis=1)
+    )
+    alert_df = _build_watchlist_alerts(health_eval, settings=st.session_state.watchlist_settings)
+    return health_eval, alert_df
+
+
+def _customer_backlog_table(status_bundle: dict | None) -> pd.DataFrame:
+    model_health = ((status_bundle or {}).get("model_health_3yr") or {}).get("assessment", {})
+    return pd.DataFrame(
+        [
+            {
+                "Lane": "Cloud accounts",
+                "Status": "Not implemented",
+                "Next Step": "Add hosted auth, user database, and server-side share tokens outside the local Streamlit demo store.",
+            },
+            {
+                "Lane": "3yr model stabilization",
+                "Status": _humanize_status_label(model_health.get("health_status", "unknown")),
+                "Next Step": "Keep 3yr diagnostic until controlled specialist gate passes.",
+            },
+            {
+                "Lane": "Announcement-event promotion",
+                "Status": "Blocked",
+                "Next Step": "Finish systematic acquisition coverage, analog depth, and refresh governance before promotion.",
+            },
+            {
+                "Lane": "SEC HQ point-in-time semantics",
+                "Status": "Blocked",
+                "Next Step": "Acquire historical filing-address trails and event-validity windows.",
+            },
+            {
+                "Lane": "Pre-1990 demographic composition",
+                "Status": "Thin source coverage",
+                "Next Step": "Stage richer 1970/1980 composition fields before feature promotion.",
+            },
+        ]
+    )
+
+
+def _customer_history_row(
+    row: pd.Series | None,
+    run_history_summary_df: pd.DataFrame | None,
+) -> pd.Series | None:
+    if row is None or run_history_summary_df is None or run_history_summary_df.empty:
+        return None
+    match = run_history_summary_df[
+        run_history_summary_df["fips"].astype(str).str.zfill(5) == str(row.get("fips")).zfill(5)
+    ]
+    if match.empty:
+        return None
+    return match.iloc[0]
+
+
+def _render_customer_story(
+    row: pd.Series,
+    history_row: pd.Series | None,
+    filtered_df: pd.DataFrame,
+    latest_compare_rank_df: pd.DataFrame | None,
+    wave3_status: dict | None,
+    cfg: dict,
+    preboom_surfaces: dict[str, pd.DataFrame | None] | None,
+    known_analog_suite: dict | None,
+    xfactor_scoreboard: dict | None,
+) -> None:
+    fips = str(row.get("fips", "")).zfill(5)
+    tier = str(row.get("customer_tier") or _customer_tier_label(row))
+    color = CUSTOMER_TIER_COLORS.get(tier, "#64748b")
+    st.markdown(
+        f"""
+<div class="customer-hero">
+  <div class="customer-kicker">Customer Mode County Story</div>
+  <h1>{_customer_escape(_customer_county_display(row))}</h1>
+  <p>{_customer_escape(_customer_thesis_read(row))}</p>
+  <div class="customer-hero-strip">
+    <span style="border-color:{color}; color:{color};">{_customer_escape(tier)} signal</span>
+    <span>Strategy {_rank_text(row.get('sim_rank'))}</span>
+    <span>Production {_rank_text(row.get('overall_rank'))}</span>
+    <span>Risk {_fmt_score(row.get('composite_risk'))}</span>
+  </div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("Customer Signal", _fmt_score(row.get("customer_signal_score")))
+    c2.metric("5yr Upside", _fmt_pct(row.get("pred_avg_5yr")))
+    c3.metric("Risk Band", row.get("customer_risk_band", _customer_risk_band(row)))
+    c4.metric("Confidence", row.get("confidence", "n/a"))
+    c5.metric("Parcel Read", _parcel_readiness(row)[0])
+
+    signal_rows = _customer_signal_rows(row)
+    radar_labels = signal_rows["Signal"].tolist()
+    radar_values = signal_rows["Score"].astype(float).tolist()
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatterpolar(
+            r=radar_values + [radar_values[0]],
+            theta=radar_labels + [radar_labels[0]],
+            fill="toself",
+            line=dict(color=color, width=3),
+            fillcolor="rgba(20, 184, 166, 0.22)",
+            name="Signal stack",
+        )
+    )
+    fig.update_layout(
+        height=380,
+        template="plotly_white",
+        polar=dict(
+            radialaxis=dict(range=[0, 100], showticklabels=False, gridcolor="rgba(148,163,184,0.35)"),
+            angularaxis=dict(gridcolor="rgba(148,163,184,0.28)"),
+            bgcolor="rgba(248,250,252,0.95)",
+        ),
+        margin=dict(l=35, r=35, t=25, b=25),
+        showlegend=False,
+        paper_bgcolor="rgba(255,255,255,0)",
+        font=dict(color="#0f172a", family="Inter, system-ui, sans-serif"),
+        hoverlabel=dict(bgcolor="#0f172a", font_color="#f8fafc", bordercolor="#14b8a6"),
+    )
+
+    left, right = st.columns([1.05, 1])
+    with left:
+        with st.container(border=True):
+            st.plotly_chart(fig, width="stretch")
+    with right:
+        signal_view = signal_rows.copy()
+        signal_view["Score"] = signal_view["Score"].map(lambda x: f"{float(x):.0f}")
+        st.caption("Signal stack")
+        st.dataframe(signal_view, width="stretch", hide_index=True, height=310)
+
+    change_rows = _customer_change_table(row, latest_compare_rank_df)
+    source_rows = _customer_signal_provenance_table(row, wave3_status)
+    similar_rows = _customer_similar_counties(row, filtered_df)
+    m1, m2 = st.columns(2)
+    with m1:
+        st.subheader("What Changed")
+        if change_rows.empty:
+            st.caption("No latest-run delta is available for this county.")
+        else:
+            st.dataframe(change_rows, width="stretch", hide_index=True, height=220)
+    with m2:
+        st.subheader("Signal Provenance")
+        st.dataframe(source_rows, width="stretch", hide_index=True, height=220)
+
+    narrative = _build_county_narrative(row, history_row=history_row)
+    readiness, actions = _parcel_readiness(row)
+    support_col, brake_col, diligence_col = st.columns(3)
+    with support_col:
+        st.subheader("Why It Could Work")
+        for item in narrative["positives"][:5]:
+            st.markdown(f"- {item}")
+    with brake_col:
+        st.subheader("What Could Go Wrong")
+        for item in narrative["cautions"][:5]:
+            st.markdown(f"- {item}")
+    with diligence_col:
+        st.subheader("Next Diligence")
+        st.markdown(f"**{readiness}**")
+        for item in actions[:5]:
+            st.markdown(f"- {item}")
+
+    preboom_rows = _preboom_signal_rows_for_county(row, preboom_surfaces)
+    analog_rows = _analog_rows_for_county(row, known_analog_suite)
+    e1, e2 = st.columns(2)
+    with e1:
+        st.subheader("Pre-Boom Context")
+        if preboom_rows.empty:
+            st.caption("No loaded pre-boom review surface currently includes this county.")
+        else:
+            st.dataframe(preboom_rows, width="stretch", hide_index=True, height=220)
+    with e2:
+        st.subheader("Analog Context")
+        if analog_rows.empty:
+            st.caption("No analog-library context is currently available for this county.")
+        else:
+            st.dataframe(analog_rows, width="stretch", hide_index=True, height=220)
+
+    st.subheader("Similar Counties")
+    if similar_rows.empty:
+        st.caption("No similar-county alternatives are available under the current filters.")
+    else:
+        st.dataframe(similar_rows, width="stretch", hide_index=True, height=250)
+
+    _render_customer_parcel_diligence(row)
+
+    action_col, note_col = st.columns([1, 2])
+    with action_col:
+        if fips not in {str(x).zfill(5) for x in st.session_state.watchlist_fips}:
+            if st.button("Add To Watchlist", key=f"customer_story_watch_{fips}", type="primary"):
+                st.session_state.watchlist_fips = sorted(set(st.session_state.watchlist_fips + [fips]))
+                _save_current_user_state()
+                st.success("County added to watchlist.")
+        memo_md = _build_county_memo_markdown(
+            row=row,
+            history_row=history_row,
+            wave3_status=wave3_status,
+            cfg=cfg,
+            preboom_surfaces=preboom_surfaces,
+            analog_suite=known_analog_suite,
+            xfactor_scoreboard=xfactor_scoreboard,
+        )
+        st.download_button(
+            "Download Story Memo",
+            data=memo_md.encode("utf-8"),
+            file_name=f"landinvest_customer_story_{fips}.md",
+            mime="text/markdown",
+            key=f"customer_story_download_{fips}",
+        )
+    with note_col:
+        note_entry = st.session_state.county_notes.get(fips, {})
+        note = st.text_area("Customer note", value=note_entry.get("note", ""), height=115, key=f"customer_note_{fips}")
+        if st.button("Save Customer Note", key=f"customer_note_save_{fips}"):
+            st.session_state.county_notes[fips] = {
+                "county_name": row.get("county_name"),
+                "state": row.get("state"),
+                "note": note.strip(),
+                "updated_at": datetime.now().isoformat(),
+            }
+            _save_current_user_state()
+            st.success("Note saved.")
+
+
+def _render_customer_mode(
+    df: pd.DataFrame,
+    states: list[str],
+    latest_run: dict | None,
+    latest_deltas: dict | None,
+    status_bundle: dict | None,
+    run_history_summary_df: pd.DataFrame | None,
+    latest_compare_rank_df: pd.DataFrame | None,
+    wave3_status: dict | None,
+    preboom_surfaces: dict[str, pd.DataFrame | None] | None = None,
+    known_analog_suite: dict | None = None,
+    xfactor_scoreboard: dict | None = None,
+    xfactor_promotion_gate: dict | None = None,
+    demo_readiness_report: dict | None = None,
+) -> None:
+    presets = _product_thesis_presets()
+    customer_preset_names = list(CUSTOMER_PRESET_CATALOG)
+    requested_customer_preset = _query_param_first("customer_preset", "General Opportunity")
+    if requested_customer_preset not in CUSTOMER_PRESET_CATALOG:
+        requested_customer_preset = "General Opportunity"
+    requested_workspace = _query_param_first("workspace", "Radar")
+    workspace_options = ["Radar", "Opportunities", "County Story", "Compare", "Watchlist", "Packet"]
+    if requested_workspace not in workspace_options:
+        requested_workspace = "Radar"
+    requested_fips = _normalize_fips_value(_query_param_first("fips"))
+    if requested_fips and "customer_selected_fips" not in st.session_state:
+        st.session_state.customer_selected_fips = requested_fips
+    pending_customer_view = st.session_state.pop("pending_customer_view_profile", None)
+    if isinstance(pending_customer_view, dict):
+        for key, value in _customer_view_session_state(pending_customer_view).items():
+            st.session_state[key] = value
+    has_explicit_customer_view = any(
+        _query_param_first(param)
+        for param in ["customer_preset", "risk_posture", "workspace", "states", "fips"]
+    )
+    if (
+        not has_explicit_customer_view
+        and "customer_workspace" not in st.session_state
+        and (default_view := _customer_default_view_profile()) is not None
+    ):
+        for key, value in _customer_view_session_state(default_view).items():
+            st.session_state[key] = value
+
+    with st.sidebar:
+        st.markdown('<div class="customer-sidebar-title">Investment Control Rail</div>', unsafe_allow_html=True)
+        with st.expander("Strategy Setup", expanded=True):
+            customer_preset_kwargs = {}
+            if "customer_experience_preset" not in st.session_state:
+                customer_preset_kwargs["index"] = customer_preset_names.index(requested_customer_preset)
+            customer_preset_name = st.selectbox(
+                "Customer preset",
+                customer_preset_names,
+                key="customer_experience_preset",
+                help="Preset bundles a Product Mode thesis and customer-facing risk posture.",
+                **customer_preset_kwargs,
+            )
+            preset_def = CUSTOMER_PRESET_CATALOG[customer_preset_name]
+            st.caption(preset_def["description"])
+            risk_options = ["Balanced", "Lower risk", "More aggressive"]
+            requested_risk = _query_param_first("risk_posture", preset_def["risk_posture"])
+            if requested_risk not in risk_options:
+                requested_risk = preset_def["risk_posture"]
+            risk_kwargs = {}
+            if "customer_risk_posture" not in st.session_state:
+                risk_kwargs["index"] = risk_options.index(requested_risk)
+            risk_posture = st.selectbox(
+                "Risk posture",
+                risk_options,
+                key="customer_risk_posture",
+                help="Controls the risk ceiling, risk weight, and confidence gate used by the active Customer view.",
+                **risk_kwargs,
+            )
+        with st.expander("Universe And Display", expanded=True):
+            state_lookup = {str(state).upper(): state for state in states}
+            query_states = [state_lookup[s.upper()] for s in _query_param_list("states") if s.upper() in state_lookup]
+            state_kwargs = {}
+            if "customer_states" not in st.session_state:
+                state_kwargs["default"] = query_states
+            selected_states = st.multiselect(
+                "States",
+                states,
+                placeholder="All states",
+                key="customer_states",
+                help="Limits Customer Radar and Opportunity Deck to selected states. County Story remains globally searchable.",
+                **state_kwargs,
+            )
+            card_limit_kwargs = {}
+            if "customer_card_limit" not in st.session_state:
+                card_limit_kwargs["value"] = 12
+            card_limit = st.slider(
+                "Opportunity cards",
+                6,
+                30,
+                step=3,
+                key="customer_card_limit",
+                help="Number of cards shown in the Opportunity Deck.",
+                **card_limit_kwargs,
+            )
+        with st.expander("Advanced Strategy Tuning", expanded=False):
+            thesis_kwargs = {}
+            if "customer_preset" not in st.session_state:
+                thesis_kwargs["index"] = list(presets.keys()).index(preset_def["base_preset"])
+            preset_name = st.selectbox(
+                "Thesis",
+                list(presets.keys()),
+                key="customer_preset",
+                help="Underlying Product Mode thesis used for the Customer Mode strategy score.",
+                **thesis_kwargs,
+            )
+            st.caption("Advanced tuning changes the simulated strategy lens only. It does not retrain or rewrite production artifacts.")
+        _render_customer_term_guide("Term Guide")
+
+    cfg = presets[preset_name].copy()
+    if risk_posture == "Lower risk":
+        cfg["max_risk"] = min(float(cfg.get("max_risk", 70)), 48.0)
+        cfg["risk"] = max(int(cfg.get("risk", 15)), 35)
+        cfg["confidence"] = max(int(cfg.get("confidence", 5)), 10)
+        cfg["uncertainty"] = max(int(cfg.get("uncertainty", 5)), 10)
+        cfg["min_confidence"] = "MEDIUM+"
+    elif risk_posture == "More aggressive":
+        cfg["max_risk"] = max(float(cfg.get("max_risk", 70)), 75.0)
+        cfg["growth"] = max(int(cfg.get("growth", 75)), 80)
+        cfg["risk"] = min(int(cfg.get("risk", 15)), 8)
+        cfg["min_confidence"] = "Any"
+    cfg["states"] = selected_states
+    cfg["preset_name"] = f"{customer_preset_name}: {preset_name} / {risk_posture}"
+
+    sim_df = _simulate_strategy_rankings(df, cfg)
+    sim_df = _add_product_lenses(sim_df)
+    if run_history_summary_df is not None and not run_history_summary_df.empty:
+        hist_cols = [
+            c for c in ["fips", "avg_rank", "std_rank", "top25_presence_share", "rank_range"]
+            if c in run_history_summary_df.columns
+        ]
+        sim_df["fips"] = sim_df["fips"].astype(str).str.zfill(5)
+        sim_df = sim_df.merge(run_history_summary_df[hist_cols], on="fips", how="left")
+    sim_df = _customer_augment(sim_df)
+    filtered = _apply_product_filter(sim_df, selected_states, float(cfg.get("max_risk", 70)), str(cfg.get("min_confidence", "Any"))).sort_values("sim_rank")
+
+    if filtered.empty:
+        _render_trust_banner(latest_run, df, xfactor_promotion_gate)
+        st.warning("No counties match the current Customer Mode setup.")
+        _render_demo_footer(latest_run, status_bundle, demo_readiness_report)
+        return
+
+    if "customer_selected_fips" not in st.session_state:
+        st.session_state.customer_selected_fips = str(filtered.iloc[0]["fips"]).zfill(5)
+    if str(st.session_state.customer_selected_fips).zfill(5) not in set(sim_df["fips"].astype(str).str.zfill(5)):
+        st.session_state.customer_selected_fips = str(filtered.iloc[0]["fips"]).zfill(5)
+
+    run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
+    churn = latest_deltas.get("top25_churn") if latest_deltas and latest_deltas.get("has_previous") else None
+    health = ((status_bundle or {}).get("model_health_3yr") or {}).get("assessment", {}).get("health_status")
+    top_row = filtered.sort_values("sim_rank").iloc[0]
+    prime_count = int(filtered["customer_tier"].eq("Prime").sum()) if "customer_tier" in filtered.columns else 0
+    st.markdown(
+        _customer_header_html(
+            top_row=top_row,
+            customer_preset_name=customer_preset_name,
+            risk_posture=risk_posture,
+            run_id=run_id,
+            universe_count=len(filtered),
+            full_count=len(sim_df),
+            prime_count=prime_count,
+            churn=churn,
+            health=health,
+        ),
+        unsafe_allow_html=True,
+    )
+    _render_trust_banner(latest_run, df, xfactor_promotion_gate)
+
+    if not st.session_state.get("customer_intro_seen", False):
+        with st.expander("Investor Brief", expanded=False):
+            st.markdown(
+                "- Customer Mode is the polished review layer over the current ranking artifacts.\n"
+                "- Production rank remains unchanged; customer signal tiers are presentation aids.\n"
+                "- Watchlist notes, parcel checks, stages, and packets save to the local demo user profile."
+            )
+            if st.button("Hide Customer Brief", key="customer_intro_seen_button"):
+                st.session_state.customer_intro_seen = True
+                st.rerun()
+
+    nav_col, guide_col = st.columns([5, 1])
+    with nav_col:
+        workspace_widget_kwargs = {}
+        if "customer_workspace" not in st.session_state:
+            workspace_widget_kwargs["default"] = requested_workspace
+        workspace = st.segmented_control(
+            "Customer workspace",
+            workspace_options,
+            selection_mode="single",
+            required=True,
+            format_func=_customer_workspace_label,
+            key="customer_workspace",
+            help="Switch between the Customer Mode review surfaces.",
+            width="stretch",
+            **workspace_widget_kwargs,
+        )
+    if workspace is None:
+        workspace = requested_workspace
+    with guide_col:
+        st.write("")
+        _render_customer_term_guide("Info")
+    _customer_section_header(
+        _customer_workspace_label(workspace),
+        {
+            "Radar": "Interactive market map, selected-county action panel, and live signal stack.",
+            "Opportunities": "Card-based shortlist for the active thesis and filter universe.",
+            "County Story": "Full county narrative, provenance, peer context, and diligence checklist.",
+            "Compare": "Side-by-side signal stack for a small compare set.",
+            "Watchlist": "Saved counties, stages, alerts, drift reads, and review flags.",
+            "Packet": "Customer-facing exports and review packet assembly.",
+        }.get(workspace),
+    )
+    _render_customer_workspace_help(workspace)
+    with st.sidebar:
+        with st.expander("Saved Customer Views", expanded=False):
+            saved_views = _saved_customer_views()
+            default_view_name = _customer_default_view_name()
+            if saved_views:
+                selected_view_name = st.selectbox(
+                    "Saved view",
+                    sorted(saved_views),
+                    key="customer_saved_view_choice",
+                    help="Load a saved Customer Mode preset, filters, workspace, selected county, and map layer.",
+                )
+                view_meta = saved_views.get(selected_view_name, {})
+                default_badge = "Default view" if selected_view_name == default_view_name else "Saved view"
+                st.caption(
+                    f"{default_badge}: {view_meta.get('customer_preset_name', 'Customer view')} / "
+                    f"{view_meta.get('risk_posture', 'Balanced')} / "
+                    f"{view_meta.get('workspace', 'Radar')}"
+                )
+                load_col, default_col = st.columns(2)
+                if load_col.button("Load View", key="customer_load_saved_view", type="primary"):
+                    st.session_state.pending_customer_view_profile = saved_views[selected_view_name]
+                    st.rerun()
+                if default_col.button("Make Default", key="customer_make_default_view"):
+                    st.session_state.saved_strategy_profiles["__customer_default_view__"] = {
+                        "profile_type": "customer_default_view",
+                        "name": selected_view_name,
+                        "updated_at": datetime.now().isoformat(),
+                    }
+                    _save_current_user_state()
+                    st.success(f"Default Customer view set to: {selected_view_name}")
+                    st.rerun()
+                rename_name = st.text_input(
+                    "Rename selected view to",
+                    key="customer_rename_view_name",
+                    placeholder=selected_view_name,
+                    help="Rename this saved Customer view in local profile storage.",
+                )
+                rename_col, duplicate_col = st.columns(2)
+                if rename_col.button("Rename", key="customer_rename_saved_view"):
+                    clean_rename = rename_name.strip()
+                    if clean_rename and clean_rename != selected_view_name:
+                        st.session_state.saved_strategy_profiles[clean_rename] = st.session_state.saved_strategy_profiles.pop(selected_view_name)
+                        if default_view_name == selected_view_name:
+                            st.session_state.saved_strategy_profiles["__customer_default_view__"] = {
+                                "profile_type": "customer_default_view",
+                                "name": clean_rename,
+                                "updated_at": datetime.now().isoformat(),
+                            }
+                        _save_current_user_state()
+                        st.success(f"Renamed view to: {clean_rename}")
+                        st.rerun()
+                    else:
+                        st.warning("Enter a new view name first.")
+                if duplicate_col.button("Duplicate", key="customer_duplicate_saved_view"):
+                    base_name = f"{selected_view_name} Copy"
+                    duplicate_name = base_name
+                    idx = 2
+                    while duplicate_name in st.session_state.saved_strategy_profiles:
+                        duplicate_name = f"{base_name} {idx}"
+                        idx += 1
+                    duplicate_profile = dict(saved_views[selected_view_name])
+                    duplicate_profile["saved_at"] = datetime.now().isoformat()
+                    st.session_state.saved_strategy_profiles[duplicate_name] = duplicate_profile
+                    _save_current_user_state()
+                    st.success(f"Duplicated view: {duplicate_name}")
+                    st.rerun()
+                export_col, delete_col = st.columns(2)
+                export_col.download_button(
+                    "Export View",
+                    data=json.dumps(_customer_view_export_payload(selected_view_name, view_meta), indent=2).encode("utf-8"),
+                    file_name=f"landinvest_customer_view_{re.sub(r'[^a-zA-Z0-9_-]+', '_', selected_view_name).strip('_') or 'view'}.json",
+                    mime="application/json",
+                    key="customer_export_saved_view",
+                    help="Download this saved Customer view as JSON.",
+                )
+                if delete_col.button("Delete", key="customer_delete_saved_view"):
+                    st.session_state.saved_strategy_profiles.pop(selected_view_name, None)
+                    if default_view_name == selected_view_name:
+                        st.session_state.saved_strategy_profiles.pop("__customer_default_view__", None)
+                    _save_current_user_state()
+                    st.success(f"Deleted view: {selected_view_name}")
+                    st.rerun()
+            else:
+                st.caption("No saved Customer views yet.")
+            import_file = st.file_uploader(
+                "Import Customer View JSON",
+                type=["json"],
+                key="customer_import_view_file",
+                help="Import a Customer View JSON exported from this app.",
+            )
+            if import_file is not None and st.button("Import View", key="customer_import_view_button"):
+                try:
+                    imported_name, imported_profile = _parse_customer_view_import(import_file.getvalue())
+                    final_name = imported_name
+                    idx = 2
+                    while final_name in st.session_state.saved_strategy_profiles:
+                        final_name = f"{imported_name} {idx}"
+                        idx += 1
+                    st.session_state.saved_strategy_profiles[final_name] = imported_profile
+                    _save_current_user_state()
+                    st.success(f"Imported Customer view: {final_name}")
+                    st.rerun()
+                except (json.JSONDecodeError, UnicodeDecodeError, ValueError) as exc:
+                    st.error(f"Customer view import failed: {exc}")
+            save_view_name = st.text_input(
+                "Save current view as",
+                key="customer_save_view_name",
+                placeholder="e.g. Retirement land screen",
+                help="Stores Customer preset, risk posture, states, workspace, selected county, and map layer in local profile storage.",
+            )
+            if st.button("Save Customer View", key="customer_save_view_button", type="secondary"):
+                clean_name = save_view_name.strip()
+                if clean_name:
+                    st.session_state.saved_strategy_profiles[clean_name] = _customer_view_payload(
+                        customer_preset_name=customer_preset_name,
+                        preset_name=preset_name,
+                        risk_posture=risk_posture,
+                        selected_states=selected_states,
+                        card_limit=int(card_limit),
+                        workspace=workspace,
+                        selected_fips=st.session_state.get("customer_selected_fips"),
+                        radar_layer=st.session_state.get("customer_radar_layer", "sim_score"),
+                        cfg=cfg,
+                    )
+                    _save_current_user_state()
+                    st.success(f"Saved Customer view: {clean_name}")
+                else:
+                    st.warning("Name the view before saving.")
+    share_url = _customer_share_url(
+        customer_preset=customer_preset_name,
+        risk_posture=risk_posture,
+        workspace=workspace,
+        selected_states=selected_states,
+        selected_fips=st.session_state.get("customer_selected_fips"),
+    )
+    with st.expander("Share And Profile", expanded=False):
+        s1, s2 = st.columns([2, 1])
+        with s1:
+            st.caption("Shareable view state")
+            st.code(share_url, language="text")
+        with s2:
+            st.download_button(
+                "Export Local Profile JSON",
+                data=json.dumps(_current_user_state_payload(), indent=2).encode("utf-8"),
+                file_name=f"landinvest_user_profile_{_current_user_id()}.json",
+                mime="application/json",
+                key="customer_user_profile_json",
+            )
+            st.caption("Current profile is local SQLite demo storage, not hosted authentication.")
+
+    if workspace == "Radar":
+        st.markdown(
+            f"""
+<div class="customer-stat-strip">
+  <span><b>{prime_count}</b><small>Prime signals</small></span>
+  <span><b>{int(filtered['customer_tier'].eq('Strong').sum())}</b><small>Strong signals</small></span>
+  <span><b>{100 * filtered['confidence'].astype(str).str.upper().eq('HIGH').mean():.0f}%</b><small>High confidence</small></span>
+  <span><b>{_fmt_pct(filtered['pred_avg_5yr'].mean())}</b><small>Avg 5yr upside</small></span>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+
+        map_layer_labels = {
+            "customer_signal_score": "Customer Signal",
+            "sim_score": "Strategy Score",
+            "pred_avg_5yr": "5yr Upside",
+            "composite_risk": "Risk",
+            "lens_parcel_readiness": "Parcel Readiness",
+            "sim_structure_score": "Land Fit",
+        }
+        map_layer_kwargs = {}
+        if "customer_radar_layer" not in st.session_state:
+            map_layer_kwargs["index"] = 0
+        map_layer = st.selectbox(
+            "Map signal layer",
+            ["sim_score", "customer_signal_score", "pred_avg_5yr", "composite_risk", "lens_parcel_readiness", "sim_structure_score"],
+            format_func=lambda x: map_layer_labels.get(x, x.replace("_", " ").title()),
+            key="customer_radar_layer",
+            help="Choose the score used to color the county map. Click a county to load it into the selected-county action panel.",
+            **map_layer_kwargs,
+        )
+        map_col, stack_col = st.columns([2, 1])
+        with map_col:
+            map_df = sim_df.dropna(subset=["fips", map_layer]).copy()
+            map_df["customer_universe"] = np.where(
+                map_df["fips"].astype(str).str.zfill(5).isin(filtered["fips"].astype(str).str.zfill(5)),
+                "In current Customer filter",
+                "Outside current Customer filter",
+            )
+            map_df["fips_str"] = map_df["fips"].astype(str).str.zfill(5)
+            county_geojson = load_county_geojson(_mtime=_file_mtime(COUNTY_GEOJSON_PATH))
+            selected_map_fips = _normalize_fips_value(st.session_state.get("customer_selected_fips"))
+            selected_map_initial_row = _selected_county_row(sim_df, selected_map_fips)
+            selected_map_title = (
+                f"Selected: {_customer_county_display(selected_map_initial_row)}"
+                if selected_map_initial_row is not None
+                else "Click a county to select"
+            )
+            st.caption(selected_map_title)
+            fig_map = px.choropleth(
+                map_df,
+                geojson=county_geojson,
+                locations="fips_str",
+                color=map_layer,
+                hover_name="county_name",
+                hover_data={"state": True, "customer_tier": True, "customer_universe": True, "sim_rank": True, "fips_str": False},
+                color_continuous_scale="RdYlGn_r" if map_layer == "composite_risk" else "Viridis",
+                scope="usa",
+                title=f"{map_layer_labels.get(map_layer, map_layer.replace('_', ' ').title())} Radar | {selected_map_title}",
+                custom_data=["fips_str", "state", "customer_tier", "customer_universe", "sim_rank"],
+            )
+            fig_map.update_traces(
+                marker_line_width=0.25,
+                marker_line_color="rgba(15, 23, 42, 0.28)",
+                hovertemplate=(
+                    "<b>%{hovertext}</b><br>"
+                    "State: %{customdata[1]}<br>"
+                    "Tier: %{customdata[2]}<br>"
+                    "%{customdata[3]}<br>"
+                    "Strategy rank: #%{customdata[4]}<extra>Click county</extra>"
+                ),
+            )
+            if selected_map_fips and selected_map_fips in set(map_df["fips_str"]):
+                fig_map.add_trace(
+                    go.Choropleth(
+                        geojson=county_geojson,
+                        locations=[selected_map_fips],
+                        z=[1],
+                        colorscale=[[0, "rgba(251,191,36,0.22)"], [1, "rgba(251,191,36,0.22)"]],
+                        showscale=False,
+                        marker_line_color="#f59e0b",
+                        marker_line_width=4.0,
+                        hoverinfo="skip",
+                        name="Selected county",
+                    )
+                )
+            fig_map.update_layout(
+                height=650,
+                margin=dict(l=0, r=0, t=52, b=0),
+                clickmode="event+select",
+                paper_bgcolor="rgba(255,255,255,0)",
+                plot_bgcolor="rgba(255,255,255,0)",
+                font=dict(color="#0f172a", family="Inter, system-ui, sans-serif"),
+                title=dict(font=dict(size=18), x=0.01, xanchor="left"),
+                hoverlabel=dict(bgcolor="#0f172a", font_color="#f8fafc", bordercolor="#14b8a6"),
+                geo=dict(bgcolor="rgba(0,0,0,0)", lakecolor="#e0f2fe", landcolor="#f8fafc"),
+            )
+            with st.container(border=True):
+                selection = st.plotly_chart(
+                    fig_map,
+                    width="stretch",
+                    on_select="rerun",
+                    selection_mode=["points", "box", "lasso"],
+                    key="customer_map",
+                )
+            selected_points = getattr(selection, "selection", {}).get("points", []) if selection is not None else []
+            if selected_points:
+                customdata = selected_points[0].get("customdata") or []
+                if customdata:
+                    clicked_fips = str(customdata[0]).zfill(5)
+                    st.session_state.customer_selected_fips = clicked_fips
+                    clicked_row = _selected_county_row(sim_df, clicked_fips)
+                    if clicked_row is not None:
+                        st.session_state.customer_map_feedback = f"Map selected {_customer_county_display(clicked_row)}."
+            selected_map_row = _selected_county_row(sim_df, st.session_state.get("customer_selected_fips"))
+            if selected_map_row is not None:
+                if st.session_state.get("customer_map_feedback"):
+                    st.success(st.session_state.customer_map_feedback)
+                st.markdown(_customer_map_selection_html(selected_map_row), unsafe_allow_html=True)
+                a1, a2 = st.columns(2)
+                a1.button(
+                    "Open County Story",
+                    key=f"customer_map_open_story_{str(selected_map_row.get('fips')).zfill(5)}",
+                    on_click=_set_customer_story_selection,
+                    args=(str(selected_map_row.get("fips")).zfill(5),),
+                    help="Jump to the full narrative, provenance, and diligence checklist for this county.",
+                    type="primary",
+                )
+                selected_fips = str(selected_map_row.get("fips")).zfill(5)
+                if selected_fips in {str(x).zfill(5) for x in st.session_state.watchlist_fips}:
+                    a2.caption("On watchlist")
+                elif a2.button(
+                    "Add To Watchlist",
+                    key=f"customer_map_watch_{selected_fips}",
+                    help="Save this county to the local Customer Mode watchlist.",
+                ):
+                    st.session_state.watchlist_fips = sorted(set(st.session_state.watchlist_fips + [selected_fips]))
+                    _save_current_user_state()
+                    st.success("Added to watchlist.")
+                if st.button(
+                    "Reset Map Selection To Lead County",
+                    key="customer_map_reset_selection",
+                    help="Return the selected-county panel to the top-ranked county in the active Customer filter.",
+                ):
+                    lead_fips = str(filtered.sort_values("sim_rank").iloc[0].get("fips")).zfill(5)
+                    st.session_state.customer_selected_fips = lead_fips
+                    st.session_state.customer_map_feedback = "Map selection reset to the lead active-filter county."
+                    st.rerun()
+        with stack_col:
+            st.subheader("Lead Signal Stack", help="Top counties in the active Customer filter by strategy rank.")
+            for idx, (_, row) in enumerate(filtered.sort_values("sim_rank").head(4).iterrows()):
+                _render_customer_card(row, f"customer_radar_{idx}", compact=True)
+
+    elif workspace == "Opportunities":
+        sort_choice = st.selectbox(
+            "Opportunity sorting lens",
+            ["Strategy rank", "Customer signal", "Lowest risk", "Highest 5yr upside", "Best land fit"],
+            index=0,
+            key="customer_sort",
+            help="Controls how the Opportunity Deck is ordered inside the active Customer filter.",
+        )
+        query = st.text_input(
+            "Search active opportunities",
+            key="customer_search",
+            placeholder="County, state, archetype, or tier",
+            help="Searches only the active Customer opportunity universe. Use County Story to search every scored county.",
+        )
+        card_df = filtered.copy()
+        if query.strip():
+            q = query.strip().lower()
+            mask = pd.Series(False, index=card_df.index)
+            for col in ["county_name", "state", "opportunity_archetype", "customer_tier", "customer_risk_band"]:
+                if col in card_df.columns:
+                    mask = mask | card_df[col].astype(str).str.lower().str.contains(q, regex=False, na=False)
+            card_df = card_df[mask]
+        sort_map = {
+            "Strategy rank": ("sim_rank", True),
+            "Customer signal": ("customer_signal_score", False),
+            "Lowest risk": ("composite_risk", True),
+            "Highest 5yr upside": ("pred_avg_5yr", False),
+            "Best land fit": ("sim_structure_score", False),
+        }
+        sort_col, ascending = sort_map[sort_choice]
+        card_df = card_df.sort_values([sort_col, "sim_rank"], ascending=[ascending, True]).head(int(card_limit))
+        cols = st.columns(3)
+        for idx, (_, row) in enumerate(card_df.iterrows()):
+            if idx > 0 and idx % 3 == 0:
+                cols = st.columns(3)
+            with cols[idx % 3]:
+                _render_customer_card(row, f"customer_opportunity_{idx}")
+        with st.expander("Data View", expanded=False):
+            st.dataframe(_customer_brief_table(card_df, limit=int(card_limit)), width="stretch", hide_index=True, height=420)
+
+    elif workspace == "County Story":
+        active_fips = set(filtered["fips"].astype(str).str.zfill(5))
+        labels_df = sim_df.sort_values("sim_rank").copy()
+        labels_df["fips_str"] = labels_df["fips"].astype(str).str.zfill(5)
+        labels_df["customer_universe"] = np.where(
+            labels_df["fips_str"].isin(active_fips),
+            "active filter",
+            "outside filter",
+        )
+        story_query = st.text_input(
+            "Search all counties",
+            key="customer_story_search",
+            placeholder="County, state, FIPS, archetype, or tier",
+            help="Searches the full scored county universe, including counties outside the active Customer filter.",
+        )
+        if story_query.strip():
+            q = story_query.strip().lower()
+            mask = pd.Series(False, index=labels_df.index)
+            for col in ["county_name", "state", "fips_str", "opportunity_archetype", "customer_tier", "customer_risk_band"]:
+                if col in labels_df.columns:
+                    mask = mask | labels_df[col].astype(str).str.lower().str.contains(q, regex=False, na=False)
+            labels_df = labels_df[mask]
+        if labels_df.empty:
+            st.info("No counties match that Story search. Try a county name, state abbreviation, or FIPS code.")
+            _render_demo_footer(latest_run, status_bundle, demo_readiness_report)
+            return
+        labels = labels_df.apply(
+            lambda r: (
+                f"{_customer_county_display(r)} "
+                f"({r.get('customer_tier', _customer_tier_label(r))}, strategy {_rank_text(r.get('sim_rank'))}, "
+                f"{r.get('customer_universe')}, FIPS {r.get('fips_str')})"
+            ),
+            axis=1,
+        ).tolist()
+        label_to_fips = dict(zip(labels, labels_df["fips_str"]))
+        current_fips = st.session_state.get("customer_selected_fips")
+        current_label = next((label for label, fips in label_to_fips.items() if fips == current_fips), labels[0])
+        chosen = st.selectbox(
+            "County",
+            labels,
+            index=labels.index(current_label) if current_label in labels else 0,
+            key="customer_story_county",
+            help="Labels show whether the county is inside the active filter or outside it.",
+        )
+        st.session_state.customer_selected_fips = label_to_fips[chosen]
+        row = _selected_county_row(sim_df, st.session_state.customer_selected_fips)
+        if row is not None:
+            _render_customer_story(
+                row,
+                _customer_history_row(row, run_history_summary_df),
+                sim_df,
+                latest_compare_rank_df,
+                wave3_status,
+                cfg,
+                preboom_surfaces,
+                known_analog_suite,
+                xfactor_scoreboard,
+            )
+
+    elif workspace == "Compare":
+        compare_source = filtered.sort_values("sim_rank").head(250).copy()
+        compare_labels = compare_source.apply(
+            lambda r: f"{_customer_county_display(r)} ({r.get('customer_tier', _customer_tier_label(r))}, {_rank_text(r.get('sim_rank'))})",
+            axis=1,
+        ).tolist()
+        selected = st.multiselect(
+            "Compare counties",
+            compare_labels,
+            default=compare_labels[: min(3, len(compare_labels))],
+            key="customer_compare_labels",
+            help="Choose a focused set of counties to compare across signal components.",
+        )
+        label_to_fips = dict(zip(compare_labels, compare_source["fips"].astype(str).str.zfill(5)))
+        selected_fips = [label_to_fips[label] for label in selected if label in label_to_fips]
+        compare_df = compare_source[compare_source["fips"].astype(str).str.zfill(5).isin(selected_fips)].copy()
+        if compare_df.empty:
+            st.info("Choose at least one county to compare.")
+        else:
+            winner = compare_df.sort_values("sim_rank").iloc[0]
+            st.success(
+                f"Best fit under this Customer Mode thesis: {_customer_county_display(winner)} "
+                f"at strategy {_rank_text(winner.get('sim_rank'))}."
+            )
+            score_cols = ["customer_signal_score", "sim_growth_score", "sim_risk_fit", "sim_structure_score", "sim_confidence_score"]
+            chart_df = compare_df[["county_name", "state"] + [c for c in score_cols if c in compare_df.columns]].copy()
+            chart_df["County"] = compare_df.apply(_customer_county_display, axis=1).values
+            long_chart = chart_df.melt(id_vars=["County"], value_vars=[c for c in score_cols if c in chart_df.columns], var_name="Signal", value_name="Score")
+            long_chart["Signal"] = long_chart["Signal"].map(
+                {
+                    "customer_signal_score": "Customer Signal",
+                    "sim_growth_score": "Upside",
+                    "sim_risk_fit": "Risk Control",
+                    "sim_structure_score": "Land Fit",
+                    "sim_confidence_score": "Confidence",
+                }
+            )
+            fig_compare = px.bar(
+                long_chart,
+                x="Signal",
+                y="Score",
+                color="County",
+                barmode="group",
+                range_y=[0, 100],
+                title="Signal Stack Comparison",
+                color_discrete_sequence=px.colors.qualitative.Set2,
+            )
+            fig_compare.update_layout(height=420, margin=dict(t=45, b=20))
+            fig_compare.update_layout(
+                paper_bgcolor="rgba(255,255,255,0)",
+                plot_bgcolor="rgba(248,250,252,0.92)",
+                font=dict(color="#0f172a", family="Inter, system-ui, sans-serif"),
+                hoverlabel=dict(bgcolor="#0f172a", font_color="#f8fafc", bordercolor="#14b8a6"),
+            )
+            with st.container(border=True):
+                st.plotly_chart(fig_compare, width="stretch")
+            st.dataframe(_customer_brief_table(compare_df, limit=len(compare_df)), width="stretch", hide_index=True, height=320)
+
+    elif workspace == "Watchlist":
+        watch_fips = {str(f).zfill(5) for f in st.session_state.watchlist_fips}
+        watch_df = sim_df[sim_df["fips"].astype(str).str.zfill(5).isin(watch_fips)].copy().sort_values("sim_rank")
+        summary = _watchlist_portfolio_summary(watch_df)
+        if watch_df.empty:
+            st.info("No customer watchlist yet. Add counties from Radar, Opportunities, or County Story.")
+            with st.container(border=True):
+                st.subheader("Starter Candidates", help="Top active-filter counties to consider adding first.")
+                st.dataframe(_customer_brief_table(filtered.head(8), limit=8), width="stretch", hide_index=True, height=320)
+        else:
+            flags = _watchlist_review_flags(watch_df)
+            drift_alerts = _watchlist_drift_alerts(watch_df, latest_compare_rank_df)
+            health_eval, alert_df = _customer_watchlist_health(
+                watch_df,
+                latest_compare_rank_df=latest_compare_rank_df,
+                run_history_summary_df=run_history_summary_df,
+                wave3_status=wave3_status,
+            )
+            fits_count = int((health_eval["health_status"] == "fits_thesis").sum()) if not health_eval.empty else 0
+            watch_count = int((health_eval["health_status"] == "watch_closely").sum()) if not health_eval.empty else 0
+            review_count = int((health_eval["health_status"] == "review_or_drop").sum()) if not health_eval.empty else 0
+            stage_mix = {
+                st.session_state.county_funnel.get(str(row.get("fips")).zfill(5), {}).get("stage", "Interested")
+                for _, row in watch_df.iterrows()
+            }
+            st.markdown(
+                f"""
+<div class="customer-stat-strip">
+  <span><b>{summary['count']}</b><small>Saved counties</small></span>
+  <span><b>{fits_count}</b><small>Fits thesis</small></span>
+  <span><b>{watch_count}</b><small>Watch closely</small></span>
+  <span><b>{review_count}</b><small>Review or drop</small></span>
+  <span><b>{len(alert_df) if alert_df is not None else 0}</b><small>Active alerts</small></span>
+  <span><b>{summary['avg_risk']}</b><small>Avg risk</small></span>
+  <span><b>{len(stage_mix)}</b><small>Stage count</small></span>
+</div>
+""",
+                unsafe_allow_html=True,
+            )
+            watch_panel = st.segmented_control(
+                "Watchlist command view",
+                ["Command Center", "Stage Board", "Alerts"],
+                selection_mode="single",
+                default="Command Center",
+                required=True,
+                key="customer_watchlist_panel",
+                help="Switch between portfolio summary, stage management, and alert review.",
+                width="stretch",
+            )
+            if watch_panel == "Command Center":
+                command_df = _customer_watchlist_command_rows(watch_df, health_eval, alert_df)
+                cfilter1, cfilter2, cfilter3 = st.columns(3)
+                command_search = cfilter1.text_input(
+                    "Search watchlist",
+                    key="customer_watchlist_search",
+                    placeholder="County, stage, health, or FIPS",
+                    help="Filter the command queue without changing the saved watchlist.",
+                )
+                stage_filter_options = ["All"] + sorted(command_df["Stage"].dropna().astype(str).unique().tolist())
+                stage_filter = cfilter2.selectbox(
+                    "Stage filter",
+                    stage_filter_options,
+                    key="customer_watchlist_stage_filter",
+                    help="Limit the command queue to one diligence stage.",
+                )
+                sort_choice = cfilter3.selectbox(
+                    "Sort queue",
+                    ["Strategy rank", "Most alerts", "Highest signal", "Lowest risk", "County"],
+                    key="customer_watchlist_sort",
+                    help="Sort the command queue and export.",
+                )
+                command_view = command_df.copy()
+                if command_search.strip():
+                    q = command_search.strip().lower()
+                    mask = pd.Series(False, index=command_view.index)
+                    for col in ["County", "Stage", "Health", "FIPS", "Next Action"]:
+                        mask = mask | command_view[col].astype(str).str.lower().str.contains(q, regex=False, na=False)
+                    command_view = command_view[mask]
+                if stage_filter != "All":
+                    command_view = command_view[command_view["Stage"].astype(str).eq(stage_filter)]
+                sort_map = {
+                    "Strategy rank": (["_strategy_rank", "County"], [True, True]),
+                    "Most alerts": (["_alerts", "_strategy_rank"], [False, True]),
+                    "Highest signal": (["_signal_value", "_strategy_rank"], [False, True]),
+                    "Lowest risk": (["_risk_value", "_strategy_rank"], [True, True]),
+                    "County": (["County"], [True]),
+                }
+                sort_cols, sort_ascending = sort_map[sort_choice]
+                command_view = command_view.sort_values(sort_cols, ascending=sort_ascending)
+                display_command = command_view[[c for c in command_view.columns if not c.startswith("_")]].copy()
+                with st.container(border=True):
+                    st.subheader("Watchlist Command Center", help="One-line operating read for each saved county.")
+                    st.dataframe(display_command, width="stretch", hide_index=True, height=320)
+                    st.download_button(
+                        "Download Command CSV",
+                        data=display_command.to_csv(index=False).encode("utf-8"),
+                        file_name="landinvest_customer_watchlist_command_center.csv",
+                        mime="text/csv",
+                        key="customer_watchlist_command_csv",
+                    )
+                s1, s2 = st.columns([1, 1])
+                with s1:
+                    st.subheader("Stage Summary", help="Current saved-county distribution by diligence stage.")
+                    st.dataframe(_customer_watchlist_stage_summary(command_df), width="stretch", hide_index=True, height=220)
+                with s2:
+                    remove_options = ["None"] + display_command["County"].tolist()
+                    remove_choice = st.selectbox(
+                        "Remove from watchlist",
+                        remove_options,
+                        key="customer_watchlist_remove_choice",
+                        help="Remove a county from the local Customer watchlist.",
+                    )
+                    if remove_choice != "None" and st.button("Remove Selected County", key="customer_watchlist_remove_button"):
+                        remove_fips = display_command.loc[display_command["County"].eq(remove_choice), "FIPS"].iloc[0]
+                        st.session_state.watchlist_fips = [
+                            f for f in st.session_state.watchlist_fips if str(f).zfill(5) != str(remove_fips).zfill(5)
+                        ]
+                        _save_current_user_state()
+                        st.success(f"Removed {remove_choice} from watchlist.")
+                        st.rerun()
+                plot_df = watch_df.copy()
+                if not health_eval.empty:
+                    health_cols = [c for c in ["fips", "health_status"] if c in health_eval.columns]
+                    plot_df = plot_df.merge(health_eval[health_cols], on="fips", how="left")
+                plot_df["County"] = plot_df.apply(_customer_county_display, axis=1)
+                plot_df["plot_upside_size"] = pd.to_numeric(
+                    plot_df.get("pred_avg_5yr", pd.Series(0.01, index=plot_df.index)),
+                    errors="coerce",
+                ).fillna(0.01).clip(lower=0.01)
+                fig_watch = px.scatter(
+                    plot_df,
+                    x="composite_risk",
+                    y="customer_signal_score",
+                    size="plot_upside_size",
+                    color="health_status" if "health_status" in plot_df.columns else "customer_tier",
+                    hover_name="County",
+                    hover_data={"sim_rank": True, "pred_avg_5yr": True, "confidence": True, "plot_upside_size": False},
+                    title="Watchlist Signal vs Risk",
+                    color_discrete_sequence=px.colors.qualitative.Set2,
+                )
+                fig_watch.update_layout(
+                    height=420,
+                    margin=dict(t=50, b=30),
+                    paper_bgcolor="rgba(255,255,255,0)",
+                    plot_bgcolor="rgba(248,250,252,0.92)",
+                    font=dict(color="#0f172a", family="Inter, system-ui, sans-serif"),
+                    hoverlabel=dict(bgcolor="#0f172a", font_color="#f8fafc", bordercolor="#14b8a6"),
+                    xaxis_title="Composite Risk (lower is cleaner)",
+                    yaxis_title="Customer Signal",
+                )
+                with st.container(border=True):
+                    st.plotly_chart(fig_watch, width="stretch")
+                replacement_df = _recommend_watchlist_replacements(filtered, watch_df)
+                with st.container(border=True):
+                    st.subheader("Replacement Radar", help="High-fit active-filter counties not already on the watchlist.")
+                    if replacement_df.empty:
+                        st.caption("No replacement suggestions available under the active filter.")
+                    else:
+                        st.dataframe(_customer_brief_table(replacement_df, limit=8), width="stretch", hide_index=True, height=300)
+
+            elif watch_panel == "Stage Board":
+                stage_options = ["Interested", "Researching", "Parcel Check", "IC Review", "Approved", "Rejected", "Monitor"]
+                stage_summary_df = _customer_watchlist_stage_summary(_customer_watchlist_command_rows(watch_df, health_eval, alert_df))
+                st.dataframe(stage_summary_df, width="stretch", hide_index=True, height=180)
+                for idx, (_, row) in enumerate(watch_df.head(12).iterrows()):
+                    fips = str(row.get("fips")).zfill(5)
+                    card_col, stage_col = st.columns([2, 1])
+                    with card_col:
+                        _render_customer_card(row, f"customer_watch_{idx}", compact=True)
+                    with stage_col:
+                        current_stage = st.session_state.county_funnel.get(fips, {}).get("stage", "Interested")
+                        stage = st.selectbox(
+                            "Stage",
+                            stage_options,
+                            index=stage_options.index(current_stage) if current_stage in stage_options else 0,
+                            key=f"customer_stage_{fips}",
+                            help="Local workflow stage for this saved county.",
+                        )
+                        if st.button("Save Stage", key=f"customer_stage_save_{fips}"):
+                            st.session_state.county_funnel[fips] = {
+                                "county_name": row.get("county_name"),
+                                "state": row.get("state"),
+                                "stage": stage,
+                                "updated_at": datetime.now().isoformat(),
+                            }
+                            _save_current_user_state()
+                            st.success("Stage saved.")
+                        if st.button("Remove", key=f"customer_stage_remove_{fips}"):
+                            st.session_state.watchlist_fips = [
+                                saved for saved in st.session_state.watchlist_fips if str(saved).zfill(5) != fips
+                            ]
+                            _save_current_user_state()
+                            st.success(f"Removed {_customer_county_display(row)} from watchlist.")
+                            st.rerun()
+
+            else:
+                c1, c2, c3 = st.columns(3)
+                with c1:
+                    st.subheader("Review Flags", help="Risk, rank, and stability issues that deserve human review.")
+                    if flags.empty:
+                        st.caption("No watchlist counties are currently triggering review flags.")
+                    else:
+                        st.dataframe(flags, width="stretch", hide_index=True, height=300)
+                with c2:
+                    st.subheader("Drift Alerts", help="Latest-run movement against prior rank or signal artifacts.")
+                    if drift_alerts.empty:
+                        st.caption("No watchlist drift alerts are currently firing.")
+                    else:
+                        st.dataframe(drift_alerts, width="stretch", hide_index=True, height=300)
+                with c3:
+                    st.subheader("Run Alerts", help="Current health and ranking alerts generated from watchlist rules.")
+                    if alert_df.empty:
+                        st.caption("No current watchlist alerts are firing.")
+                    else:
+                        alert_view = alert_df.copy()
+                        alert_view["County"] = alert_view.apply(_customer_county_display, axis=1)
+                        alert_view = alert_view.rename(
+                            columns={
+                                "severity": "Severity",
+                                "alert_type": "Alert",
+                                "message": "Message",
+                                "current_rank": "Current Rank",
+                            }
+                        )
+                        st.dataframe(
+                            alert_view[[c for c in ["Severity", "Alert", "County", "Current Rank", "Message"] if c in alert_view.columns]].head(12),
+                            width="stretch",
+                            hide_index=True,
+                            height=300,
+                        )
+
+    elif workspace == "Packet":
+        watch_fips = {str(f).zfill(5) for f in st.session_state.watchlist_fips}
+        watch_df = sim_df[sim_df["fips"].astype(str).str.zfill(5).isin(watch_fips)].copy().sort_values("sim_rank")
+        packet_health_df = pd.DataFrame()
+        packet_alert_df = pd.DataFrame()
+        if not watch_df.empty:
+            packet_health_df, packet_alert_df = _customer_watchlist_health(
+                watch_df,
+                latest_compare_rank_df=latest_compare_rank_df,
+                run_history_summary_df=run_history_summary_df,
+                wave3_status=wave3_status,
+            )
+        packet = _customer_packet_markdown(
+            filtered,
+            watch_df,
+            cfg,
+            latest_run,
+            customer_preset_name=customer_preset_name,
+            risk_posture=risk_posture,
+            selected_states=selected_states,
+            selected_fips=st.session_state.get("customer_selected_fips"),
+            full_df=sim_df,
+            health_eval=packet_health_df,
+            alert_df=packet_alert_df,
+        )
+        packet_html = _customer_packet_html(packet)
+        st.markdown(
+            f"""
+<div class="customer-stat-strip">
+  <span><b>{len(filtered):,}</b><small>Active counties</small></span>
+  <span><b>{len(watch_df):,}</b><small>Watchlist counties</small></span>
+  <span><b>{len(packet_alert_df) if packet_alert_df is not None else 0}</b><small>Packet alerts</small></span>
+  <span><b>{customer_preset_name}</b><small>Customer view</small></span>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+        with st.container(border=True):
+            st.subheader("Packet Contents", help="Sections included in the Customer Review Packet export.")
+            st.markdown(
+                "- Executive Snapshot\n"
+                "- Active View\n"
+                "- Radar Shortlist\n"
+                "- Watchlist Command Center\n"
+                "- Alerts And Review Items\n"
+                "- Diligence Checklist\n"
+                "- Review Notes"
+            )
+        p1, p2, p3 = st.columns(3)
+        with p1:
+            st.download_button(
+                "Download Markdown Packet",
+                data=packet.encode("utf-8"),
+                file_name="landinvest_customer_review_packet.md",
+                mime="text/markdown",
+                key="customer_packet_download",
+                type="primary",
+            )
+        with p2:
+            st.download_button(
+                "Download Print HTML",
+                data=packet_html.encode("utf-8"),
+                file_name="landinvest_customer_review_packet.html",
+                mime="text/html",
+                key="customer_packet_html_download",
+            )
+        with p3:
+            st.download_button(
+                "Download Watchlist CSV",
+                data=_format_export_frame(watch_df if not watch_df.empty else filtered, 100).to_csv(index=False).encode("utf-8"),
+                file_name="landinvest_customer_watchlist.csv",
+                mime="text/csv",
+                key="customer_packet_watchlist_csv",
+            )
+        st.text_area("Packet Preview", value=packet, height=520)
+        with st.expander("Platform Readiness", expanded=False):
+            st.dataframe(_customer_backlog_table(status_bundle), width="stretch", hide_index=True, height=260)
+
+    _render_demo_footer(latest_run, status_bundle, demo_readiness_report)
+
+
 def _render_product_mode(
     df: pd.DataFrame,
     states: list[str],
@@ -3723,10 +6920,15 @@ def _render_product_mode(
     preboom_blend_report: dict | None = None,
     preboom_analog_report: dict | None = None,
     preboom_promotion_gate: dict | None = None,
+    known_analog_suite: dict | None = None,
+    xfactor_scoreboard: dict | None = None,
+    xfactor_ablation_queue: dict | None = None,
+    xfactor_promotion_gate: dict | None = None,
+    demo_readiness_report: dict | None = None,
+    p0_repeatable_residual_guardrail: dict | None = None,
+    p0_repeatable_residual_candidates: pd.DataFrame | None = None,
 ) -> None:
     presets = _product_thesis_presets()
-    st.title("LandInvest")
-    st.caption("Interactive county land-growth intelligence")
 
     pending_profile = st.session_state.pop("pending_product_strategy_profile", None)
     if isinstance(pending_profile, dict):
@@ -3830,59 +7032,115 @@ def _render_product_mode(
         f"Top-25 churn: {100 * churn:.1f}%" if churn is not None else "Top-25 churn: n/a",
     ]
     if health:
-        chips.append(f"3yr health: {health}")
+        chips.append(f"3yr health: {_humanize_status_label(health)}")
     st.markdown(" ".join(f'<span class="run-chip">{chip}</span>' for chip in chips), unsafe_allow_html=True)
+    _render_trust_banner(latest_run, df, xfactor_promotion_gate)
 
     (
-        tab_search,
-        tab_explore,
-        tab_preboom,
-        tab_play,
-        tab_screen,
-        tab_stress,
-        tab_map,
-        tab_memo,
-        tab_peers,
-        tab_disagree,
-        tab_region,
-        tab_thesis,
-        tab_workflow,
-        tab_watch,
-        tab_run,
-        tab_autopsy,
-        tab_promo,
-        tab_health,
+        top_start,
+        top_discover,
+        top_map,
+        top_memo,
+        top_watch,
+        top_reports,
+        top_advanced,
     ) = st.tabs(
         [
-            "Search",
-            "Explore",
-            "Pre-Boom",
-            "Strategy Playground",
-            "Screening",
-            "Stress Tests",
+            "Start",
+            "Discover",
             "Map",
             "County Memo",
-            "Peer Sets",
-            "Disagreement",
-            "Region",
-            "Thesis Builder",
-            "Workflow",
             "Watchlist",
-            "Run Review",
-            "Autopsy",
-            "Promotion Gate",
-            "Model Health",
+            "Reports",
+            "Advanced",
         ]
     )
+    st.caption("Main workflow: Start -> Discover -> Map -> County Memo -> Watchlist -> Reports. Advanced keeps diagnostics and promotion gates out of the default path.")
+
+    tab_start = top_start
+    tab_map = top_map
+    tab_memo = top_memo
+
+    with top_discover:
+        (
+            tab_search,
+            tab_explore,
+            tab_preboom,
+            tab_play,
+            tab_screen,
+            tab_stress,
+            tab_peers,
+            tab_disagree,
+            tab_region,
+        ) = st.tabs(
+            [
+                "Search",
+                "Explore",
+                "Pre-Boom",
+                "Strategy",
+                "Screening",
+                "Stress Tests",
+                "Peer Sets",
+                "Disagreement",
+                "Region",
+            ]
+        )
+
+    with top_watch:
+        tab_watch, tab_workflow = st.tabs(
+            [
+                "Watchlist",
+                "Funnel",
+            ]
+        )
+
+    with top_reports:
+        tab_reports, tab_thesis = st.tabs(
+            [
+                "Reports",
+                "Investment Memo",
+            ]
+        )
+
+    with top_advanced:
+        tab_run, tab_autopsy, tab_promo, tab_health = st.tabs(
+            [
+                "Run Review",
+                "Autopsy",
+                "Promotion Gate",
+                "Model Health",
+            ]
+        )
+
+    with tab_start:
+        _render_start_here_tab(filtered, cfg, latest_run, xfactor_scoreboard, xfactor_promotion_gate, demo_readiness_report)
 
     with tab_search:
         st.header("Natural-Language Search")
-        query = st.text_input(
-            "Ask for a county set",
-            value="",
-            placeholder="e.g. low-risk counties with strong 5yr upside in the Mountain West",
-            key="product_nl_query",
-        )
+        if "product_nl_query" not in st.session_state:
+            st.session_state.product_nl_query = ""
+        st.caption("Use transparent keyword search for quick county-set discovery, then tune the sidebar strategy for precise policy changes.")
+        examples = [
+            ("Low-risk Mountain West", "low-risk counties with strong 5yr upside in the Mountain West"),
+            ("High-confidence recreation", "high confidence recreation"),
+            ("Model disagreement", "model disagreement"),
+        ]
+        ecols = st.columns(len(examples))
+        for col, (label, example_query) in zip(ecols, examples):
+            if col.button(label, key=f"product_nl_example_{label.lower().replace(' ', '_').replace('-', '_')}"):
+                st.session_state.product_nl_query = example_query
+                st.rerun()
+        with st.form("product_nl_search_form", clear_on_submit=False):
+            query = st.text_input(
+                "Ask for a county set",
+                placeholder="e.g. low-risk counties with strong 5yr upside in the Mountain West",
+                key="product_nl_query",
+            )
+            st.form_submit_button("Apply search", type="primary")
+        if st.button("Clear search", key="product_nl_clear_search"):
+            st.session_state.product_nl_query = ""
+            st.rerun()
+        query = st.session_state.get("product_nl_query", query)
         result_df, query_notes = _apply_natural_language_query(filtered, query)
         for note in query_notes:
             st.caption(note)
@@ -3925,12 +7183,134 @@ def _render_product_mode(
                 fig_arch.update_layout(height=320, margin=dict(t=45, b=20))
                 st.plotly_chart(fig_arch, width="stretch")
 
+    with tab_reports:
+        st.header("Review Package")
+        st.caption("Exports are shareable screening artifacts for discussion. They preserve the current Product Mode strategy settings.")
+        st.info(
+            "Use this after County Memo and Watchlist review: export a Top 25/Top 100 package, "
+            "then attach a compare set for the counties you want to discuss."
+        )
+        if filtered.empty:
+            st.warning("No counties match the active strategy filters.")
+        else:
+            report_df = filtered.sort_values("sim_rank").copy()
+            c1, c2, c3, c4 = st.columns(4)
+            with c1:
+                top25_md = _top_report_markdown(
+                    report_df,
+                    cfg,
+                    latest_run,
+                    limit=25,
+                    title="LandInvest Top 25 Opportunity Report",
+                )
+                st.download_button(
+                    "Top 25 Markdown",
+                    data=top25_md.encode("utf-8"),
+                    file_name="landinvest_top25_opportunity_report.md",
+                    mime="text/markdown",
+                    key="product_report_top25_md",
+                )
+            with c2:
+                top100_md = _top_report_markdown(
+                    report_df,
+                    cfg,
+                    latest_run,
+                    limit=100,
+                    title="LandInvest Top 100 Opportunity Report",
+                )
+                st.download_button(
+                    "Top 100 Markdown",
+                    data=top100_md.encode("utf-8"),
+                    file_name="landinvest_top100_opportunity_report.md",
+                    mime="text/markdown",
+                    key="product_report_top100_md",
+                )
+            with c3:
+                shortlist = _format_export_frame(report_df, 100)
+                st.download_button(
+                    "Shortlist CSV",
+                    data=shortlist.to_csv(index=False).encode("utf-8"),
+                    file_name="landinvest_active_shortlist_top100.csv",
+                    mime="text/csv",
+                    key="product_report_shortlist_csv",
+                )
+            with c4:
+                review_packet = (
+                    _top_report_markdown(
+                        report_df,
+                        cfg,
+                        latest_run,
+                        limit=25,
+                        title="LandInvest Investor Review Packet",
+                    )
+                    + "\n---\n\n"
+                    + _compare_set_markdown(report_df.head(5), cfg, latest_run)
+                )
+                st.download_button(
+                    "Review Packet",
+                    data=review_packet.encode("utf-8"),
+                    file_name="landinvest_investor_review_packet.md",
+                    mime="text/markdown",
+                    key="product_report_review_packet_md",
+                )
+
+            st.subheader("Shortlist Preview")
+            st.dataframe(_product_table(report_df, limit=25), width="stretch", hide_index=True, height=420)
+
+            st.subheader("Compare-Set Export")
+            compare_source = report_df.head(500).copy()
+            compare_labels = compare_source.apply(
+                lambda r: f"{r['county_name']}, {r['state']} (strategy #{int(r['sim_rank'])}, production #{int(r['overall_rank'])})",
+                axis=1,
+            ).tolist()
+            default_labels = compare_labels[: min(3, len(compare_labels))]
+            selected_labels = st.multiselect(
+                "Counties to compare",
+                compare_labels,
+                default=default_labels,
+                key="product_report_compare_set",
+            )
+            label_to_fips = dict(zip(compare_labels, compare_source["fips"].astype(str).str.zfill(5)))
+            selected_fips = {label_to_fips[label] for label in selected_labels if label in label_to_fips}
+            compare_df = report_df[report_df["fips"].astype(str).str.zfill(5).isin(selected_fips)].copy()
+            if compare_df.empty:
+                st.info("Choose at least one county to build a compare-set export.")
+            else:
+                compare_export = _compare_export_frame(compare_df)
+                st.dataframe(compare_export, width="stretch", hide_index=True, height=260)
+                e1, e2 = st.columns(2)
+                with e1:
+                    compare_md = _compare_set_markdown(compare_df, cfg, latest_run)
+                    st.download_button(
+                        "Compare Summary Markdown",
+                        data=compare_md.encode("utf-8"),
+                        file_name="landinvest_compare_set_summary.md",
+                        mime="text/markdown",
+                        key="product_report_compare_md",
+                    )
+                with e2:
+                    compare_payload = {
+                        "generated_at": datetime.now().isoformat(),
+                        "strategy": cfg,
+                        "ranking_run": latest_run or {},
+                        "counties": json.loads(compare_export.to_json(orient="records")),
+                    }
+                    st.download_button(
+                        "Compare Set JSON",
+                        data=json.dumps(compare_payload, indent=2).encode("utf-8"),
+                        file_name="landinvest_compare_set.json",
+                        mime="application/json",
+                        key="product_report_compare_json",
+                    )
+
     with tab_preboom:
         _render_preboom_review_tab(
             surfaces=preboom_surfaces or {},
             blend_report=preboom_blend_report,
             analog_report=preboom_analog_report,
             promotion_gate=preboom_promotion_gate,
+            p0_repeatable_residual_guardrail=p0_repeatable_residual_guardrail,
+            p0_repeatable_residual_candidates=p0_repeatable_residual_candidates,
         )
 
     with tab_play:
@@ -4118,7 +7498,7 @@ def _render_product_mode(
         color_scale = "RdYlGn_r" if "risk" in metric or metric == "sim_rank_delta" else "Viridis"
         fig_map = px.choropleth(
             map_df,
-            geojson="https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json",
+            geojson=load_county_geojson(_mtime=_file_mtime(COUNTY_GEOJSON_PATH)),
             locations="fips_str",
             color=metric,
             hover_name="county_name",
@@ -4159,7 +7539,15 @@ def _render_product_mode(
                 if not match.empty:
                     history_row = match.iloc[0]
             if row is not None:
-                _render_product_county_memo(row, history_row, wave3_status, cfg)
+                _render_product_county_memo(
+                    row,
+                    history_row,
+                    wave3_status,
+                    cfg,
+                    preboom_surfaces=preboom_surfaces,
+                    analog_suite=known_analog_suite,
+                    xfactor_scoreboard=xfactor_scoreboard,
+                )
 
     with tab_peers:
         st.header("Peer Sets")
@@ -4367,6 +7755,7 @@ def _render_product_mode(
 
     with tab_watch:
         st.header("Watchlist")
+        st.caption("Use Watchlist as the active review queue before generating Reports or an Investment Memo.")
         watch_fips = {str(f).zfill(5) for f in st.session_state.watchlist_fips}
         watch_df = filtered[filtered["fips"].astype(str).str.zfill(5).isin(watch_fips)].copy()
         summary = _watchlist_portfolio_summary(watch_df)
@@ -4477,6 +7866,51 @@ def _render_product_mode(
         st.header("Promotion-Readiness Console")
         st.caption("This is a compact product gate for deciding whether candidate model/policy changes deserve promotion work.")
         st.dataframe(_promotion_readiness_rows(status_bundle), width="stretch", hide_index=True, height=260)
+        gate = xfactor_promotion_gate or {}
+        if gate:
+            st.subheader("X-Factor Interaction Promotion Gate")
+            g1, g2, g3, g4 = st.columns(4)
+            g1.metric("Status", gate.get("production_promotion_status", "n/a"))
+            g2.metric("Ablation Ready", gate.get("ablation_ready_count", "n/a"))
+            g3.metric("Default Promotion", gate.get("default_promotion_count", "n/a"))
+            g4.metric("Report-Only", gate.get("report_only_count", "n/a"))
+            gate_rows = pd.DataFrame(gate.get("gates") or [])
+            if not gate_rows.empty:
+                view_cols = [
+                    "interaction",
+                    "label",
+                    "scoreboard_decision",
+                    "ablation_decision",
+                    "quiet_lift_gate",
+                    "already_hot_gate",
+                    "analog_gate",
+                    "ablation_gate",
+                    "final_decision",
+                ]
+                st.dataframe(gate_rows[[c for c in view_cols if c in gate_rows.columns]], width="stretch", hide_index=True, height=300)
+            notes = gate.get("notes") or []
+            for note in notes[:4]:
+                st.markdown(f"- {note}")
+        queue = xfactor_ablation_queue or {}
+        queue_rows = pd.DataFrame(queue.get("queue") or [])
+        if not queue_rows.empty:
+            st.subheader("Controlled Ablation Queue")
+            queue_cols = [
+                "interaction",
+                "label",
+                "status",
+                "scoreboard_decision",
+                "ablation_decision",
+                "recommended_action",
+            ]
+            st.dataframe(queue_rows[[c for c in queue_cols if c in queue_rows.columns]], width="stretch", hide_index=True, height=300)
+            st.download_button(
+                "Export Ablation Queue JSON",
+                data=json.dumps(queue, indent=2).encode("utf-8"),
+                file_name="xfactor_interaction_ablation_queue.json",
+                mime="application/json",
+                key="product_ablation_queue_json",
+            )
         st.markdown(
             "- Treat green-looking product lenses as exploration aids until they pass historical quality, churn, source-health, and model-health gates.\n"
             "- Current Product Mode simulations are UI overlays only; `scoring_pipeline.py` production rankings remain unchanged.\n"
@@ -4489,19 +7923,29 @@ def _render_product_mode(
         wave3_closeout = (status_bundle or {}).get("wave3_closeout") or {}
         h1c, h2c, h3c, h4c = st.columns(4)
         assessment = model_health.get("assessment", {}) or {}
-        h1c.metric("3yr Status", assessment.get("health_status", "n/a"))
+        raw_health_status = assessment.get("health_status", "n/a")
+        h1c.metric("3yr Status", _humanize_status_label(raw_health_status))
         fallback_share = (((model_health.get("live_rankings") or {}).get("fallback") or {}).get("fallback_share"))
         h2c.metric("3yr Fallback", f"{100 * fallback_share:.1f}%" if fallback_share is not None else "n/a")
         drift = model_health.get("target_drift_3yr", {}) or {}
-        h3c.metric("3yr Drift PSI", f"{drift.get('psi', 'n/a')}")
+        drift_psi = drift.get("psi")
+        try:
+            drift_read = f"{float(drift_psi):.3f}" if drift_psi is not None else "n/a"
+        except (TypeError, ValueError):
+            drift_read = str(drift_psi)
+        h3c.metric("3yr Drift PSI", drift_read)
         closeout_summary = wave3_closeout.get("summary", {}) or {}
-        h4c.metric("Wave 3 Posture", wave3_closeout.get("status", closeout_summary.get("status", "n/a")))
+        wave3_status_label = wave3_closeout.get("status", closeout_summary.get("status", "n/a"))
+        h4c.metric("Wave 3 Posture", _humanize_status_label(wave3_status_label))
+        st.caption(f"Full 3yr status: `{raw_health_status}`")
         warnings = assessment.get("blocking_reasons") or assessment.get("warnings") or assessment.get("notes") or []
         if warnings:
             st.caption("Current model-health read")
             for item in warnings[:6]:
                 st.markdown(f"- {item}")
         st.info("Use Legacy Mode for full validation, source-health, drift, calibration, and run-comparison diagnostics.")
+
+    _render_demo_footer(latest_run, status_bundle, demo_readiness_report)
 
 
 # ---------------------------------------------------------------------------
@@ -4518,6 +7962,113 @@ st.set_page_config(
 st.markdown(
     """
 <style>
+    .landinvest-brand-header {
+        display: grid;
+        grid-template-columns: minmax(280px, 0.82fr) minmax(320px, 1.18fr);
+        align-items: center;
+        gap: 0.82rem;
+        border: 1px solid rgba(15, 118, 110, 0.22);
+        background: linear-gradient(135deg, #f8fafc 0%, #f0fdfa 58%, #fffbeb 100%);
+        color: #0f172a;
+        border-radius: 8px;
+        padding: 0.78rem 0.86rem;
+        margin: 0 0 0.85rem 0;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+    }
+    .landinvest-brand-main {
+        display: flex;
+        align-items: center;
+        gap: 0.68rem;
+        min-width: 0;
+    }
+    .landinvest-logo-wrap {
+        width: 2.85rem;
+        height: 2.85rem;
+        flex: 0 0 2.85rem;
+    }
+    .landinvest-logo-wrap svg,
+    .landinvest-sidebar-logo svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    .landinvest-brand-kicker {
+        color: #0f766e;
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        margin-bottom: 0.1rem;
+    }
+    .landinvest-brand-copy h1 {
+        color: #0f172a;
+        font-size: 1.42rem;
+        line-height: 1.06;
+        margin: 0;
+        letter-spacing: 0;
+    }
+    .landinvest-brand-copy p {
+        color: #475569;
+        font-size: 0.83rem;
+        line-height: 1.35;
+        margin: 0.22rem 0 0 0;
+        max-width: 44rem;
+    }
+    .landinvest-brand-meta {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0.45rem;
+        max-width: none;
+    }
+    .landinvest-brand-chip {
+        min-width: 5.95rem;
+        border: 1px solid rgba(15, 118, 110, 0.20);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.76);
+        padding: 0.35rem 0.5rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+    }
+    .landinvest-brand-chip b {
+        display: block;
+        color: #0f766e;
+        font-size: 0.62rem;
+        line-height: 1.1;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        margin-bottom: 0.12rem;
+    }
+    .landinvest-brand-chip span {
+        display: block;
+        color: #0f172a;
+        font-size: 0.76rem;
+        line-height: 1.15;
+        font-weight: 700;
+    }
+    .landinvest-sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.58rem;
+        margin: 0.15rem 0 0.85rem 0;
+        padding: 0.45rem 0.1rem;
+    }
+    .landinvest-sidebar-logo {
+        width: 2.25rem;
+        height: 2.25rem;
+        flex: 0 0 2.25rem;
+    }
+    .landinvest-sidebar-brand b {
+        display: block;
+        color: #0f172a;
+        font-size: 1rem;
+        line-height: 1.05;
+    }
+    .landinvest-sidebar-brand span {
+        display: block;
+        color: #64748b;
+        font-size: 0.76rem;
+        margin-top: 0.12rem;
+    }
     .run-chip {
         display: inline-block;
         padding: 0.25rem 0.55rem;
@@ -4540,7 +8091,329 @@ st.markdown(
     .onboard b {
         color: #0b3a7e;
     }
+    .customer-sidebar-title {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #0f766e;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        margin: 0.2rem 0 0.65rem 0;
+    }
+    .customer-command-header {
+        border: 1px solid rgba(20, 184, 166, 0.35);
+        background:
+            linear-gradient(135deg, rgba(204, 251, 241, 0.96) 0%, rgba(248, 250, 252, 0.98) 44%, rgba(254, 243, 199, 0.74) 100%);
+        color: #0f172a;
+        border-radius: 8px;
+        padding: 1.15rem 1.25rem;
+        margin: 0 0 0.85rem 0;
+        box-shadow: 0 18px 46px rgba(15, 23, 42, 0.10);
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
+        gap: 1rem;
+        align-items: end;
+    }
+    .customer-command-header h1 {
+        color: #0f172a;
+        font-size: 2.1rem;
+        line-height: 1.08;
+        margin: 0 0 0.45rem 0;
+        letter-spacing: 0;
+    }
+    .customer-command-header p {
+        color: #334155;
+        margin: 0;
+        max-width: 76rem;
+    }
+    .customer-command-grid,
+    .customer-stat-strip,
+    .customer-map-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.48rem;
+    }
+    .customer-command-grid span,
+    .customer-stat-strip span,
+    .customer-map-stats span {
+        border: 1px solid rgba(15, 118, 110, 0.24);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.72);
+        padding: 0.52rem 0.64rem;
+        min-width: 7.2rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.80);
+    }
+    .customer-command-grid b,
+    .customer-stat-strip b,
+    .customer-map-stats b {
+        display: block;
+        color: #0f172a;
+        font-size: 0.95rem;
+        line-height: 1.15;
+    }
+    .customer-command-grid small,
+    .customer-stat-strip small,
+    .customer-map-stats small {
+        display: block;
+        color: #64748b;
+        font-size: 0.72rem;
+        margin-top: 0.18rem;
+    }
+    .customer-section-header {
+        margin: 0.65rem 0 0.75rem 0;
+        padding: 0.72rem 0.85rem;
+        border-left: 4px solid #14b8a6;
+        border-radius: 8px;
+        background: linear-gradient(90deg, rgba(240, 253, 250, 0.95), rgba(255, 251, 235, 0.55));
+    }
+    .customer-section-header p {
+        margin: 0.12rem 0 0 0;
+        color: #475569;
+    }
+    .customer-stat-strip {
+        margin: 0.3rem 0 0.85rem 0;
+    }
+    .customer-stat-strip span {
+        min-width: 10rem;
+    }
+    .customer-map-callout {
+        margin: 0.8rem 0 0.25rem 0;
+        border: 1px solid rgba(20, 184, 166, 0.34);
+        border-radius: 8px;
+        background: #f8fafc;
+        padding: 0.82rem 0.92rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.85rem;
+        align-items: center;
+    }
+    .customer-map-callout h3 {
+        margin: 0.08rem 0 0.22rem 0;
+        font-size: 1.05rem;
+        letter-spacing: 0;
+        color: #0f172a;
+    }
+    .customer-map-callout p {
+        margin: 0;
+        color: #475569;
+        font-size: 0.84rem;
+    }
+    button[data-testid^="stBaseButton-segmented_control"] {
+        border-radius: 7px;
+        font-weight: 700;
+        border: 1px solid rgba(20, 184, 166, 0.22);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+        color: #0f172a;
+    }
+    button[data-testid="stBaseButton-segmented_controlActive"] {
+        border-color: rgba(15, 118, 110, 0.55);
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(251, 191, 36, 0.14));
+        color: #0f172a !important;
+    }
+    button[data-testid^="stBaseButton-segmented_control"] *,
+    button[kind^="segmented_control"] * {
+        color: inherit !important;
+    }
+    button[kind="primary"],
+    button[data-testid="stBaseButton-primary"] {
+        background: #0f766e !important;
+        border-color: #0f766e !important;
+        color: #ffffff !important;
+    }
+    button[kind="primary"] *,
+    button[data-testid="stBaseButton-primary"] * {
+        color: #ffffff !important;
+    }
+    div[role="slider"] [data-testid="stSliderThumbValue"],
+    div[data-testid="stSliderThumbValue"],
+    div[data-testid="stSliderThumbValue"] * {
+        color: #ffffff !important;
+    }
+    div[data-testid="stPlotlyChart"] {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .customer-hero {
+        border: 1px solid rgba(20, 184, 166, 0.38);
+        background: linear-gradient(135deg, #0b1115 0%, #10231f 58%, #312914 100%);
+        color: #f8fafc;
+        border-radius: 8px;
+        padding: 1.1rem 1.25rem;
+        margin: 0.75rem 0 1rem 0;
+        box-shadow: 0 18px 45px rgba(2, 6, 23, 0.22);
+    }
+    .customer-kicker {
+        color: #0f766e;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.35rem;
+    }
+    .customer-hero h1 {
+        color: #f8fafc;
+        font-size: 2.1rem;
+        line-height: 1.15;
+        margin: 0 0 0.45rem 0;
+        letter-spacing: 0;
+    }
+    .customer-hero p {
+        color: #cbd5e1;
+        margin: 0;
+        max-width: 78rem;
+    }
+    .customer-hero-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin-top: 0.95rem;
+    }
+    .customer-hero-strip span {
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        border-radius: 999px;
+        padding: 0.22rem 0.55rem;
+        color: #e2e8f0 !important;
+        font-size: 0.8rem;
+        background: rgba(15, 23, 42, 0.60);
+    }
+    .customer-card {
+        min-height: 332px;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #0f172a;
+        border-radius: 8px;
+        padding: 0.9rem;
+        margin: 0.35rem 0 0.6rem 0;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+        transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .customer-card:hover {
+        transform: translateY(-1px);
+        border-color: #14b8a6;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+    }
+    .customer-card-compact {
+        min-height: 238px;
+    }
+    .customer-card-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        align-items: center;
+        color: #64748b;
+        font-size: 0.78rem;
+        margin-bottom: 0.55rem;
+    }
+    .customer-tier {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid;
+        border-radius: 999px;
+        padding: 0.15rem 0.45rem;
+        font-weight: 700;
+        background: #f8fafc;
+    }
+    .customer-card h3 {
+        font-size: 1.03rem;
+        line-height: 1.25;
+        margin: 0 0 0.45rem 0;
+        letter-spacing: 0;
+    }
+    .customer-thesis {
+        min-height: 3.4rem;
+        color: #334155;
+        font-size: 0.87rem;
+        margin: 0 0 0.65rem 0;
+    }
+    .customer-next {
+        color: #475569;
+        font-size: 0.78rem;
+        margin: 0.75rem 0 0 0;
+    }
+    .customer-signal-row {
+        margin-top: 0.42rem;
+    }
+    .customer-signal-row div:first-child {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        color: #475569;
+        font-size: 0.75rem;
+        margin-bottom: 0.12rem;
+    }
+    .customer-meter {
+        width: 100%;
+        height: 7px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+    .customer-meter span {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+    }
+    @media (max-width: 720px) {
+        .landinvest-brand-header {
+            grid-template-columns: 1fr;
+            padding: 0.8rem;
+        }
+        .landinvest-brand-meta {
+            justify-content: flex-start;
+        }
+        .landinvest-brand-chip {
+            min-width: 7.3rem;
+        }
+        .landinvest-brand-copy h1 {
+            font-size: 1.35rem;
+        }
+        .landinvest-brand-copy p {
+            font-size: 0.84rem;
+        }
+        .customer-command-header,
+        .customer-map-callout {
+            grid-template-columns: 1fr;
+        }
+        .customer-command-header h1 {
+            font-size: 1.55rem;
+        }
+        .customer-hero {
+            padding: 0.9rem;
+        }
+        .customer-hero h1 {
+            font-size: 1.45rem;
+        }
+        .customer-card,
+        .customer-card-compact {
+            min-height: auto;
+        }
+        .customer-thesis {
+            min-height: auto;
+        }
+    }
     @media (prefers-color-scheme: dark) {
+        .landinvest-brand-header {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(6, 78, 59, 0.60));
+            border-color: rgba(45, 212, 191, 0.40);
+            color: #f8fafc;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
+        }
+        .landinvest-brand-kicker,
+        .landinvest-brand-chip b {
+            color: #5eead4;
+        }
+        .landinvest-brand-copy h1,
+        .landinvest-brand-chip span,
+        .landinvest-sidebar-brand b {
+            color: #f8fafc;
+        }
+        .landinvest-brand-copy p,
+        .landinvest-sidebar-brand span {
+            color: #cbd5e1;
+        }
+        .landinvest-brand-chip {
+            background: rgba(15, 23, 42, 0.66);
+            border-color: rgba(148, 163, 184, 0.34);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
         .run-chip {
             background: rgba(100, 116, 139, 0.25);
             border: 1px solid rgba(148, 163, 184, 0.45);
@@ -4554,6 +8427,102 @@ st.markdown(
         .onboard b {
             color: #bfdbfe;
         }
+        .customer-sidebar-title {
+            color: #5eead4;
+        }
+        .customer-kicker {
+            color: #5eead4;
+        }
+        .customer-command-header {
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.62), rgba(15, 23, 42, 0.92));
+            color: #f8fafc;
+            border-color: rgba(45, 212, 191, 0.45);
+        }
+        .customer-command-header h1,
+        .customer-command-grid b,
+        .customer-stat-strip b,
+        .customer-map-stats b,
+        .customer-map-callout h3 {
+            color: #f8fafc;
+        }
+        .customer-command-header p,
+        .customer-section-header p,
+        .customer-map-callout p {
+            color: #cbd5e1;
+        }
+        .customer-command-grid span,
+        .customer-stat-strip span,
+        .customer-map-stats span,
+        .customer-map-callout,
+        .customer-section-header {
+            background: rgba(15, 23, 42, 0.66);
+            border-color: rgba(148, 163, 184, 0.36);
+        }
+        button[data-testid^="stBaseButton-segmented_control"] {
+            border-color: rgba(148, 163, 184, 0.35);
+            color: #e5e7eb !important;
+        }
+        button[data-testid="stBaseButton-segmented_controlActive"] {
+            border-color: rgba(45, 212, 191, 0.55);
+            background: #0f766e !important;
+            color: #ffffff !important;
+        }
+        button[data-testid="stTab"] {
+            color: #e5e7eb !important;
+        }
+        button[data-testid="stTab"][aria-selected="true"] {
+            color: #5eead4 !important;
+        }
+        button[data-testid="stTab"] * {
+            color: inherit !important;
+        }
+        .customer-tier,
+        .customer-hero-strip span {
+            color: #f8fafc !important;
+            border-color: rgba(203, 213, 225, 0.70) !important;
+        }
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .bg {
+            fill: rgba(15, 23, 42, 0.94) !important;
+        }
+        div[data-testid="stPlotlyChart"] .js-plotly-plot svg text,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .legendtext,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .gtitle,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .xtitle,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .ytitle {
+            fill: #e5e7eb !important;
+            color: #e5e7eb !important;
+        }
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .gridlayer path,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .xgrid,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .ygrid,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .zerolinelayer path,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .xlines-above,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .ylines-above {
+            stroke: rgba(148, 163, 184, 0.38) !important;
+        }
+        .customer-command-grid small,
+        .customer-stat-strip small,
+        .customer-map-stats small {
+            color: #94a3b8;
+        }
+        .customer-card {
+            background: #0b1115;
+            border-color: rgba(148, 163, 184, 0.35);
+            color: #f8fafc;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+        }
+        .customer-tier {
+            background: rgba(15, 23, 42, 0.68);
+        }
+        .customer-card-top,
+        .customer-thesis,
+        .customer-next,
+        .customer-signal-row div:first-child {
+            color: #cbd5e1;
+        }
+        .customer-meter {
+            background: rgba(100, 116, 139, 0.35);
+        }
     }
 </style>
 """,
@@ -4561,6 +8530,9 @@ st.markdown(
 )
 
 df = load_data(_mtime=_file_mtime(DATA_PATH))
+if df.empty:
+    _render_missing_artifact_help()
+    st.stop()
 wave3_overlay_df = load_wave3_structural_overlay_df(_mtime=_file_mtime(WAVE3_STRUCTURAL_OVERLAY_CSV_PATH))
 wave3_overlay_summary = load_wave3_structural_overlay_summary(_mtime=_file_mtime(WAVE3_STRUCTURAL_OVERLAY_JSON_PATH))
 if wave3_overlay_df is not None and not wave3_overlay_df.empty:
@@ -4625,6 +8597,16 @@ preboom_surfaces = {
 preboom_blend_report = _safe_json_load(PREBOOM_BLEND_REPORT_PATH)
 preboom_analog_report = _safe_json_load(PREBOOM_ANALOG_REPORT_PATH)
 preboom_promotion_gate = _safe_json_load(PREBOOM_PROMOTION_GATE_PATH)
+p0_repeatable_residual_guardrail = _safe_json_load(P0_REPEATABLE_RESIDUAL_GUARDRAIL_PATH)
+p0_repeatable_residual_candidates = load_preboom_surface_df(
+    str(P0_REPEATABLE_RESIDUAL_GUARDRAIL_TOP_CANDIDATES_PATH),
+    _mtime=_file_mtime(P0_REPEATABLE_RESIDUAL_GUARDRAIL_TOP_CANDIDATES_PATH),
+)
+known_analog_suite = load_known_analog_suite(_mtime=_file_mtime(KNOWN_ANALOG_SUITE_PATH))
+xfactor_scoreboard = load_xfactor_interaction_scoreboard(_mtime=_file_mtime(XFACTOR_INTERACTION_SCOREBOARD_PATH))
+xfactor_ablation_queue = load_xfactor_interaction_ablation_queue(_mtime=_file_mtime(XFACTOR_INTERACTION_ABLATION_QUEUE_PATH))
+xfactor_promotion_gate = load_xfactor_interaction_promotion_gate(_mtime=_file_mtime(XFACTOR_INTERACTION_PROMOTION_GATE_PATH))
+demo_readiness_report = load_demo_readiness_report(_mtime=_file_mtime(DEMO_READINESS_REPORT_PATH))
 latest_compare_json_path = ((status_bundle or {}).get("latest_run") or {}).get("run_compare_path")
 latest_compare_rank_df = None
 latest_compare_boundary_df = None
@@ -4636,9 +8618,28 @@ if latest_compare_json_path:
 
 wave3_status = (status_bundle or {}).get("wave3_status") or {}
 
+with st.sidebar:
+    st.markdown(_sidebar_brand_html(), unsafe_allow_html=True)
+
+if "dashboard_user_id" not in st.session_state:
+    st.session_state.dashboard_user_id = "demo"
+with st.sidebar:
+    user_id_input = st.text_input(
+        "Demo user",
+        value=st.session_state.dashboard_user_id,
+        key="dashboard_user_id_input",
+        help="Separates saved watchlists, notes, and compare sets in a local SQLite store. This is not authentication.",
+    )
+resolved_user_id = _normalize_user_id(user_id_input)
+if resolved_user_id != st.session_state.dashboard_user_id:
+    st.session_state.dashboard_user_id = resolved_user_id
+    st.session_state.user_data_loaded = False
+with st.sidebar:
+    st.caption(_user_storage_status())
+
 if "watchlist_fips" not in st.session_state:
     st.session_state.watchlist_fips = []
-if "user_data_loaded" not in st.session_state:
+if not st.session_state.get("user_data_loaded", False):
     user_data = _load_user_data()
     st.session_state.saved_watchlists = user_data.get("saved_watchlists", {})
     st.session_state.county_notes = user_data.get("county_notes", {})
@@ -4648,6 +8649,7 @@ if "user_data_loaded" not in st.session_state:
     st.session_state.county_feedback = user_data.get("county_feedback", {})
     st.session_state.preboom_feedback = user_data.get("preboom_feedback", {})
     st.session_state.diligence_evidence = user_data.get("diligence_evidence", {})
+    st.session_state.parcel_checklists = user_data.get("parcel_checklists", {})
     st.session_state.watchlist_alert_state = user_data.get("watchlist_alert_state", {})
     st.session_state.watchlist_settings = user_data.get("watchlist_settings", _default_user_data()["watchlist_settings"])
     st.session_state.user_data_loaded = True
@@ -4667,17 +8669,60 @@ if "preboom_feedback" not in st.session_state:
     st.session_state.preboom_feedback = {}
 if "diligence_evidence" not in st.session_state:
     st.session_state.diligence_evidence = {}
+if "parcel_checklists" not in st.session_state:
+    st.session_state.parcel_checklists = {}
 if "watchlist_alert_state" not in st.session_state:
     st.session_state.watchlist_alert_state = _load_user_data().get("watchlist_alert_state", {})
 if "watchlist_settings" not in st.session_state:
     st.session_state.watchlist_settings = _load_user_data().get("watchlist_settings", _default_user_data()["watchlist_settings"])
 
+experience_options = ["Product Mode", "Customer Mode", "Legacy Mode"]
+requested_experience = (_query_param_first("experience", "") or "").strip().lower()
+experience_default_index = 1 if requested_experience in {"customer", "customer mode"} else 0
 experience_mode = st.sidebar.radio(
     "Experience",
-    ["Product Mode", "Legacy Mode"],
+    experience_options,
+    index=experience_default_index,
     horizontal=False,
-    help="Product Mode is the cleaner exploration workflow. Legacy Mode keeps the full existing analyst console.",
+    help="Customer Mode is the visual investor workflow. Product Mode keeps power-user controls. Legacy Mode keeps the full analyst console.",
 )
+
+header_data_ts = datetime.fromtimestamp(_file_mtime(DATA_PATH)).strftime("%Y-%m-%d %H:%M")
+header_run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
+header_run_year = latest_run.get("year", "n/a") if latest_run else "n/a"
+header_churn = latest_deltas.get("top25_churn") if latest_deltas and latest_deltas.get("has_previous") else None
+header_churn_text = f"{100 * header_churn:.1f}%" if header_churn is not None else "n/a"
+header_health = ((status_bundle or {}).get("model_health_3yr") or {}).get("assessment", {}).get("health_status")
+header_health_text = _humanize_status_label(header_health) if header_health else None
+st.markdown(
+    _brand_header_html(
+        experience_mode=experience_mode,
+        run_id=header_run_id,
+        run_year=header_run_year,
+        data_ts=header_data_ts,
+        churn_text=header_churn_text,
+        health_text=header_health_text,
+    ),
+    unsafe_allow_html=True,
+)
+
+if experience_mode == "Customer Mode":
+    _render_customer_mode(
+        df=df,
+        states=states,
+        latest_run=latest_run,
+        latest_deltas=latest_deltas,
+        status_bundle=status_bundle,
+        run_history_summary_df=run_history_summary_df,
+        latest_compare_rank_df=latest_compare_rank_df,
+        wave3_status=wave3_status,
+        preboom_surfaces=preboom_surfaces,
+        known_analog_suite=known_analog_suite,
+        xfactor_scoreboard=xfactor_scoreboard,
+        xfactor_promotion_gate=xfactor_promotion_gate,
+        demo_readiness_report=demo_readiness_report,
+    )
+    st.stop()
 
 if experience_mode == "Product Mode":
     _render_product_mode(
@@ -4695,6 +8740,13 @@ if experience_mode == "Product Mode":
         preboom_blend_report=preboom_blend_report,
         preboom_analog_report=preboom_analog_report,
         preboom_promotion_gate=preboom_promotion_gate,
+        known_analog_suite=known_analog_suite,
+        xfactor_scoreboard=xfactor_scoreboard,
+        xfactor_ablation_queue=xfactor_ablation_queue,
+        xfactor_promotion_gate=xfactor_promotion_gate,
+        demo_readiness_report=demo_readiness_report,
+        p0_repeatable_residual_guardrail=p0_repeatable_residual_guardrail,
+        p0_repeatable_residual_candidates=p0_repeatable_residual_candidates,
     )
     st.stop()
 
@@ -4702,8 +8754,6 @@ if experience_mode == "Product Mode":
 # Header + mode
 # ---------------------------------------------------------------------------
 
-st.title("LandInvest")
-st.caption("County Growth Forecasting Platform")
 st.markdown(
     '<div class="onboard"><b>Workflow:</b> 1) Apply filters 2) Inspect map 3) Deep-dive counties 4) Compare counties 5) Export shortlist</div>',
     unsafe_allow_html=True,
@@ -4739,8 +8789,6 @@ st.markdown(
 # Sidebar filters
 # ---------------------------------------------------------------------------
 
-st.sidebar.title("LandInvest")
-st.sidebar.caption("Land Growth Forecasting Platform")
 st.sidebar.divider()
 st.sidebar.caption(f"Mode: `{view_mode}`")
 
@@ -4756,7 +8804,7 @@ if "flt_show_all" not in st.session_state:
     st.session_state.flt_show_all = False
 if "watchlist_fips" not in st.session_state:
     st.session_state.watchlist_fips = []
-if "user_data_loaded" not in st.session_state:
+if not st.session_state.get("user_data_loaded", False):
     user_data = _load_user_data()
     st.session_state.saved_watchlists = user_data.get("saved_watchlists", {})
     st.session_state.county_notes = user_data.get("county_notes", {})
@@ -4766,6 +8814,7 @@ if "user_data_loaded" not in st.session_state:
     st.session_state.county_feedback = user_data.get("county_feedback", {})
     st.session_state.preboom_feedback = user_data.get("preboom_feedback", {})
     st.session_state.diligence_evidence = user_data.get("diligence_evidence", {})
+    st.session_state.parcel_checklists = user_data.get("parcel_checklists", {})
     st.session_state.user_data_loaded = True
 if "saved_watchlists" not in st.session_state:
     st.session_state.saved_watchlists = {}
@@ -4783,6 +8832,8 @@ if "preboom_feedback" not in st.session_state:
     st.session_state.preboom_feedback = {}
 if "diligence_evidence" not in st.session_state:
     st.session_state.diligence_evidence = {}
+if "parcel_checklists" not in st.session_state:
+    st.session_state.parcel_checklists = {}
 if "watchlist_alert_state" not in st.session_state:
     st.session_state.watchlist_alert_state = _load_user_data().get("watchlist_alert_state", {})
 if "session_watchlist_meta" not in st.session_state:
@@ -5045,7 +9096,7 @@ with tab_map:
 
             fig_map = px.choropleth(
                 map_df,
-                geojson="https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json",
+                geojson=load_county_geojson(_mtime=_file_mtime(COUNTY_GEOJSON_PATH)),
                 locations="fips_str",
                 color=map_metric,
                 hover_name=("county_name" if "county_name" in map_df.columns else None),
@@ -5147,7 +9198,7 @@ with tab_detail:
                 value=note_default,
                 height=140,
                 key=f"county_note_{county_fips}",
-                help="Saved locally to output/dashboard_user_data.json",
+                help="Saved to the local per-user SQLite demo store. This is not authentication.",
             )
             nsave1, nsave2 = st.columns(2)
             with nsave1:
@@ -5629,7 +9680,7 @@ with tab_watch:
             },
             indent=2,
         ).encode("utf-8"),
-        file_name="dashboard_user_data.json",
+        file_name=f"dashboard_user_data_{_current_user_id()}.json",
         mime="application/json",
     )
 
@@ -7236,3 +11287,5 @@ with tab_status:
                 ] if c in rr_df.columns
             ]
             st.dataframe(rr_df[show_rr_cols], width="stretch", hide_index=True, height=320)
+
+_render_demo_footer(latest_run, status_bundle, demo_readiness_report)

@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-05-27T22:19:27.645468+00:00",
+  "status": "report_only_autopsy",
+  "candidate_count": 2,
+  "default_promotion_recommendation": "do_not_promote_current_interactions",
+  "inputs": {
+    "scoreboard_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_validation_scoreboard.json",
+    "queue_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_queue.json",
+    "ablation_summary_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_model_ablations/top_frontier_interaction_ablation_summary.json"
+  },
+  "summary": [
+    {
+      "interaction": "anchor_halo_optionality",
+      "label": "Anchor/halo support x land optionality",
+      "queue_status": "ablation_completed_no_default_promotion",
+      "scoreboard_decision": "model-ablation-candidate",
+      "ablation_decision": "reject_default_feature",
+      "ablation_reason": "Does not improve model-fold quality consistently enough for feature promotion.",
+      "avg_preboom_rate_lift": 0.05490042620614957,
+      "positive_preboom_lift_share": 0.8421052631578947,
+      "already_hot_top_decile_share": 0.3058958879430368,
+      "analog_before_hot_top_decile_capture_share": 0.37583892617449666,
+      "ablation_rows": 6,
+      "average_precision_positive_share": 0.5,
+      "roc_auc_positive_share": 0.0,
+      "residual_ndcg_positive_share": 0.0,
+      "preboom_lift_positive_share": 0.8333333333333334,
+      "mean_top100_churn": 0.16857142857142857,
+      "mean_delta_preboom_lift_at_25": 0.26161004330539733,
+      "best_support_family": "structural_plus",
+      "best_support_surface": "preboom_classifier_score",
+      "diagnosis": "Report-only ranking signal did not translate into consistent residual-model rank quality.",
+      "recommended_next_test": "Keep in Product Mode narrative/overlay context; next test should be capped post-model overlay or interaction-only residual surface."
+    },
+    {
+      "interaction": "scarcity_buildability",
+      "label": "Scarcity x buildability",
+      "queue_status": "ablation_completed_no_default_promotion",
+      "scoreboard_decision": "model-ablation-candidate",
+      "ablation_decision": "reject_default_feature",
+      "ablation_reason": "Does not improve model-fold quality consistently enough for feature promotion.",
+      "avg_preboom_rate_lift": 0.04846002915624668,
+      "positive_preboom_lift_share": 0.8421052631578947,
+      "already_hot_top_decile_share": 0.31405310997135005,
+      "analog_before_hot_top_decile_capture_share": 0.12080536912751678,
+      "ablation_rows": 6,
+      "average_precision_positive_share": 0.5,
+      "roc_auc_positive_share": 0.5,
+      "residual_ndcg_positive_share": 0.25,
+      "preboom_lift_positive_share": 0.8333333333333334,
+      "mean_top100_churn": 0.16023809523809526,
+      "mean_delta_preboom_lift_at_25": 0.07344930889190875,
+      "best_support_family": "conservative",
+      "best_support_surface": "residual_model_score",
+      "diagnosis": "Report-only ranking signal did not translate into consistent residual-model rank quality.",
+      "recommended_next_test": "Keep in Product Mode narrative/overlay context; next test should be capped post-model overlay or interaction-only residual surface."
+    }
+  ],
+  "next_research_lanes": [
+    "Convert winning interaction concepts into capped post-model overlays and test rank-impact guardrails.",
+    "Test interaction-only residual surfaces rather than adding raw interaction columns to default model features.",
+    "Use false-positive controls and top-100 churn as hard gates before default promotion."
+  ],
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_autopsy.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_autopsy.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_autopsy.md"
+  }
+}

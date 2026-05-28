@@ -1,0 +1,216 @@
+{
+  "generated_at": "2026-05-27T22:19:31.151050+00:00",
+  "ranking_rows": 3144,
+  "demo_strategy": {
+    "preset_name": "Long-term appreciation",
+    "h1": 0,
+    "h3": 10,
+    "h5": 90,
+    "growth": 75,
+    "risk": 15,
+    "structure": 5,
+    "confidence": 5,
+    "uncertainty": 5,
+    "max_risk": 70,
+    "min_confidence": "Any",
+    "structural_focus": "Overall land thesis"
+  },
+  "review_exports": {
+    "top25_markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/demo_readiness/landinvest_top25_opportunity_report.md",
+    "top100_markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/demo_readiness/landinvest_top100_opportunity_report.md",
+    "shortlist_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/demo_readiness/landinvest_active_shortlist_top100.csv",
+    "compare_markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/demo_readiness/landinvest_compare_set_summary.md",
+    "compare_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/demo_readiness/landinvest_compare_set.json"
+  },
+  "commands": {
+    "py_compile": {
+      "command": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/.venv/bin/python -m py_compile dashboard.py scripts/evaluate_xfactor_frontier_interactions.py scripts/build_xfactor_ablation_autopsy.py scripts/build_xfactor_guarded_overlay_next_lane.py scripts/evaluate_p0_repeatable_residual_guardrail.py scripts/build_demo_readiness_bundle.py",
+      "status": "pass",
+      "returncode": 0,
+      "stdout_tail": "",
+      "stderr_tail": ""
+    },
+    "xfactor_gate": {
+      "command": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/.venv/bin/python scripts/evaluate_xfactor_frontier_interactions.py",
+      "status": "pass",
+      "returncode": 0,
+      "stdout_tail": "Wrote fold CSV: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_frontier_interaction_folds.csv\nWrote summary CSV: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_frontier_interaction_summary.csv\nWrote scoreboard CSV: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_validation_scoreboard.csv\nWrote scoreboard JSON: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_validation_scoreboard.json\nWrote scoreboard Markdown: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_validation_scoreboard.md\nWrote ablation queue CSV: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_queue.csv\nWrote ablation queue JSON: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_queue.json\nWrote ablation queue Markdown: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_queue.md\nWrote promotion gate JSON: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_promotion_gate.json\nWrote promotion gate Markdown: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_promotion_gate.md\nWrote JSON: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_frontier_interaction_report.json\nWrote Markdown: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_frontier_interaction_report.md\nTop interaction: anchor_halo_optionality\n",
+      "stderr_tail": "/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:242: IOError: sysctlbyname failed for 'hw.l1dcachesize'. Detail: [errno 1] Operation not permitted\n/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:242: IOError: sysctlbyname failed for 'hw.l2cachesize'. Detail: [errno 1] Operation not permitted\n/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:242: IOError: sysctlbyname failed for 'hw.l3cachesize'. Detail: [errno 1] Operation not permitted\n/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:242: IOError: sysctlbyname failed for 'hw.optional.neon'. Detail: [errno 1] Operation not permitted\n"
+    },
+    "xfactor_autopsy": {
+      "command": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/.venv/bin/python scripts/build_xfactor_ablation_autopsy.py",
+      "status": "pass",
+      "returncode": 0,
+      "stdout_tail": "Wrote CSV: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_autopsy.csv\nWrote JSON: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_autopsy.json\nWrote Markdown: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_autopsy.md\nDefault promotion recommendation: do_not_promote_current_interactions\n",
+      "stderr_tail": ""
+    },
+    "xfactor_guarded_overlay": {
+      "command": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/.venv/bin/python scripts/build_xfactor_guarded_overlay_next_lane.py",
+      "status": "pass",
+      "returncode": 0,
+      "stdout_tail": "Wrote CSV: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_guarded_overlay_next_lane.csv\nWrote top movers CSV: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_guarded_overlay_top_movers.csv\nWrote JSON: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_guarded_overlay_next_lane.json\nWrote Markdown: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_guarded_overlay_next_lane.md\nDecision: pass_guardrails\n",
+      "stderr_tail": "/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:242: IOError: sysctlbyname failed for 'hw.l1dcachesize'. Detail: [errno 1] Operation not permitted\n/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:242: IOError: sysctlbyname failed for 'hw.l2cachesize'. Detail: [errno 1] Operation not permitted\n/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:242: IOError: sysctlbyname failed for 'hw.l3cachesize'. Detail: [errno 1] Operation not permitted\n/Users/runner/work/crossbow/crossbow/arrow/cpp/src/arrow/util/cpu_info.cc:242: IOError: sysctlbyname failed for 'hw.optional.neon'. Detail: [errno 1] Operation not permitted\n"
+    },
+    "deploy_bundle": {
+      "command": "bash scripts/build_streamlit_deploy_bundle.sh",
+      "status": "pass",
+      "returncode": 0,
+      "stdout_tail": "Built deploy bundle at: /Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app\n 14M\t/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app\n",
+      "stderr_tail": ""
+    }
+  },
+  "deploy_artifact_checks": [
+    {
+      "artifact": "Deploy dashboard",
+      "status": "pass",
+      "path": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/dashboard.py",
+      "required": "yes"
+    },
+    {
+      "artifact": "Deploy rankings",
+      "status": "pass",
+      "path": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/county_rankings_2024.parquet",
+      "required": "yes"
+    },
+    {
+      "artifact": "Deploy project status",
+      "status": "pass",
+      "path": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/project_status_bundle.json",
+      "required": "optional"
+    },
+    {
+      "artifact": "Deploy demo readiness",
+      "status": "pass",
+      "path": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/demo_readiness_report.json",
+      "required": "optional"
+    },
+    {
+      "artifact": "Deploy X-factor gate",
+      "status": "pass",
+      "path": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/xfactor_interaction_promotion_gate.json",
+      "required": "optional"
+    },
+    {
+      "artifact": "Deploy X-factor autopsy",
+      "status": "pass",
+      "path": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/xfactor_interaction_ablation_autopsy.json",
+      "required": "optional"
+    },
+    {
+      "artifact": "Deploy X-factor guarded overlay",
+      "status": "pass",
+      "path": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/xfactor_guarded_overlay_next_lane.json",
+      "required": "optional"
+    },
+    {
+      "artifact": "Deploy repeatable P0 residual guardrail",
+      "status": "pass",
+      "path": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/p0_repeatable_residual_guardrail.json",
+      "required": "optional"
+    },
+    {
+      "artifact": "Deploy repeatable P0 residual guardrail preview",
+      "status": "pass",
+      "path": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/p0_repeatable_residual_guardrail_top_candidates.csv",
+      "required": "optional"
+    }
+  ],
+  "app_tests": {
+    "status": "pass",
+    "apps": [
+      {
+        "path": "dashboard.py",
+        "status": "pass",
+        "exceptions": []
+      },
+      {
+        "path": "deploy/streamlit_app/dashboard.py",
+        "status": "pass",
+        "exceptions": []
+      }
+    ]
+  },
+  "xfactor_gate": {
+    "production_promotion_status": "no_default_interaction_promotion",
+    "ablation_ready_count": 2,
+    "default_promotion_count": 0,
+    "completed_blocked_count": 2
+  },
+  "xfactor_queue": {
+    "candidate_count": 2,
+    "ready_for_new_ablation_count": 0,
+    "completed_no_default_promotion_count": 2
+  },
+  "xfactor_autopsy": {
+    "candidate_count": 2,
+    "default_promotion_recommendation": "do_not_promote_current_interactions"
+  },
+  "xfactor_overlay": {
+    "decision": "pass_guardrails",
+    "metrics": {
+      "rows": 3144,
+      "cap_points": 1.0,
+      "top25_churn": 0.040000000000000036,
+      "top100_churn": 0.030000000000000027,
+      "mean_abs_rank_shift": 24.580788804071247,
+      "median_abs_rank_shift": 22.0,
+      "p95_abs_rank_shift": 64.0,
+      "max_abs_rank_shift": 101.0,
+      "mean_adjustment": 0.25652656308943284,
+      "p95_adjustment": 0.9999812732445273
+    }
+  },
+  "notes": [
+    "Review exports are county-level screening material, not investment advice.",
+    "Exports include public-source attribution and avoid saved user notes by default.",
+    "Current X-factor interaction gate keeps candidates report-only because controlled ablations block default promotion."
+  ],
+  "checklist": [
+    {
+      "area": "Rankings",
+      "status": "pass",
+      "detail": "3,144 county rows loaded."
+    },
+    {
+      "area": "X-factor gate",
+      "status": "pass",
+      "detail": "no_default_interaction_promotion"
+    },
+    {
+      "area": "Share exports",
+      "status": "pass",
+      "detail": "Top 25, Top 100, shortlist CSV, compare Markdown, and compare JSON generated."
+    },
+    {
+      "area": "Deploy bundle",
+      "status": "pass",
+      "detail": "bash scripts/build_streamlit_deploy_bundle.sh"
+    },
+    {
+      "area": "Deploy artifacts",
+      "status": "pass",
+      "detail": "0 required missing, 0 optional missing."
+    },
+    {
+      "area": "App tests",
+      "status": "pass",
+      "detail": "Local and deploy Streamlit AppTest smoke tests."
+    },
+    {
+      "area": "Model research gate",
+      "status": "pass",
+      "detail": "do_not_promote_current_interactions"
+    }
+  ],
+  "overall_status": "pass",
+  "deployed_final_artifacts": [
+    "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/demo_readiness_report.json",
+    "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/demo_readiness_report.md",
+    "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/xfactor_interaction_promotion_gate.json",
+    "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/xfactor_interaction_ablation_queue.json",
+    "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/xfactor_interaction_ablation_autopsy.json",
+    "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/xfactor_guarded_overlay_next_lane.json",
+    "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/p0_repeatable_residual_guardrail.json",
+    "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/deploy/streamlit_app/output/p0_repeatable_residual_guardrail_top_candidates.csv"
+  ]
+}

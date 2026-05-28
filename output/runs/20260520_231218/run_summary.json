@@ -1,0 +1,648 @@
+{
+  "run_id": "20260520_231218",
+  "year": 2024,
+  "offline": false,
+  "score_only": true,
+  "score_only_source_health": "reuse",
+  "policy_settings": {
+    "threeyr_disagree_q": 0.6,
+    "threeyr_gap_q": 0.7
+  },
+  "evaluation_summary": {},
+  "champion_challenger": {},
+  "champion_sensitivity": {},
+  "calibration_summary": {
+    "year": 2024,
+    "policy_settings": {
+      "threeyr_disagree_q": 0.6,
+      "threeyr_gap_q": 0.7,
+      "rank_aware_3yr_hybrid_enabled": false
+    },
+    "fallback_rate_3yr": 0.5909669211195929,
+    "rank_aware_3yr_hybrid": null,
+    "calibration_stats": [
+      {
+        "model_name": "xgboost_1yr",
+        "horizon_yr": 1,
+        "cap": 0.04,
+        "min_shift": 0.04,
+        "max_shift": 0.12,
+        "mean_abs_shift": 0.04000000000000001,
+        "max_abs_shift": 0.04000000000000001,
+        "cap_hit_rate": 1.0,
+        "model_type": "xgboost",
+        "raw_col": "pred_xgboost_1yr",
+        "cal_col": "pred_xgboost_1yr_cal"
+      },
+      {
+        "model_name": "lightgbm_1yr",
+        "horizon_yr": 1,
+        "cap": 0.04,
+        "min_shift": 0.04,
+        "max_shift": 0.12,
+        "mean_abs_shift": 0.039999999999999994,
+        "max_abs_shift": 0.04000000000000001,
+        "cap_hit_rate": 1.0,
+        "model_type": "lightgbm",
+        "raw_col": "pred_lightgbm_1yr",
+        "cal_col": "pred_lightgbm_1yr_cal"
+      },
+      {
+        "model_name": "xgboost_3yr",
+        "horizon_yr": 3,
+        "cap": 0.28322677686810493,
+        "min_shift": 0.08,
+        "max_shift": 0.3,
+        "mean_abs_shift": 0.28322677686810493,
+        "max_abs_shift": 0.28322677686810493,
+        "cap_hit_rate": 1.0,
+        "model_type": "xgboost",
+        "raw_col": "pred_xgboost_3yr",
+        "cal_col": "pred_xgboost_3yr_cal"
+      },
+      {
+        "model_name": "lightgbm_3yr",
+        "horizon_yr": 3,
+        "cap": 0.27686755220450293,
+        "min_shift": 0.08,
+        "max_shift": 0.3,
+        "mean_abs_shift": 0.029132160583753175,
+        "max_abs_shift": 0.029132160583753175,
+        "cap_hit_rate": 0.0,
+        "model_type": "lightgbm",
+        "raw_col": "pred_lightgbm_3yr",
+        "cal_col": "pred_lightgbm_3yr_cal"
+      },
+      {
+        "model_name": "xgboost_5yr",
+        "horizon_yr": 5,
+        "cap": 0.3083747781813144,
+        "min_shift": 0.12,
+        "max_shift": 0.5,
+        "mean_abs_shift": 0.3083747781813145,
+        "max_abs_shift": 0.3083747781813144,
+        "cap_hit_rate": 1.0,
+        "model_type": "xgboost",
+        "raw_col": "pred_xgboost_5yr",
+        "cal_col": "pred_xgboost_5yr_cal"
+      },
+      {
+        "model_name": "lightgbm_5yr",
+        "horizon_yr": 5,
+        "cap": 0.34045706909358386,
+        "min_shift": 0.12,
+        "max_shift": 0.5,
+        "mean_abs_shift": 0.3404570690935839,
+        "max_abs_shift": 0.34045706909358386,
+        "cap_hit_rate": 1.0,
+        "model_type": "lightgbm",
+        "raw_col": "pred_lightgbm_5yr",
+        "cal_col": "pred_lightgbm_5yr_cal"
+      }
+    ]
+  },
+  "data_vintage_manifest_fingerprint": "4408463d6b7b19699ac7c3cf5d17ac71cfb05f52bc48a5541b511e2ee324e367",
+  "missingness_summary": {
+    "year": 2024,
+    "rows": 3153,
+    "n_features": 351,
+    "row_missingness": {
+      "avg_share": 0.13528561863480987,
+      "p50_share": 0.1282051282051282,
+      "p90_share": 0.17094017094017094,
+      "avg_count": 47.48525214081827,
+      "p90_count": 60.0
+    },
+    "top_missing_features": [
+      {
+        "feature": "lodes_resident_jobs_yoy",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "urbanization_pressure",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "migration_pressure_score",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "returns_out_pc",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "exemptions_in_pc",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "activity_intensity_accel",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "net_migration_rate_lag1",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "exemptions_out_pc",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "lodes_workplace_jobs_yoy",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "job_growth_5yr",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "wage_premium",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "net_migration_rate_vs_state",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "migration_2yr_avg",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "migration_persistence",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "establishment_density",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "wage_growth_yoy",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "net_migration_rate",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "activity_intensity_yoy",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "returns_in_pc",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "migration_accel",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "employment_density",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "migration_3yr_avg",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "nn_peer_net_migration_rate_lag1",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "prox_peer_net_migration_rate_lag1",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      },
+      {
+        "feature": "activity_intensity",
+        "missing_share": 1.0,
+        "missing_count": 3153
+      }
+    ],
+    "dominant_patterns": [
+      {
+        "pattern_key": "111111111111",
+        "rows": 3153
+      }
+    ]
+  },
+  "drift_summary": {
+    "year": 2024,
+    "feature_drift": {
+      "year": 2024,
+      "previous_year": 2023,
+      "available": true,
+      "top_features": [
+        {
+          "feature": "local_peer_wage_growth_yoy_lag1",
+          "psi": 12.429299492729685,
+          "severity": "high",
+          "missing_share_current": 0.0060260069774817635,
+          "missing_share_previous": 0.0213089802130898
+        },
+        {
+          "feature": "prox_peer_wage_growth_yoy_lag1",
+          "psi": 12.429299492729685,
+          "severity": "high",
+          "missing_share_current": 0.0060260069774817635,
+          "missing_share_previous": 0.0213089802130898
+        },
+        {
+          "feature": "prox_peer_job_growth_yoy_lag1",
+          "psi": 12.428555304395015,
+          "severity": "high",
+          "missing_share_current": 0.003171582619727244,
+          "missing_share_previous": 0.01856925418569254
+        },
+        {
+          "feature": "local_peer_zhvi_yoy_lag1",
+          "psi": 12.427617578409961,
+          "severity": "high",
+          "missing_share_current": 0.03203298445924516,
+          "missing_share_previous": 0.08280060882800609
+        },
+        {
+          "feature": "prox_peer_zhvi_yoy_lag1",
+          "psi": 12.427617578409961,
+          "severity": "high",
+          "missing_share_current": 0.03203298445924516,
+          "missing_share_previous": 0.08280060882800609
+        },
+        {
+          "feature": "cluster_peer_zhvi_yoy_lag1",
+          "psi": 12.426858409007892,
+          "severity": "high",
+          "missing_share_current": 0.029178560101490645,
+          "missing_share_previous": 0.08006088280060883
+        },
+        {
+          "feature": "local_cluster_peer_zhvi_yoy_lag1",
+          "psi": 12.426858409007892,
+          "severity": "high",
+          "missing_share_current": 0.029178560101490645,
+          "missing_share_previous": 0.08006088280060883
+        },
+        {
+          "feature": "hpi_yoy_lag1",
+          "psi": 12.164745642604093,
+          "severity": "high",
+          "missing_share_current": 0.0003171582619727244,
+          "missing_share_previous": 0.025570776255707764
+        },
+        {
+          "feature": "cluster_peer_job_growth_yoy_lag1",
+          "psi": 11.852612157716479,
+          "severity": "high",
+          "missing_share_current": 0.0006343165239454488,
+          "missing_share_previous": 0.0006088280060882801
+        },
+        {
+          "feature": "local_cluster_peer_job_growth_yoy_lag1",
+          "psi": 11.852612157716479,
+          "severity": "high",
+          "missing_share_current": 0.0006343165239454488,
+          "missing_share_previous": 0.0006088280060882801
+        },
+        {
+          "feature": "cluster_peer_wage_growth_yoy_lag1",
+          "psi": 11.85142964666439,
+          "severity": "high",
+          "missing_share_current": 0.0034887408816999684,
+          "missing_share_previous": 0.0033485540334855404
+        },
+        {
+          "feature": "local_cluster_peer_wage_growth_yoy_lag1",
+          "psi": 11.85142964666439,
+          "severity": "high",
+          "missing_share_current": 0.0034887408816999684,
+          "missing_share_previous": 0.0033485540334855404
+        },
+        {
+          "feature": "local_peer_job_growth_yoy_lag1",
+          "psi": 10.526361515118793,
+          "severity": "high",
+          "missing_share_current": 0.003171582619727244,
+          "missing_share_previous": 0.01856925418569254
+        },
+        {
+          "feature": "hmda_refi_purchase_ratio_yoy",
+          "psi": 4.729597931336005,
+          "severity": "high",
+          "missing_share_current": 0.008246114811290834,
+          "missing_share_previous": 0.021004566210045664
+        },
+        {
+          "feature": "state_peer_zhvi_yoy_lag1",
+          "psi": 3.660291929414594,
+          "severity": "high",
+          "missing_share_current": 0.029495718363463368,
+          "missing_share_previous": 0.08036529680365297
+        },
+        {
+          "feature": "state_peer_wage_growth_yoy_lag1",
+          "psi": 2.712728256595941,
+          "severity": "high",
+          "missing_share_current": 0.003805899143672693,
+          "missing_share_previous": 0.0289193302891933
+        },
+        {
+          "feature": "noaa_climate_hdd_yoy",
+          "psi": 2.6575999749846235,
+          "severity": "high",
+          "missing_share_current": 0.017443704408499842,
+          "missing_share_previous": 0.056925418569254184
+        },
+        {
+          "feature": "zori_cum_3yr",
+          "psi": 2.3993677099776924,
+          "severity": "high",
+          "missing_share_current": 0.8046305106248017,
+          "missing_share_previous": 0.828310502283105
+        },
+        {
+          "feature": "noaa_climate_cdd_yoy",
+          "psi": 1.9087847453437934,
+          "severity": "high",
+          "missing_share_current": 0.02029812876625436,
+          "missing_share_previous": 0.05966514459665145
+        },
+        {
+          "feature": "fhfa_county_hpi_yoy_lag1",
+          "psi": 1.8975439473510105,
+          "severity": "high",
+          "missing_share_current": 0.15953060577228037,
+          "missing_share_previous": 0.16103500761035008
+        },
+        {
+          "feature": "price_accel",
+          "psi": 1.874674389711832,
+          "severity": "high",
+          "missing_share_current": 0.029178560101490645,
+          "missing_share_previous": 0.08006088280060883
+        },
+        {
+          "feature": "credit_stress_index_2yr_avg",
+          "psi": 1.7437716327911614,
+          "severity": "high",
+          "missing_share_current": 0.0006343165239454488,
+          "missing_share_previous": 0.018873668188736682
+        },
+        {
+          "feature": "nn_peer_zhvi_yoy_lag1",
+          "psi": 1.6905938247625165,
+          "severity": "high",
+          "missing_share_current": 0.0006343165239454488,
+          "missing_share_previous": 0.022526636225266364
+        },
+        {
+          "feature": "zhvi_yoy_lag1",
+          "psi": 1.377422907388032,
+          "severity": "high",
+          "missing_share_current": 0.029178560101490645,
+          "missing_share_previous": 0.08006088280060883
+        },
+        {
+          "feature": "supply_constraint_score",
+          "psi": 1.215523342606853,
+          "severity": "high",
+          "missing_share_current": 0.041230574056454174,
+          "missing_share_previous": 0.07945205479452055
+        }
+      ],
+      "high_alert_count": 53,
+      "moderate_or_higher_count": 78
+    },
+    "target_drift": {
+      "1yr": {
+        "available": true,
+        "current_target_year": 2023,
+        "previous_target_year": 2022,
+        "psi": 0.20499330916253372,
+        "severity": "moderate",
+        "mean_current": 0.03710378244255906,
+        "mean_previous": 0.01647567162720921
+      },
+      "3yr": {
+        "available": true,
+        "current_target_year": 2021,
+        "previous_target_year": 2020,
+        "psi": 1.0681011968706815,
+        "severity": "high",
+        "mean_current": 0.1380931710812567,
+        "mean_previous": 0.24896961254188973
+      },
+      "5yr": {
+        "available": true,
+        "current_target_year": 2019,
+        "previous_target_year": 2018,
+        "psi": 0.032637080038721955,
+        "severity": "low",
+        "mean_current": 0.44172912969023403,
+        "mean_previous": 0.4670411095683588
+      }
+    },
+    "prediction_drift": {
+      "available": true,
+      "current_rankings": "/Users/coryseidel/Desktop/IdeaTests/LandInvest/output/county_rankings_2024.parquet",
+      "previous_rankings": "/Users/coryseidel/Desktop/IdeaTests/LandInvest/output/runs/20260520_231147/county_rankings_2024.parquet",
+      "top_predictions": [
+        {
+          "column": "pred_policy_3yr",
+          "psi": 12.42931397540651,
+          "severity": "high",
+          "mean_current": 0.122884642795513,
+          "mean_previous": 0.42631883284907324
+        },
+        {
+          "column": "opportunity_score",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 50.36618030604048,
+          "mean_previous": 50.36618030604048
+        },
+        {
+          "column": "pred_avg_1yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.06868296001622431,
+          "mean_previous": 0.06868296001622431
+        },
+        {
+          "column": "pred_avg_3yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.16280439364272978,
+          "mean_previous": 0.16280439364272978
+        },
+        {
+          "column": "pred_avg_5yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.015246587616636338,
+          "mean_previous": 0.015246587616636338
+        },
+        {
+          "column": "pred_gap_3yr_vs_adjacent",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.12105728348624678,
+          "mean_previous": 0.12105728348624678
+        },
+        {
+          "column": "pred_hier_3yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.16224931099275613,
+          "mean_previous": 0.16224931099275613
+        },
+        {
+          "column": "pred_lightgbm_1yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.030751798423455632,
+          "mean_previous": 0.030751798423455632
+        },
+        {
+          "column": "pred_lightgbm_1yr_cal",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.07075179842345562,
+          "mean_previous": 0.07075179842345562
+        },
+        {
+          "column": "pred_lightgbm_3yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.32306070612782106,
+          "mean_previous": 0.32306070612782106
+        },
+        {
+          "column": "pred_lightgbm_3yr_cal",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.29392854554406783,
+          "mean_previous": 0.29392854554406783
+        },
+        {
+          "column": "pred_lightgbm_5yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.36406340353895245,
+          "mean_previous": 0.36406340353895245
+        },
+        {
+          "column": "pred_lightgbm_5yr_cal",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.023606334445368613,
+          "mean_previous": 0.023606334445368613
+        },
+        {
+          "column": "pred_stable_3yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.10210704240459323,
+          "mean_previous": 0.10210704240459323
+        },
+        {
+          "column": "pred_std",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.1552220540289348,
+          "mean_previous": 0.1552220540289348
+        },
+        {
+          "column": "pred_xgboost_1yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.026614122092723846,
+          "mean_previous": 0.026614122092723846
+        },
+        {
+          "column": "pred_xgboost_1yr_cal",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.06661412160899302,
+          "mean_previous": 0.06661412160899302
+        },
+        {
+          "column": "pred_xgboost_3yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.3149070143699646,
+          "mean_previous": 0.3149070143699646
+        },
+        {
+          "column": "pred_xgboost_3yr_cal",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.03168024174139169,
+          "mean_previous": 0.03168024174139169
+        },
+        {
+          "column": "pred_xgboost_5yr",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.3152616322040558,
+          "mean_previous": 0.3152616322040558
+        },
+        {
+          "column": "pred_xgboost_5yr_cal",
+          "psi": 0.0,
+          "severity": "low",
+          "mean_current": 0.006886840787904052,
+          "mean_previous": 0.006886840787904052
+        }
+      ],
+      "high_alert_count": 1
+    }
+  },
+  "top25": [
+    "51580|Covington city, Virginia|VA",
+    "39081|Jefferson County, Ohio|OH",
+    "17163|St. Clair County, Illinois|IL",
+    "51690|Martinsville city, Virginia|VA",
+    "18103|Miami County, Indiana|IN",
+    "51530|Buena Vista city, Virginia|VA",
+    "51105|Lee County, Virginia|VA",
+    "26053|Gogebic County, Michigan|MI",
+    "17027|Clinton County, Illinois|IL",
+    "26163|Wayne County, Michigan|MI",
+    "17183|Vermilion County, Illinois|IL",
+    "26071|Iron County, Michigan|MI",
+    "17119|Madison County, Illinois|IL",
+    "18035|Delaware County, Indiana|IN",
+    "18177|Wayne County, Indiana|IN",
+    "18165|Vermillion County, Indiana|IN",
+    "18095|Madison County, Indiana|IN",
+    "42107|Schuylkill County, Pennsylvania|PA",
+    "39095|Lucas County, Ohio|OH",
+    "18135|Randolph County, Indiana|IN",
+    "17179|Tazewell County, Illinois|IL",
+    "42021|Cambria County, Pennsylvania|PA",
+    "17041|Douglas County, Illinois|IL",
+    "39039|Defiance County, Ohio|OH",
+    "17199|Williamson County, Illinois|IL"
+  ]
+}

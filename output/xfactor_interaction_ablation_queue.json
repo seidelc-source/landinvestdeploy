@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-05-27T22:19:27.320470+00:00",
+  "training_status": "controlled_ablation_queue_not_production",
+  "scoreboard_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_validation_scoreboard.json",
+  "ablation_summary_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_model_ablations/top_frontier_interaction_ablation_summary.json",
+  "candidate_count": 2,
+  "ready_for_new_ablation_count": 0,
+  "completed_no_default_promotion_count": 2,
+  "queue": [
+    {
+      "interaction": "anchor_halo_optionality",
+      "label": "Anchor/halo support x land optionality",
+      "status": "ablation_completed_no_default_promotion",
+      "scoreboard_decision": "model-ablation-candidate",
+      "validation_score": 0.4688393360571079,
+      "avg_preboom_rate_lift": 0.05490042620614957,
+      "positive_preboom_lift_share": 0.8421052631578947,
+      "already_hot_top_decile_share": 0.3058958879430368,
+      "analog_before_hot_top_decile_capture_share": 0.37583892617449666,
+      "ablation_decision": "reject_default_feature",
+      "ablation_reason": "Does not improve model-fold quality consistently enough for feature promotion.",
+      "recommended_action": "Keep report-only/product-context only; do not promote as a default feature."
+    },
+    {
+      "interaction": "scarcity_buildability",
+      "label": "Scarcity x buildability",
+      "status": "ablation_completed_no_default_promotion",
+      "scoreboard_decision": "model-ablation-candidate",
+      "validation_score": 0.3512037764486331,
+      "avg_preboom_rate_lift": 0.04846002915624668,
+      "positive_preboom_lift_share": 0.8421052631578947,
+      "already_hot_top_decile_share": 0.31405310997135005,
+      "analog_before_hot_top_decile_capture_share": 0.12080536912751678,
+      "ablation_decision": "reject_default_feature",
+      "ablation_reason": "Does not improve model-fold quality consistently enough for feature promotion.",
+      "recommended_action": "Keep report-only/product-context only; do not promote as a default feature."
+    }
+  ],
+  "notes": [
+    "Queue rows come only from interactions that passed the report-only scoreboard gates.",
+    "A completed ablation can still block default promotion when model-fold quality is not consistently better."
+  ],
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_queue.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_queue.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_interaction_ablation_queue.md"
+  }
+}
