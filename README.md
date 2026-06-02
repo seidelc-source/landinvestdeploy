@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # LandInvestDeploy
+=======
+# The Land Investment Opportunity Forecasting AI System
+>>>>>>> cd4b04bdf41945a238e73ee1a408d9bf0cb16d4b
 
 
 
@@ -15,14 +19,22 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
+<<<<<<< HEAD
 git remote add origin https://gitlab.com/seidelcrypto/landinvestdeploy.git
+=======
+git remote add origin https://gitlab.com/laiser_rnd/the-land-investment-opportunity-forecasting-ai-system.git
+>>>>>>> cd4b04bdf41945a238e73ee1a408d9bf0cb16d4b
 git branch -M main
 git push -uf origin main
 ```
 
 ## Integrate with your tools
 
+<<<<<<< HEAD
 * [Set up project integrations](https://gitlab.com/seidelcrypto/landinvestdeploy/-/settings/integrations)
+=======
+* [Set up project integrations](https://gitlab.com/laiser_rnd/the-land-investment-opportunity-forecasting-ai-system/-/settings/integrations)
+>>>>>>> cd4b04bdf41945a238e73ee1a408d9bf0cb16d4b
 
 ## Collaborate with your team
 
