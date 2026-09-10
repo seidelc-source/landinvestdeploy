@@ -3848,10 +3848,23 @@ def _demo_checklist_table(demo_readiness_report: dict | None) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+DATA_ATTRIBUTION_LINE = (
+    "Data attribution: home values and rents from Zillow (ZHVI, ZORI) — Zillow Research data, used with attribution to Zillow; "
+    "FHFA house-price indices; HUD Fair Market Rents; USDA NASS Census of Agriculture; U.S. Bureau of Economic Analysis; "
+    "U.S. Census Bureau (ACS, CBP, BDS, PEP); BLS QCEW; IRS SOI migration; National Park Service; FEMA National Risk Index; "
+    "EPA Smart Location Database; AEI Housing Center land price indicators; USGS PAD-US. All figures are estimates derived "
+    "from these sources, not statements of fact, and not investment advice."
+)
+
+
 def _source_attribution_table() -> pd.DataFrame:
     return pd.DataFrame(
         [
-            {"Family": "Home values and price history", "Examples": "FHFA, Zillow-derived ZHVI artifacts", "Use": "Targets, trend context, ranking inputs"},
+            {"Family": "Home values and rents (Zillow)", "Examples": "Zillow Home Value Index (ZHVI) and Zillow Observed Rent Index (ZORI) — free public-use data, shown with attribution to Zillow", "Use": "Home-value facts, gross rent yield (with HUD FMR), targets"},
+            {"Family": "House-price history (FHFA)", "Examples": "FHFA county house-price index (public)", "Use": "Boom labels, embargoed precision, targets"},
+            {"Family": "Rents, land, and agriculture", "Examples": "HUD Fair Market Rents; USDA NASS Census of Agriculture (land values, cash rents); AEI Housing Center land price indicators (free of charge)", "Use": "Value & yield facts by category"},
+            {"Family": "Tourism and amenity", "Examples": "National Park Service visitation; Census ACS seasonal homes; BEA tourism GDP; USDA natural-amenity scale", "Use": "Tourism intensity facts"},
+            {"Family": "Short-term rentals (internal builds only)", "Examples": "AirROI market aggregates — not included in public builds until a redistribution addendum is executed; Redfin Data Center series are used in research panels only and are not displayed", "Use": "Internal facts; forward test"},
             {"Family": "Labor, income, and establishments", "Examples": "BLS, BEA, Census CBP/QCEW", "Use": "Growth context, economic anchors, affordability"},
             {"Family": "Population and migration", "Examples": "U.S. Census, IRS-style migration-derived features where staged", "Use": "Demand and demographic context"},
             {"Family": "Credit, lending, and housing activity", "Examples": "HMDA and project-staged housing indicators", "Use": "Liquidity, market depth, and risk context"},
@@ -3907,6 +3920,7 @@ def _render_demo_footer(
     total = source_summary.get("n_sources")
     source_read = f"{healthy}/{total} healthy" if healthy is not None and total is not None else "source summary unavailable"
     st.divider()
+    st.caption(DATA_ATTRIBUTION_LINE)
     st.caption(
         f"Demo status `{readiness}` · ranking run `{run_id}` · readiness generated `{generated}` · "
         f"sources `{source_read}` · user store `{_current_user_id()}`"
