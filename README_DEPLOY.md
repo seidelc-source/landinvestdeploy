@@ -34,7 +34,19 @@ pip install -r requirements.txt
 streamlit run dashboard.py
 ```
 
-## Streamlit Community Cloud
+## Publishing the hosted demo (GitHub → Streamlit Community Cloud)
+
+The hosted-demo lineage is the public GitHub repo `seidelc-source/landinvestdeploy` (Community Cloud deploys from GitHub only; the GitLab `origin` of the main repository is the research lineage). A working clone lives at `../landinvestdeploy` next to the main repo. To publish a refreshed bundle:
+
+```bash
+bash scripts/build_streamlit_deploy_bundle.sh
+rsync -a --delete --exclude .git --exclude __pycache__ deploy/streamlit_app/ ../landinvestdeploy/
+git -C ../landinvestdeploy add -A && git -C ../landinvestdeploy commit -m "Refresh hosted demo" && git -C ../landinvestdeploy push github main
+```
+
+A Community Cloud app pointed at that repo (branch `main`, main file `dashboard.py`) redeploys on push. If no app exists yet: share.streamlit.io → sign in with GitHub → New app → repository `seidelc-source/landinvestdeploy`, branch `main`, main file `dashboard.py` → Deploy. The repo is public, so the app is public: it carries no AirROI figures (stripped by the bundle script) but does carry ZHVI-derived yields — the Zillow/Redfin redistribution check is still open.
+
+## Streamlit Community Cloud (original notes)
 
 1. Create a new GitHub repo, for example `LandInvestDeploy`.
 2. Copy the contents of this folder into that repo root.
