@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-06-04T15:44:32.654799+00:00",
+  "status": "training_blocked_insufficient_historical_observed_years",
+  "production_model_rank_or_dashboard_change": false,
+  "gate_checks": {
+    "institutional_columns_absent_from_default_features": true,
+    "observed_years_not_backfilled_for_training": true,
+    "sufficient_historical_depth_for_training": false,
+    "source_maturity_gate_required_before_training": true
+  },
+  "metrics": {
+    "panel_rows": 3483,
+    "panel_year_min": 2022,
+    "panel_year_max": 2024,
+    "panel_year_count": 3,
+    "features_rows_loaded": 82755,
+    "feature_year_min": 2000,
+    "feature_year_max": 2024,
+    "institutional_feature_column_count": 0
+  },
+  "institutional_feature_columns": [],
+  "decision": "Keep institutional anchors out of default model training. Current official panel has clean report-only observed-year semantics but insufficient historical depth for leakage-safe training.",
+  "next_action": "Resolve provider geocode/source maturity first; for modeling, build a historical multi-year institutional panel before any controlled training gate.",
+  "outputs": {
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_leakage_gate.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_leakage_gate.md"
+  }
+}

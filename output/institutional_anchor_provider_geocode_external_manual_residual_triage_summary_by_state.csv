@@ -1,0 +1,12 @@
+state_abbr,triage_rows,p0_rows,high_priority_rows,same_city_held_manual_review_rows,weak_census_context_manual_review_rows,external_geocoder_followup_rows
+PR,5,0,0,5,0,0
+LA,2,0,2,2,0,0
+OK,2,0,2,2,0,0
+TX,2,0,1,2,0,0
+CA,1,0,1,1,0,0
+FL,1,0,1,1,0,0
+MD,1,0,1,1,0,0
+NE,1,0,1,0,1,0
+NV,1,0,1,1,0,0
+VT,1,0,1,1,0,0
+WV,1,0,1,1,0,0

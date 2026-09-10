@@ -1,0 +1,15 @@
+batch_id,census_input_address,census_match_status,census_match_type,census_matched_address,census_coordinates,census_lon,census_lat,census_tigerline_id,census_tigerline_side,census_state_fips,census_county_fips,candidate_fips,census_tract,census_block,census_raw_field_count
+sec_pit_0237__held_005,"12100 WILSHIRE BOULEVARD, 8TH FLOOR, Los Angeles, CA, 90025",Match,Exact,"12100 WILSHIRE BLVD, LOS ANGELES, CA, 90025","-118.467475100971,34.04401613682",-118.467475100971,34.04401613682,141568131,L,06,037,06037,267405,1000,12
+sec_pit_0103__held_011,"804 Carnegie Center Blvd, Princeton, NJ, 08540",No_Match,,,,,,,,,,,,,3
+sec_pit_0326__held_013,"244 5TH AVENUE 2ND FL., SUITE 2821, New York, NY, 10001",Match,Exact,"244 5TH AVE, NEW YORK, NY, 10001","-73.987454128631,40.74458672151",-73.987454128631,40.74458672151,59653461,L,36,061,36061,005800,1000,12
+sec_pit_0036__held_007,"4 Gatehall Dr, Parsippany, NJ, 07054",Match,Exact,"4 GATEHALL DR, PARSIPPANY, NJ, 07054","-74.461008525766,40.846704337934",-74.461008525766,40.846704337934,60490421,R,34,027,34027,041604,2015,12
+sec_pit_0300__held_010,"804 Carnegie Center Blvd, Princeton, NJ, 08540",No_Match,,,,,,,,,,,,,3
+sec_pit_0036__held_006,"4 Gatehall Drive, Parsippany, NJ, 07054",Match,Exact,"4 GATEHALL DR, PARSIPPANY, NJ, 07054","-74.461008525766,40.846704337934",-74.461008525766,40.846704337934,60490421,R,34,027,34027,041604,2015,12
+sec_pit_0381__held_014,"910 LOUISIANA STREET SUITE 4440, Houston, TX, 77002",Match,Exact,"910 LOUISIANA ST, HOUSTON, TX, 77002","-95.367066787298,29.759187339607",-95.367066787298,29.759187339607,96067552,R,48,201,48201,980700,1079,12
+sec_pit_0032__held_004,"1 Infinite Loop Dr, Cupertino, CA, 95014",No_Match,,,,,,,,,,,,,3
+sec_pit_0032__held_003,"1 Infinite Loop, Cupertino, CA, 95014",No_Match,,,,,,,,,,,,,3
+sec_pit_0131__held_012,"244 5TH AVENUE 2ND FL., SUITE 2821, New York, NY, 10001",Match,Exact,"244 5TH AVE, NEW YORK, NY, 10001","-73.987454128631,40.74458672151",-73.987454128631,40.74458672151,59653461,L,36,061,36061,005800,1000,12
+sec_pit_0231__held_001,"1 Infinite Loop, Cupertino, CA, 95014",No_Match,,,,,,,,,,,,,3
+sec_pit_0037__held_009,"4 Gatehall Dr, Parsippany, NJ, 07054",Match,Exact,"4 GATEHALL DR, PARSIPPANY, NJ, 07054","-74.461008525766,40.846704337934",-74.461008525766,40.846704337934,60490421,R,34,027,34027,041604,2015,12
+sec_pit_0231__held_002,"1 Infinite Loop Dr, Cupertino, CA, 95014",No_Match,,,,,,,,,,,,,3
+sec_pit_0037__held_008,"4 Gatehall Drive, Parsippany, NJ, 07054",Match,Exact,"4 GATEHALL DR, PARSIPPANY, NJ, 07054","-74.461008525766,40.846704337934",-74.461008525766,40.846704337934,60490421,R,34,027,34027,041604,2015,12

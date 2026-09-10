@@ -1,0 +1,1071 @@
+{
+ "generated_at": "2026-09-09T23:35:26.564392+00:00",
+ "run_dir": "output/recalibration_20260908",
+ "boundary": "report-only surfaces; no production rank change",
+ "honest": {
+  "generated_at": "2026-09-09T19:01:38.436409+00:00",
+  "boundary": "report-only; regenerate with scripts/build_honest_coordinates.py",
+  "classifier": {
+   "honest_held_out_capture_at_100": 0.1493,
+   "vs_random_multiple": 4.69,
+   "naive_argmax": 0.1753,
+   "class_median": 0.1678,
+   "vs_best_baseline_ratio": 1.74,
+   "claim": "Ensemble-class recall of curated narrative-boom counties; selection-bias-corrected held-out figure; never a named lane.",
+   "measured_on": "2025-vintage clean panel + audited (D2) labels, full config; vintage-stable (honest 0.149-0.157 across four surfaces)",
+   "sources": [
+    "output/champion_selection_bias.json",
+    "output/v6_2025_remeasure/v6_2025_full.json"
+   ],
+   "as_of": "2026-09-08"
+  },
+  "regression": {
+   "horizons": {
+    "1yr": {
+     "embargoed_median_spearman": 0.347,
+     "positive_fold_share": 0.81,
+     "status": "ordinal-only (top-K unproven)"
+    },
+    "3yr": {
+     "embargoed_median_spearman": -0.259,
+     "positive_fold_share": 0.25,
+     "status": "falsified \u2014 never present as a forecast"
+    },
+    "5yr": {
+     "embargoed_median_spearman": -0.154,
+     "positive_fold_share": 0.0,
+     "status": "falsified \u2014 never present as a forecast"
+    }
+   },
+   "method": "walk-forward, embargo=H, PIT-enforced (selective) clean panel",
+   "sources": [
+    "output/embargo_walkforward_clean_pit_sel_read.json"
+   ],
+   "as_of": "2026-09-02"
+  },
+  "operator_review": {
+   "operator_precision": 0.7692,
+   "accepted": 30,
+   "rejected": 9,
+   "held": 25,
+   "caveat": "operator-JUDGED proxy, not realized-outcome precision",
+   "sources": [
+    "output/boom_onset_operator_precision_report.json"
+   ],
+   "as_of": "2026-09-09"
+  },
+  "forward_validation": {
+   "snapshots": [
+    {
+     "snapshot": "snapshot_20260716",
+     "days_elapsed": 55,
+     "post_snapshot_sales_pick": 0,
+     "post_snapshot_sales_control": 0,
+     "last_read": "2026-09-09"
+    },
+    {
+     "snapshot": "snapshot_20260904",
+     "days_elapsed": 4,
+     "post_snapshot_sales_pick": 0,
+     "post_snapshot_sales_control": 0,
+     "last_read": "2026-09-09"
+    },
+    {
+     "snapshot": "snapshot_20260908",
+     "days_elapsed": 0,
+     "post_snapshot_sales_pick": 0,
+     "post_snapshot_sales_control": 0,
+     "last_read": "2026-09-09"
+    },
+    {
+     "snapshot": "snapshot_20260909",
+     "days_elapsed": 0,
+     "post_snapshot_sales_pick": 0,
+     "post_snapshot_sales_control": 0,
+     "last_read": "2026-09-09"
+    }
+   ],
+   "note": "realized validation clock \u2014 sparse by design early; no realized outcome has graded the shortlist yet"
+  }
+ },
+ "universe": {
+  "generated_at": "2026-09-09T02:46:53.605339+00:00",
+  "boundary": "report-only",
+  "population_cap": 1000000,
+  "n_counties": 3146,
+  "n_coverage_ok": 3063,
+  "n_family_counties": 179,
+  "rules": {
+   "A": {
+    "rule": "rucc_code >= 2 & pop < 1M",
+    "n_counties": 2622,
+    "family_counties_kept": 131,
+    "family_counties_total": 179,
+    "family_retention": 0.7318,
+    "families_fully_dropped": [
+     "austin_san_antonio_corridor",
+     "charlotte_exurban_ring",
+     "columbus_intel_anchor",
+     "dfw_exurban_ring",
+     "nashville_middle_tennessee"
+    ],
+    "2024_accept_removed": 1,
+    "2024_accept_total": 20,
+    "2024_reject_removed": 2,
+    "2024_reject_total": 5,
+    "2024_hold_removed": 1,
+    "2024_hold_total": 14,
+    "2025_accept_removed": 3,
+    "2025_accept_total": 10,
+    "2025_reject_removed": 4,
+    "2025_reject_total": 4,
+    "2025_hold_removed": 1,
+    "2025_hold_total": 11,
+    "dropped_2025_reviewed": [
+     {
+      "fips": "13063",
+      "county": "Clayton County, Georgia",
+      "state_abbr": "GA",
+      "review_2025": "accept"
+     },
+     {
+      "fips": "15003",
+      "county": "Honolulu County, Hawaii",
+      "state_abbr": "HI",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "18089",
+      "county": "Lake County, Indiana",
+      "state_abbr": "IN",
+      "review_2025": "accept"
+     },
+     {
+      "fips": "25025",
+      "county": "Suffolk County, Massachusetts",
+      "state_abbr": "MA",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "34017",
+      "county": "Hudson County, New Jersey",
+      "state_abbr": "NJ",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "36085",
+      "county": "Richmond County, New York",
+      "state_abbr": "NY",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "47157",
+      "county": "Shelby County, Tennessee",
+      "state_abbr": "TN",
+      "review_2025": "hold"
+     },
+     {
+      "fips": "55109",
+      "county": "St. Croix County, Wisconsin",
+      "state_abbr": "WI",
+      "review_2025": "accept"
+     }
+    ]
+   },
+   "B": {
+    "rule": "density pct <= 0.95 & pop < 1M",
+    "n_counties": 2902,
+    "family_counties_kept": 163,
+    "family_counties_total": 179,
+    "family_retention": 0.9106,
+    "families_fully_dropped": [],
+    "2024_accept_removed": 0,
+    "2024_accept_total": 20,
+    "2024_reject_removed": 2,
+    "2024_reject_total": 5,
+    "2024_hold_removed": 1,
+    "2024_hold_total": 14,
+    "2025_accept_removed": 1,
+    "2025_accept_total": 10,
+    "2025_reject_removed": 4,
+    "2025_reject_total": 4,
+    "2025_hold_removed": 1,
+    "2025_hold_total": 11,
+    "dropped_2025_reviewed": [
+     {
+      "fips": "13063",
+      "county": "Clayton County, Georgia",
+      "state_abbr": "GA",
+      "review_2025": "accept"
+     },
+     {
+      "fips": "15003",
+      "county": "Honolulu County, Hawaii",
+      "state_abbr": "HI",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "25025",
+      "county": "Suffolk County, Massachusetts",
+      "state_abbr": "MA",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "34017",
+      "county": "Hudson County, New Jersey",
+      "state_abbr": "NJ",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "36085",
+      "county": "Richmond County, New York",
+      "state_abbr": "NY",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "47157",
+      "county": "Shelby County, Tennessee",
+      "state_abbr": "TN",
+      "review_2025": "hold"
+     }
+    ]
+   },
+   "C": {
+    "rule": "density pct <= 0.90 & pop < 1M",
+    "n_counties": 2749,
+    "family_counties_kept": 136,
+    "family_counties_total": 179,
+    "family_retention": 0.7598,
+    "families_fully_dropped": [],
+    "2024_accept_removed": 3,
+    "2024_accept_total": 20,
+    "2024_reject_removed": 2,
+    "2024_reject_total": 5,
+    "2024_hold_removed": 3,
+    "2024_hold_total": 14,
+    "2025_accept_removed": 3,
+    "2025_accept_total": 10,
+    "2025_reject_removed": 4,
+    "2025_reject_total": 4,
+    "2025_hold_removed": 2,
+    "2025_hold_total": 11,
+    "dropped_2025_reviewed": [
+     {
+      "fips": "02020",
+      "county": "Anchorage Municipality, Alaska",
+      "state_abbr": "AK",
+      "review_2025": "hold"
+     },
+     {
+      "fips": "13063",
+      "county": "Clayton County, Georgia",
+      "state_abbr": "GA",
+      "review_2025": "accept"
+     },
+     {
+      "fips": "15003",
+      "county": "Honolulu County, Hawaii",
+      "state_abbr": "HI",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "18089",
+      "county": "Lake County, Indiana",
+      "state_abbr": "IN",
+      "review_2025": "accept"
+     },
+     {
+      "fips": "25001",
+      "county": "Barnstable County, Massachusetts",
+      "state_abbr": "MA",
+      "review_2025": "accept"
+     },
+     {
+      "fips": "25025",
+      "county": "Suffolk County, Massachusetts",
+      "state_abbr": "MA",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "34017",
+      "county": "Hudson County, New Jersey",
+      "state_abbr": "NJ",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "36085",
+      "county": "Richmond County, New York",
+      "state_abbr": "NY",
+      "review_2025": "reject"
+     },
+     {
+      "fips": "47157",
+      "county": "Shelby County, Tennessee",
+      "state_abbr": "TN",
+      "review_2025": "hold"
+     }
+    ]
+   }
+  }
+ },
+ "universe_capture": {
+  "generated_at": "2026-09-09T04:05:43.853511+00:00",
+  "source_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/recalibration_20260908/classifier/classifier_universes_full.json",
+  "boundary": "report-only",
+  "unrestricted": {
+   "class_median": 0.16777559542422346,
+   "class_n_lanes": 8,
+   "naive_argmax_lane": "ensemble_blend_cbp_dynamism/rank_blend",
+   "naive_argmax": 0.17526257459089012,
+   "baseline_gbm": 0.10075312137049942,
+   "momentum_reference": 0.01294642857142857
+  },
+  "universes": {
+   "A": {
+    "class_median": 0.21787918871252204,
+    "class_n_lanes": 8,
+    "naive_argmax_lane": "ensemble_blend_cbp_dynamism/rank_blend",
+    "naive_argmax": 0.2347442680776014,
+    "baseline_gbm": 0.14982363315696648,
+    "momentum_reference": 0.04832451499118166,
+    "ratio_vs_unrestricted": 1.2986345729342268,
+    "family_quiet_rows_total": 650,
+    "family_quiet_rows_inside": 523,
+    "windows_with_no_quiet_family_rows_inside": 20,
+    "rule": "rucc_code >= 2 & pop < 1M",
+    "n_counties": 2622,
+    "UNIV-1_capture_floor_0.8x": true
+   },
+   "B": {
+    "class_median": 0.17992367875180376,
+    "class_n_lanes": 8,
+    "naive_argmax_lane": "ensemble_blend_cbp_dynamism/rank_blend",
+    "naive_argmax": 0.18687094155844156,
+    "baseline_gbm": 0.10699404761904761,
+    "momentum_reference": 0.02775297619047619,
+    "ratio_vs_unrestricted": 1.0724067364914645,
+    "family_quiet_rows_total": 650,
+    "family_quiet_rows_inside": 613,
+    "windows_with_no_quiet_family_rows_inside": 10,
+    "rule": "density pct <= 0.95 & pop < 1M",
+    "n_counties": 2902,
+    "UNIV-1_capture_floor_0.8x": true
+   },
+   "C": {
+    "class_median": 0.1835222978080121,
+    "class_n_lanes": 8,
+    "naive_argmax_lane": "ensemble_blend_anchor/rank_blend",
+    "naive_argmax": 0.19871504157218442,
+    "baseline_gbm": 0.1240448704734419,
+    "momentum_reference": 0.0417989417989418,
+    "ratio_vs_unrestricted": 1.0938557383388974,
+    "family_quiet_rows_total": 650,
+    "family_quiet_rows_inside": 535,
+    "windows_with_no_quiet_family_rows_inside": 11,
+    "rule": "density pct <= 0.90 & pop < 1M",
+    "n_counties": 2749,
+    "UNIV-1_capture_floor_0.8x": true
+   }
+  }
+ },
+ "value_lens": {
+  "generated_at": "2026-09-09T23:35:25.585695+00:00",
+  "boundary": "report-only facts layer; no production change",
+  "n_counties": 3146,
+  "gaps": [],
+  "coverage": {
+   "fmr_gross_yield": 3063,
+   "zori_gross_yield": 1098,
+   "acs_gross_yield": 3120,
+   "nass_cash_rent_cropland_nonirr": 2774,
+   "nass_land_value_per_acre": 3071,
+   "aei_land_value_per_acre": 2271,
+   "farm_cap_rate_proxy": 2368,
+   "tourism_gdp_share": 2291,
+   "qcew_sector_hospitality_employment_share": 3145,
+   "seasonal_home_share": 3143,
+   "nps_visits_50km": 3141,
+   "str_host_proxy_per_1k_units": 3098,
+   "gdp_total": 3080,
+   "cbp_total_est": 3146,
+   "cbp_retail_est": 3143,
+   "cbp_real_estate_est": 3118,
+   "tourism_intensity_index": 3146,
+   "str_revpar": 63,
+   "str_demand_pressure_3yr": 55
+  },
+  "validation": {
+   "VAL-1 fmr_yield_vs_zori_yield": {
+    "spearman": 0.7946065610277077,
+    "n": 1090,
+    "verdict": "market-rent proxy (\u22650.7)"
+   },
+   "fmr_yield_vs_acs_yield": {
+    "spearman": 0.819927960274773,
+    "n": 3056
+   },
+   "fmr_level_vs_zori_level": {
+    "spearman": 0.8295179332568936,
+    "n": 1090
+   },
+   "VAL-2 nass_land_value_2022_vs_aei_2022": {
+    "spearman": 0.4036426078279199,
+    "n": 2229,
+    "verdict": "publish as range (<0.6)",
+    "note": "NASS = farm real estate incl. buildings $/ac (Census of Ag); AEI = residential land under housing $/ac; different assets \u2014 agreement measures shared location value"
+   },
+   "nass_land_value_vs_cash_rent (same source family)": {
+    "spearman": 0.5080377895596416,
+    "n": 2774
+   },
+   "aei_land_value_vs_zhvi": {
+    "spearman": 0.772112831237085,
+    "n": 2270
+   },
+   "parcel_bridge_4_pilots": [
+    {
+     "fips": "05069",
+     "parcel_median_income_yield": 0.00375,
+     "county": "Jefferson County, Arkansas",
+     "state_abbr": "AR",
+     "farm_cap_rate_proxy": 0.018603319977103606,
+     "fmr_gross_yield": 0.1319588681096623
+    },
+    {
+     "fips": "10005",
+     "parcel_median_income_yield": 0.0003827751196172249,
+     "county": "Sussex County, Delaware",
+     "state_abbr": "DE",
+     "farm_cap_rate_proxy": 0.008867454884878655,
+     "fmr_gross_yield": 0.034158575028511835
+    },
+    {
+     "fips": "47155",
+     "parcel_median_income_yield": NaN,
+     "county": "Sevier County, Tennessee",
+     "state_abbr": "TN",
+     "farm_cap_rate_proxy": 0.0038163001293661063,
+     "fmr_gross_yield": 0.033971216175114026
+    },
+    {
+     "fips": "50015",
+     "parcel_median_income_yield": 0.004322924407858702,
+     "county": "Lamoille County, Vermont",
+     "state_abbr": "VT",
+     "farm_cap_rate_proxy": 0.01539338654503991,
+     "fmr_gross_yield": 0.03253072190470114
+    }
+   ],
+   "median_yield_by_rucc_band": [
+    {
+     "rucc_band": "metro (1-3)",
+     "fmr_gross_yield": 0.0535,
+     "zori_gross_yield": 0.0571,
+     "acs_gross_yield": 0.0536,
+     "farm_cap_rate_proxy": 0.0125
+    },
+    {
+     "rucc_band": "nonmetro adjacent/large (4-6)",
+     "fmr_gross_yield": 0.056,
+     "zori_gross_yield": 0.0575,
+     "acs_gross_yield": 0.0616,
+     "farm_cap_rate_proxy": 0.0177
+    },
+    {
+     "rucc_band": "rural (7-9)",
+     "fmr_gross_yield": 0.0633,
+     "zori_gross_yield": 0.0533,
+     "acs_gross_yield": 0.0637,
+     "farm_cap_rate_proxy": 0.0213
+    }
+   ]
+  }
+ },
+ "archetypes": {
+  "tables": {
+   "unrestricted": [
+    {
+     "archetype": "amenity_tourism",
+     "families": 15,
+     "windows": 30,
+     "class_median_quiet_capture_100": 0.15384615384615385,
+     "class_min": 0.11217948717948717,
+     "class_max": 0.16987179487179485,
+     "baseline_gbm": 0.058333333333333334,
+     "momentum_reference": 0.0,
+     "best_lane_exploratory": "ensemble_blend_anchor/rank_blend",
+     "best_lane_capture": 0.16987179487179485,
+     "families_detected_le100_by_blend_class": 4,
+     "families_with_rank": 15
+    },
+    {
+     "archetype": "anchor_jobs",
+     "families": 11,
+     "windows": 22,
+     "class_median_quiet_capture_100": 0.11403508771929827,
+     "class_min": 0.11403508771929827,
+     "class_max": 0.11535087719298244,
+     "baseline_gbm": 0.13333333333333333,
+     "momentum_reference": 0.0,
+     "best_lane_exploratory": "baseline_plus_bfs_fcc/gbm",
+     "best_lane_capture": 0.1539473684210526,
+     "families_detected_le100_by_blend_class": 4,
+     "families_with_rank": 11
+    },
+    {
+     "archetype": "college_medical",
+     "families": 1,
+     "windows": 2,
+     "class_median_quiet_capture_100": 0.012195121951219513,
+     "class_min": 0.0,
+     "class_max": 0.012195121951219513,
+     "baseline_gbm": 0.012195121951219513,
+     "momentum_reference": 0.0,
+     "best_lane_exploratory": "baseline_plus_all_new/logistic",
+     "best_lane_capture": 0.036585365853658534,
+     "families_detected_le100_by_blend_class": 1,
+     "families_with_rank": 1
+    },
+    {
+     "archetype": "spillover_affordability",
+     "families": 10,
+     "windows": 20,
+     "class_median_quiet_capture_100": 0.2562841162105868,
+     "class_min": 0.2482466063348416,
+     "class_max": 0.27112242332830566,
+     "baseline_gbm": 0.1396358543417367,
+     "momentum_reference": 0.04873949579831932,
+     "best_lane_exploratory": "ensemble_blend_cbp_dynamism/rank_blend",
+     "best_lane_capture": 0.27112242332830566,
+     "families_detected_le100_by_blend_class": 7,
+     "families_with_rank": 10
+    }
+   ],
+   "universe_A": [
+    {
+     "archetype": "amenity_tourism",
+     "families": 15,
+     "windows": 30,
+     "class_median_quiet_capture_100": 0.16346153846153846,
+     "class_min": 0.11217948717948717,
+     "class_max": 0.18269230769230768,
+     "baseline_gbm": 0.06474358974358975,
+     "momentum_reference": 0.0641025641025641,
+     "best_lane_exploratory": "ensemble_blend_anchor/rank_blend",
+     "best_lane_capture": 0.18269230769230768,
+     "families_detected_le100_by_blend_class": 4,
+     "families_with_rank": 15
+    },
+    {
+     "archetype": "anchor_jobs",
+     "families": 11,
+     "windows": 22,
+     "class_median_quiet_capture_100": 0.14444444444444446,
+     "class_min": 0.14444444444444446,
+     "class_max": 0.1461111111111111,
+     "baseline_gbm": 0.1688888888888889,
+     "momentum_reference": 0.0,
+     "best_lane_exploratory": "baseline_plus_nass_farmland/gbm",
+     "best_lane_capture": 0.21722222222222223,
+     "families_detected_le100_by_blend_class": 5,
+     "families_with_rank": 9
+    },
+    {
+     "archetype": "college_medical",
+     "families": 1,
+     "windows": 2,
+     "class_median_quiet_capture_100": 0.0,
+     "class_min": 0.0,
+     "class_max": 0.0,
+     "baseline_gbm": 0.0,
+     "momentum_reference": 0.0,
+     "best_lane_exploratory": "baseline_plus_all_new/gbm",
+     "best_lane_capture": 0.013513513513513514,
+     "families_detected_le100_by_blend_class": 0,
+     "families_with_rank": 1
+    },
+    {
+     "archetype": "spillover_affordability",
+     "families": 10,
+     "windows": 20,
+     "class_median_quiet_capture_100": 0.49870129870129876,
+     "class_min": 0.4523809523809524,
+     "class_max": 0.5235930735930736,
+     "baseline_gbm": 0.3521645021645022,
+     "momentum_reference": 0.08571428571428572,
+     "best_lane_exploratory": "ensemble_blend_cbp_dynamism/rank_blend",
+     "best_lane_capture": 0.5235930735930736,
+     "families_detected_le100_by_blend_class": 5,
+     "families_with_rank": 7
+    }
+   ],
+   "universe_B": [
+    {
+     "archetype": "amenity_tourism",
+     "families": 15,
+     "windows": 30,
+     "class_median_quiet_capture_100": 0.15384615384615385,
+     "class_min": 0.11217948717948717,
+     "class_max": 0.16987179487179485,
+     "baseline_gbm": 0.05448717948717948,
+     "momentum_reference": 0.03205128205128205,
+     "best_lane_exploratory": "ensemble_blend_anchor/rank_blend",
+     "best_lane_capture": 0.16987179487179485,
+     "families_detected_le100_by_blend_class": 4,
+     "families_with_rank": 15
+    },
+    {
+     "archetype": "anchor_jobs",
+     "families": 11,
+     "windows": 22,
+     "class_median_quiet_capture_100": 0.11403508771929827,
+     "class_min": 0.11403508771929827,
+     "class_max": 0.11535087719298244,
+     "baseline_gbm": 0.13333333333333333,
+     "momentum_reference": 0.0,
+     "best_lane_exploratory": "baseline_plus_wrluri/gbm",
+     "best_lane_capture": 0.17017543859649123,
+     "families_detected_le100_by_blend_class": 5,
+     "families_with_rank": 11
+    },
+    {
+     "archetype": "college_medical",
+     "families": 1,
+     "windows": 2,
+     "class_median_quiet_capture_100": 0.0,
+     "class_min": 0.0,
+     "class_max": 0.0,
+     "baseline_gbm": 0.0,
+     "momentum_reference": 0.0,
+     "best_lane_exploratory": "baseline_plus_all_new/gbm",
+     "best_lane_capture": 0.014285714285714285,
+     "families_detected_le100_by_blend_class": 0,
+     "families_with_rank": 1
+    },
+    {
+     "archetype": "spillover_affordability",
+     "families": 10,
+     "windows": 20,
+     "class_median_quiet_capture_100": 0.3050335285629403,
+     "class_min": 0.275528393175452,
+     "class_max": 0.3162592309651133,
+     "baseline_gbm": 0.1704481792717087,
+     "momentum_reference": 0.05546218487394958,
+     "best_lane_exploratory": "ensemble_blend_cbp_dynamism/rank_blend",
+     "best_lane_capture": 0.3162592309651133,
+     "families_detected_le100_by_blend_class": 7,
+     "families_with_rank": 10
+    }
+   ],
+   "universe_C": [
+    {
+     "archetype": "amenity_tourism",
+     "families": 15,
+     "windows": 30,
+     "class_median_quiet_capture_100": 0.15865384615384615,
+     "class_min": 0.12179487179487179,
+     "class_max": 0.17307692307692307,
+     "baseline_gbm": 0.060897435897435896,
+     "momentum_reference": 0.0641025641025641,
+     "best_lane_exploratory": "ensemble_blend_anchor/rank_blend",
+     "best_lane_capture": 0.17307692307692307,
+     "families_detected_le100_by_blend_class": 4,
+     "families_with_rank": 15
+    },
+    {
+     "archetype": "anchor_jobs",
+     "families": 11,
+     "windows": 22,
+     "class_median_quiet_capture_100": 0.11403508771929827,
+     "class_min": 0.11403508771929827,
+     "class_max": 0.11403508771929827,
+     "baseline_gbm": 0.13098086124401914,
+     "momentum_reference": 0.0,
+     "best_lane_exploratory": "baseline_plus_bds/gbm",
+     "best_lane_capture": 0.1720494417862839,
+     "families_detected_le100_by_blend_class": 4,
+     "families_with_rank": 11
+    },
+    {
+     "archetype": "college_medical",
+     "families": 1,
+     "windows": 2,
+     "class_median_quiet_capture_100": 0.0,
+     "class_min": 0.0,
+     "class_max": 0.0,
+     "baseline_gbm": 0.0,
+     "momentum_reference": 0.0,
+     "best_lane_exploratory": "baseline_plus_all_new/gbm",
+     "best_lane_capture": 0.014285714285714285,
+     "families_detected_le100_by_blend_class": 0,
+     "families_with_rank": 1
+    },
+    {
+     "archetype": "spillover_affordability",
+     "families": 10,
+     "windows": 20,
+     "class_median_quiet_capture_100": 0.32857142857142857,
+     "class_min": 0.2699404761904762,
+     "class_max": 0.3657738095238095,
+     "baseline_gbm": 0.23392857142857143,
+     "momentum_reference": 0.06041666666666667,
+     "best_lane_exploratory": "ensemble_blend_anchor/rank_blend",
+     "best_lane_capture": 0.3657738095238095,
+     "families_detected_le100_by_blend_class": 7,
+     "families_with_rank": 10
+    }
+   ]
+  },
+  "archetype_map": {
+   "spillover_affordability": [
+    "boise_treasure_valley",
+    "colorado_front_range",
+    "utah_wasatch_spillover",
+    "austin_san_antonio_corridor",
+    "phoenix_tucson_spillover",
+    "florida_affordability_spillover",
+    "nv_az_logistics_retiree_migration",
+    "inland_northwest_spokane_cda",
+    "dfw_exurban_ring",
+    "charlotte_exurban_ring"
+   ],
+   "amenity_tourism": [
+    "montana_amenity_boom",
+    "western_nc_asheville",
+    "coastal_carolinas_wilmington",
+    "maine_coastal_pandemic",
+    "bend_central_oregon",
+    "santa_fe_amenity",
+    "traverse_city_amenity",
+    "teton_jackson_amenity",
+    "wenatchee_central_wa",
+    "poconos_ne_pennsylvania",
+    "hudson_valley_catskills",
+    "nw_florida_emerald_coast",
+    "colorado_high_country_ski",
+    "lake_tahoe_sierra",
+    "gulf_shores_baldwin_al"
+   ],
+   "anchor_jobs": [
+    "northwest_arkansas",
+    "nashville_middle_tennessee",
+    "sc_ga_manufacturing_port_spillover",
+    "east_tennessee_ridge",
+    "reno_sparks_tech",
+    "des_moines_metro",
+    "huntsville_aerospace",
+    "columbus_intel_anchor",
+    "sioux_falls_metro",
+    "tri_cities_wa",
+    "idaho_falls_eastern"
+   ],
+   "college_medical": [
+    "college_medical_anchor_growth"
+   ]
+  }
+ },
+ "precision": {
+  "summary": {
+   "all_folds": {
+    "n_folds": 30,
+    "median_p100": 0.32499999999999996,
+    "median_base_rate": 0.14458394168445443,
+    "median_lift_p100": 2.851224588912787,
+    "lift_ci90": [
+     1.9684582716861196,
+     3.6707055214723927
+    ],
+    "median_auc": 0.7013776702614174,
+    "median_p25": 0.52,
+    "share_folds_beating_momentum": 0.8333333333333334,
+    "share_folds_beating_mean_reversion": 0.5333333333333333,
+    "share_folds_beating_cheap": 0.6666666666666666,
+    "median_momentum_p100": 0.12,
+    "median_mean_reversion_p100": 0.305,
+    "median_cheap_p100": 0.26,
+    "median_best_naive_p100": 0.38,
+    "median_ratio_vs_best_naive": 0.9891304347826086,
+    "share_folds_beating_best_naive": 0.43333333333333335,
+    "ratio_vs_best_naive_ci90": [
+     0.7993579454253612,
+     1.0869565217391304
+    ]
+   },
+   "pre_covid_folds": {
+    "n_folds": 22,
+    "median_p100": 0.455,
+    "median_base_rate": 0.16275974764363507,
+    "median_lift_p100": 3.044265562024183,
+    "lift_ci90": [
+     1.6616129032258062,
+     3.897142857142857
+    ],
+    "median_auc": 0.7172132417838684,
+    "median_p25": 0.6000000000000001,
+    "share_folds_beating_momentum": 0.8181818181818182,
+    "share_folds_beating_mean_reversion": 0.4090909090909091,
+    "share_folds_beating_cheap": 0.5909090909090909,
+    "median_momentum_p100": 0.11499999999999999,
+    "median_mean_reversion_p100": 0.38,
+    "median_cheap_p100": 0.29,
+    "median_best_naive_p100": 0.425,
+    "median_ratio_vs_best_naive": 0.8799603174603174,
+    "share_folds_beating_best_naive": 0.2727272727272727,
+    "ratio_vs_best_naive_ci90": [
+     0.6970271979759646,
+     1.0
+    ]
+   }
+  },
+  "PREC-1_verdict": "NOT A HEADLINE \u2014 beats random (3.04x) but not the best naive rule per fold (0.88x); report as 'comparable to the strongest simple contrarian rule, regime-dependent'; vs the BEST naive rule per fold (max of momentum / mean-reversion / cheap-vs-state) the median ratio is 0.88x (90% CI [0.70, 1.00]), beating it in 27% of pre-COVID folds \u2014 quote the random multiple AND this ratio together, never the random multiple alone",
+  "embargo_years": 8,
+  "cutoffs": [
+   1990,
+   1991,
+   1992,
+   1993,
+   1994,
+   1995,
+   1996,
+   1997,
+   1998,
+   1999,
+   2000,
+   2001,
+   2002,
+   2003,
+   2004,
+   2005,
+   2006,
+   2007,
+   2008,
+   2009,
+   2010,
+   2011,
+   2012,
+   2013,
+   2014,
+   2015,
+   2016,
+   2017,
+   2018,
+   2019
+  ],
+  "generated_at": "2026-09-09T04:34:00.341903+00:00"
+ },
+ "quick_ai": {
+  "generated_at": "2026-09-09T03:03:07.476177+00:00",
+  "boundary": "report-only",
+  "runs": [
+   "run_1_sonnet",
+   "run_2_sonnet",
+   "run_3_sonnet",
+   "run_4_opus",
+   "run_5_opus"
+  ],
+  "n_picks": 125,
+  "match_rate": 1.0,
+  "H_a_already_hot_share": 0.064,
+  "momentum_year": 2025,
+  "already_hot_share_by_run": {
+   "run_1_sonnet": 0.08,
+   "run_2_sonnet": 0.04,
+   "run_3_sonnet": 0.0,
+   "run_4_opus": 0.08,
+   "run_5_opus": 0.12
+  },
+  "quiet_share": 0.936,
+  "H_b_mean_pairwise_jaccard": 0.3471994644595264,
+  "counties_named_in_all_runs": [
+   "04021",
+   "45051",
+   "48091",
+   "48491",
+   "49053"
+  ],
+  "distinct_counties": 55,
+  "H_c_median_abs_pct_error": {
+   "population": 0.03393718470927129,
+   "home_value_vs_zhvi": 0.06873214937437072,
+   "home_value_vs_acs": 0.13480055020632736
+  },
+  "share_with_value_error_gt_25pct_vs_zhvi": 0.008,
+  "median_density_pct": 0.852959898154042,
+  "share_in_universe_B": 0.976,
+  "overlap_with_landinvest_shortlist": 1,
+  "top_repeated_counties": [
+   [
+    "York County",
+    "SC",
+    3
+   ],
+   [
+    "Comal County",
+    "TX",
+    3
+   ],
+   [
+    "St. Johns County",
+    "FL",
+    3
+   ],
+   [
+    "Hays County",
+    "TX",
+    3
+   ],
+   [
+    "Gallatin County",
+    "MT",
+    3
+   ],
+   [
+    "Forsyth County",
+    "GA",
+    3
+   ],
+   [
+    "Flathead County",
+    "MT",
+    3
+   ],
+   [
+    "Washington County",
+    "UT",
+    3
+   ],
+   [
+    "Horry County",
+    "SC",
+    3
+   ],
+   [
+    "Pinal County",
+    "AZ",
+    3
+   ],
+   [
+    "Williamson County",
+    "TX",
+    3
+   ],
+   [
+    "Pinal",
+    "AZ",
+    2
+   ],
+   [
+    "Rockwall County",
+    "TX",
+    2
+   ],
+   [
+    "Rutherford",
+    "TN",
+    2
+   ],
+   [
+    "Maury",
+    "TN",
+    2
+   ]
+  ],
+  "comparison_ai_vs_landinvest_vs_universeB": {
+   "ai_picks": {
+    "n": 55,
+    "share_in_documented_boom_family_library": 0.792,
+    "families_named": [
+     "austin_san_antonio_corridor",
+     "bend_central_oregon",
+     "boise_treasure_valley",
+     "charlotte_exurban_ring",
+     "coastal_carolinas_wilmington",
+     "college_medical_anchor_growth",
+     "colorado_front_range",
+     "columbus_intel_anchor",
+     "dfw_exurban_ring",
+     "florida_affordability_spillover",
+     "huntsville_aerospace",
+     "inland_northwest_spokane_cda",
+     "montana_amenity_boom",
+     "nashville_middle_tennessee",
+     "northwest_arkansas",
+     "nv_az_logistics_retiree_migration",
+     "reno_sparks_tech",
+     "sc_ga_manufacturing_port_spillover",
+     "utah_wasatch_spillover"
+    ],
+    "median_trailing_5yr_zhvi_appreciation": 0.38402630553491823,
+    "median_home_value_pct": 0.8769130576359492,
+    "median_rent_yield_pct": 0.2804440091413647,
+    "median_fmr_gross_yield": 0.04731564004220069
+   },
+   "landinvest_2025_picks": {
+    "n": 25,
+    "share_in_documented_boom_family_library": 0.16,
+    "median_trailing_5yr_zhvi_appreciation": 0.36651399490110426,
+    "median_home_value_pct": 0.8082057961576034,
+    "median_rent_yield_pct": 0.32223310479921646,
+    "median_fmr_gross_yield": 0.048995798015674184
+   },
+   "universe_B_all": {
+    "n": 2902,
+    "median_trailing_5yr_zhvi_appreciation": 0.3441420115115348,
+    "median_home_value_pct": 0.4765548681211332,
+    "median_rent_yield_pct": 0.5088148873653281,
+    "median_fmr_gross_yield": 0.05753097854544047
+   }
+  },
+  "verdicts": {
+   "a_already_hot_ge_50pct": false,
+   "b_jaccard_lt_0.5": true,
+   "c_value_error_gt_10pct": false
+  }
+ },
+ "lanes": {
+  "generated_at": "2026-09-09T04:57:29.680125+00:00",
+  "source_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/recalibration_20260908/lanes/lanes_fast.json",
+  "config": "fast (relative reads only)",
+  "baseline_gbm": {
+   "overall": 0.137692150030744,
+   "amenity_subset": 0.06538461538461539
+  },
+  "best_blend": {
+   "lane": "ensemble_blend_cbp/rank_blend",
+   "overall": 0.18964797457444516
+  },
+  "momentum_reference": 0.012605042016806721,
+  "lanes": {
+   "baseline_plus_tourism": {
+    "overall": 0.14450194712031153,
+    "delta_vs_baseline": 0.006809797089567526,
+    "amenity_subset": 0.04615384615384615,
+    "delta_amenity_vs_baseline": -0.01923076923076924,
+    "vs_best_blend": -0.045146027454133625,
+    "verdict": "NULL (record, no full run)"
+   },
+   "baseline_plus_rent": {
+    "overall": 0.137692150030744,
+    "delta_vs_baseline": 0.0,
+    "amenity_subset": 0.06538461538461539,
+    "delta_amenity_vs_baseline": 0.0,
+    "vs_best_blend": -0.05195582454370115,
+    "verdict": "NULL (record, no full run)"
+   },
+   "baseline_plus_tourism_rent": {
+    "overall": 0.14450194712031153,
+    "delta_vs_baseline": 0.006809797089567526,
+    "amenity_subset": 0.04615384615384615,
+    "delta_amenity_vs_baseline": -0.01923076923076924,
+    "vs_best_blend": -0.045146027454133625,
+    "verdict": "NULL (record, no full run)"
+   }
+  }
+ },
+ "adopted_universe": {
+  "key": "B",
+  "rule": "density percentile <= 0.95 & population < 1M",
+  "adopted": "2026-09-09",
+  "scope": "report surfaces only"
+ }
+}

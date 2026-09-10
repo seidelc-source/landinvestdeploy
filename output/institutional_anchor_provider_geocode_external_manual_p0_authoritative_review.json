@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-06-06T01:36:25.073960+00:00",
+  "status": "p0_authoritative_review_has_accepted_rows",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "triage_external_followup": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_residual_triage_external_followup.csv",
+    "nppes_api": "https://npiregistry.cms.hhs.gov/api/",
+    "census_geocoder_api": "https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress",
+    "provider_site_url": "https://bbhsnet.com/contact-us/",
+    "davis_county_directory_url": "https://www.daviscountyutah.gov/docs/librariesprovider5/reports-and-assessments/2024-behavioral-health-directory.pdf"
+  },
+  "metrics": {
+    "target_priority": "P0",
+    "target_rows": 1,
+    "nppes_found_rows": 1,
+    "census_matched_rows": 1,
+    "authority_fips_mapped_rows": 1,
+    "reviewer_accept_rows": 1,
+    "held_rows": 0,
+    "accepted_candidate_counties": 1,
+    "production_model_rank_or_dashboard_change": false
+  },
+  "decision": "Prepared validator-ready reviewed results only for configured P0 rows with official NPPES address support, official Census county geographies, and recorded provider/county source URLs.",
+  "next_action": "Dry-run `scripts/accept_institutional_anchor_provider_geocode_external_manual_results.py` against the authoritative reviewed-results file, apply only if accepted metrics and conflicts are clean, then rebuild institutional source-maturity artifacts.",
+  "outputs": {
+    "nppes_rows": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_nppes_rows.csv",
+    "census_rows": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_census_rows.csv",
+    "review_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_review.csv",
+    "validator_results_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_results.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_review.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_review.md"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "generated_at": "2026-06-03T21:07:34.613775+00:00",
+  "status": "auto_reuse_county_closeout_candidates_ready_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "source": {
+    "census_url": "https://geocoding.geo.census.gov/geocoder/geographies/addressbatch",
+    "benchmark": "Public_AR_Current",
+    "vintage": "Current_Current",
+    "documentation": "https://geocoding.geo.census.gov/geocoder/Geocoding_Services_API.html"
+  },
+  "inputs": {
+    "spotcheck_acceptance_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_spotcheck_acceptance.csv"
+  },
+  "metrics": {
+    "open_spotcheck_rows": 25,
+    "open_spotcheck_address_keys": 16,
+    "open_spotcheck_counties": 12,
+    "census_attempt_rows": 66,
+    "census_submitted": true,
+    "census_result_rows": 66,
+    "census_match_attempt_rows": 46,
+    "county_closeout_candidate_rows": 17,
+    "strict_census_current_fips_match_rows": 15,
+    "local_same_zip_single_open_fips_candidate_rows": 2,
+    "snapshot_only_support_rows": 8,
+    "conflict_rows": 0,
+    "ambiguous_zip_county_rows": 0,
+    "unresolved_rows": 0,
+    "operator_review_remaining_rows": 8,
+    "packet_rows": 13
+  },
+  "status_counts": {
+    "county_closeout_candidate_census_matches_current_fips": 15,
+    "snapshot_only_support_current_fips_not_filing_street": 8,
+    "county_closeout_candidate_local_same_zip_single_open_fips": 2
+  },
+  "submit_error": "",
+  "decision": "County-level closeout evidence is staged for operator review only. Street-level point-in-time truth and SEC source promotion remain blocked until explicit review gates pass.",
+  "next_action": "Review strict Census same-county rows first, then local same-ZIP single-county candidates; keep conflicts, ambiguous ZIPs, and snapshot-only support in manual or external geocode review.",
+  "outputs": {
+    "census_input": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_census_input.csv",
+    "attempts_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_attempts.csv",
+    "raw_results_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_raw_results.csv",
+    "candidates_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_candidates.csv",
+    "packet_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_packet.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout.md"
+  }
+}

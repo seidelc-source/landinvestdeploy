@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-06-03T20:51:31.863465+00:00",
+  "status": "auto_reuse_spotcheck_partially_accepted_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "auto_reuse_spotcheck_queue": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_spotcheck_queue.csv"
+  },
+  "metrics": {
+    "auto_reuse_queue_rows": 203,
+    "accepted_spotcheck_rows": 178,
+    "open_spotcheck_rows": 25,
+    "accepted_counties": 44,
+    "open_counties": 12,
+    "accepted_share": 0.8768472906403941,
+    "low_priority_rows": 101,
+    "medium_priority_rows": 37,
+    "high_priority_rows": 65,
+    "accepted_low_priority_rows": 101,
+    "accepted_medium_priority_rows": 37,
+    "accepted_high_priority_rows": 40,
+    "open_high_priority_rows": 25
+  },
+  "acceptance_status_counts": {
+    "accepted_normalized_street_match": 113,
+    "accepted_parsed_street_embedded_in_snapshot": 20,
+    "accepted_parser_noise_snapshot_tokens_present": 1,
+    "accepted_same_street_number_unit_variation": 14,
+    "accepted_snapshot_street_embedded_in_parse": 30,
+    "operator_review_required_street_mismatch_same_city_zip": 25
+  },
+  "open_priority_counts": {
+    "high": 25
+  },
+  "decision": "Accept only auto snapshot reuses with strong same-street, same-building, or parser-noise evidence. Keep true street-change rows open for operator review before SEC source promotion.",
+  "next_action": "Review the remaining open same-city/state/ZIP street mismatches, then rerun SEC source maturity. Do not promote SEC HQ evidence while current-address snapshot semantics remain unresolved.",
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_spotcheck_acceptance.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_spotcheck_acceptance.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_spotcheck_acceptance.md"
+  }
+}

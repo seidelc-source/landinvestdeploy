@@ -1,0 +1,217 @@
+fips,county_name,year,sec_point_in_time_hq_company_count,sec_point_in_time_hq_filing_count,sec_point_in_time_hq_companies,sec_point_in_time_hq_tickers,sec_point_in_time_hq_ciks,sec_point_in_time_hq_source_queue_rows,sec_point_in_time_hq_mean_geocode_confidence,candidate_status,production_change_allowed
+06059,Orange County,2003,1,1,BRIDGFORD FOODS CORP,BRID,0000014177,sec_pit_0044,1.0,report_only_candidate_pending_source_maturity_gate,False
+28049,"Hinds County, Mississippi",2003,1,2,CAL-MAINE FOODS INC,CALM,0000016160,sec_pit_0262; sec_pit_0065,0.88,report_only_candidate_pending_source_maturity_gate,False
+37035,"Catawba County, North Carolina",2004,1,1,AIR T INC,AIRT,0000353184,sec_pit_0009,0.92,report_only_candidate_pending_source_maturity_gate,False
+48453,"Travis County, Texas",2004,1,1,ASURE SOFTWARE INC,ASUR,0000884144,sec_pit_0019,0.92,report_only_candidate_pending_source_maturity_gate,False
+06059,"Orange County, California",2006,1,1,"Clean Energy Technologies, Inc.",CETY,0001329606,sec_pit_0294,0.92,report_only_candidate_pending_source_maturity_gate,False
+34027,Morris County,2006,1,1,"B&G Foods, Inc.",BGS,0001278027,sec_pit_0036,1.0,report_only_candidate_pending_source_maturity_gate,False
+39035,Cuyahoga County,2006,1,1,"ENERGY FOCUS, INC/DE",EFOI,0000924168,sec_pit_0337,1.0,report_only_candidate_pending_source_maturity_gate,False
+06059,"Orange County, California",2007,1,1,"Clean Energy Technologies, Inc.",CETY,0001329606,sec_pit_0101,0.92,report_only_candidate_pending_source_maturity_gate,False
+34027,Morris County,2007,1,1,"B&G Foods, Inc.",BGS,0001278027,sec_pit_0037,1.0,report_only_candidate_pending_source_maturity_gate,False
+36061,"New York County, New York",2007,1,1,BlackRock Energy & Resources Trust,BGR,0001306550,sec_pit_0253,0.92,report_only_candidate_pending_source_maturity_gate,False
+39035,Cuyahoga County,2007,1,1,"ENERGY FOCUS, INC/DE",EFOI,0000924168,sec_pit_0142,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2007,1,1,"Cheniere Energy Partners, L.P.",CQP,0001383650,sec_pit_0285,1.0,report_only_candidate_pending_source_maturity_gate,False
+32510,"Carson City, Nevada",2008,1,1,"Big Digital Energy, Inc.",BGDE,0001218683,sec_pit_0249,0.92,report_only_candidate_pending_source_maturity_gate,False
+36103,Suffolk County,2008,1,2,AIR INDUSTRIES GROUP,AIRI,0001009891,sec_pit_0006; sec_pit_0007,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2008,1,1,"Cheniere Energy Partners, L.P.",CQP,0001383650,sec_pit_0090,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,"Harris County, Texas",2008,1,1,"CAMBER ENERGY, INC.",CEIN,0001309082,sec_pit_0067,0.92,report_only_candidate_pending_source_maturity_gate,False
+32510,"Carson City, Nevada",2009,1,1,"Big Digital Energy, Inc.",BGDE,0001218683,sec_pit_0054,0.92,report_only_candidate_pending_source_maturity_gate,False
+36059,"Nassau County, New York",2009,1,1,Data Storage Corp,DTST,0001419951,sec_pit_0130,0.92,report_only_candidate_pending_source_maturity_gate,False
+48157,Fort Bend County,2009,1,1,CVR ENERGY INC,CVI,0001376139,sec_pit_0084,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2009,1,1,BLUE DOLPHIN ENERGY CO,BDCO,0000793306,sec_pit_0041,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,"Harris County, Texas",2009,2,2,"Bimergen Energy Corp; CAMBER ENERGY, INC.",BESS; CEIN,0001066764; 0001309082,sec_pit_0056; sec_pit_0068,0.9,report_only_candidate_pending_source_maturity_gate,False
+06059,"Orange County, California",2010,1,1,Clean Energy Fuels Corp.,CLNE,0001368265,sec_pit_0292,0.92,report_only_candidate_pending_source_maturity_gate,False
+06085,Santa Clara County,2010,1,1,ALPHA & OMEGA SEMICONDUCTOR Ltd,AOSL,0001387467,sec_pit_0015,1.0,report_only_candidate_pending_source_maturity_gate,False
+36061,"New York County, New York",2010,1,1,BlackRock Energy & Resources Trust,BGR,0001306550,sec_pit_0255,0.82,report_only_candidate_pending_source_maturity_gate,False
+36119,Westchester County,2010,2,6,GABELLI UTILITY TRUST; GABELLI GLOBAL UTILITY & INCOME TRUST,GUT; GLU,0001080720; 0001282957,sec_pit_0391; sec_pit_0392; sec_pit_0393; sec_pit_0387; sec_pit_0388; sec_pit_0389,1.0,report_only_candidate_pending_source_maturity_gate,False
+06001,Alameda County,2011,1,1,"Energy Recovery, Inc.",ERII,0001421517,sec_pit_0349,1.0,report_only_candidate_pending_source_maturity_gate,False
+06037,"Los Angeles County, California",2011,1,1,"Capstone Energy Plus, Inc.",CGEH,0001009759,sec_pit_0281,0.92,report_only_candidate_pending_source_maturity_gate,False
+06059,"Orange County, California",2011,1,1,Clean Energy Fuels Corp.,CLNE,0001368265,sec_pit_0099,0.92,report_only_candidate_pending_source_maturity_gate,False
+09190,Western Connecticut Planning Region,2011,1,1,"Chefs' Warehouse, Inc.",CHEF,0001517175,sec_pit_0283,1.0,report_only_candidate_pending_source_maturity_gate,False
+29189,"St. Louis County, Missouri",2011,1,1,BUILD-A-BEAR WORKSHOP INC,BBW,0001113809,sec_pit_0046,0.92,report_only_candidate_pending_source_maturity_gate,False
+37183,"Wake County, North Carolina",2011,1,1,BARFRESH FOOD GROUP INC.,BRFH,0001487197,sec_pit_0236,0.92,report_only_candidate_pending_source_maturity_gate,False
+47065,Hamilton County,2011,1,1,"COVENANT LOGISTICS GROUP, INC.",CVLG,0000928658,sec_pit_0277,1.0,report_only_candidate_pending_source_maturity_gate,False
+48113,"Dallas County, Texas",2011,1,1,Energy Transfer LP,ET,0001276187,sec_pit_0353,0.92,report_only_candidate_pending_source_maturity_gate,False
+06001,Alameda County,2012,1,1,"Energy Recovery, Inc.",ERII,0001421517,sec_pit_0150,1.0,report_only_candidate_pending_source_maturity_gate,False
+06037,"Los Angeles County, California",2012,1,1,"Capstone Energy Plus, Inc.",CGEH,0001009759,sec_pit_0086,0.92,report_only_candidate_pending_source_maturity_gate,False
+06097,"Sonoma County, California",2012,1,1,"Enphase Energy, Inc.",ENPH,0001463101,sec_pit_0360,0.92,report_only_candidate_pending_source_maturity_gate,False
+08031,"Denver County, Colorado",2012,1,1,BARFRESH FOOD GROUP INC.,BRFH,0001487197,sec_pit_0039,0.92,report_only_candidate_pending_source_maturity_gate,False
+08069,"Larimer County, Colorado",2012,1,1,ADVANCED ENERGY INDUSTRIES INC,AEIS,0000927003,sec_pit_0004,0.95,report_only_candidate_pending_source_maturity_gate,False
+09001,"Fairfield County, Connecticut",2012,1,1,FUELCELL ENERGY INC,FCEL,0000886128,sec_pit_0178,0.88,report_only_candidate_pending_source_maturity_gate,False
+09190,Western Connecticut Planning Region,2012,1,1,"Chefs' Warehouse, Inc.",CHEF,0001517175,sec_pit_0088,1.0,report_only_candidate_pending_source_maturity_gate,False
+29189,"St. Louis County, Missouri",2012,1,1,BUILD-A-BEAR WORKSHOP INC,BBW,0001113809,sec_pit_0047,0.92,report_only_candidate_pending_source_maturity_gate,False
+47065,Hamilton County,2012,1,1,"COVENANT LOGISTICS GROUP, INC.",CVLG,0000928658,sec_pit_0082,1.0,report_only_candidate_pending_source_maturity_gate,False
+47187,"Williamson County, Tennessee",2012,1,1,"Delek Logistics Partners, LP",DKL,0001552797,sec_pit_0327,0.74,report_only_candidate_pending_source_maturity_gate,False
+48113,"Dallas County, Texas",2012,1,1,Energy Transfer LP,ET,0001276187,sec_pit_0154,0.92,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2012,1,1,GENESIS ENERGY LP,GEL,0001022321,sec_pit_0397,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,"Harris County, Texas",2012,2,2,"FORUM ENERGY TECHNOLOGIES, INC.; Amplify Energy Corp.",FET; AMPY,0001401257; 0001533924,sec_pit_0374; sec_pit_0229,0.9,report_only_candidate_pending_source_maturity_gate,False
+06097,"Sonoma County, California",2013,1,1,"Enphase Energy, Inc.",ENPH,0001463101,sec_pit_0159,0.92,report_only_candidate_pending_source_maturity_gate,False
+13275,Thomas County,2013,1,1,FLOWERS FOODS INC,FLO,0001128928,sec_pit_0372,1.0,report_only_candidate_pending_source_maturity_gate,False
+29189,"St. Louis County, Missouri",2013,1,1,BUILD-A-BEAR WORKSHOP INC,BBW,0001113809,sec_pit_0048,0.92,report_only_candidate_pending_source_maturity_gate,False
+36061,New York County,2013,1,2,ClearBridge Energy Midstream Opportunity Fund Inc.,EMO,0001517518,sec_pit_0296; sec_pit_0297,1.0,report_only_candidate_pending_source_maturity_gate,False
+47187,Williamson County,2013,1,1,TRACTOR SUPPLY CO /DE/,TSCO,0000916365,sec_pit_0405,1.0,report_only_candidate_pending_source_maturity_gate,False
+47187,"Williamson County, Tennessee",2013,1,1,"Delek Logistics Partners, LP",DKL,0001552797,sec_pit_0132,0.74,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2013,2,2,GENESIS ENERGY LP; Chord Energy Corp,GEL; CHRD,0001022321; 0001486159,sec_pit_0188; sec_pit_0094,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,"Harris County, Texas",2013,2,2,"FORUM ENERGY TECHNOLOGIES, INC.; Amplify Energy Corp.",FET; AMPY,0001401257; 0001533924,sec_pit_0173; sec_pit_0030,0.9,report_only_candidate_pending_source_maturity_gate,False
+55025,Dane County,2013,1,1,ALLIANT ENERGY CORP,LNT,0000352541,sec_pit_0214,1.0,report_only_candidate_pending_source_maturity_gate,False
+05143,"Washington County, Arkansas",2014,1,2,"TYSON FOODS, INC.",TSN,0000100493,sec_pit_0407; sec_pit_0198,0.88,report_only_candidate_pending_source_maturity_gate,False
+08059,Jefferson County,2014,1,1,ENERGY FUELS INC,UUUU,0001385849,sec_pit_0144,1.0,report_only_candidate_pending_source_maturity_gate,False
+13275,Thomas County,2014,1,1,FLOWERS FOODS INC,FLO,0001128928,sec_pit_0171,1.0,report_only_candidate_pending_source_maturity_gate,False
+25013,Hampden County,2014,1,1,EVERSOURCE ENERGY,ES,0000072741,sec_pit_0341,1.0,report_only_candidate_pending_source_maturity_gate,False
+36061,New York County,2014,1,1,ClearBridge Energy Midstream Opportunity Fund Inc.,EMO,0001517518,sec_pit_0298,1.0,report_only_candidate_pending_source_maturity_gate,False
+40109,"Oklahoma County, Oklahoma",2014,1,1,DEVON ENERGY CORP/DE,DVN,0001090012,sec_pit_0119,0.92,report_only_candidate_pending_source_maturity_gate,False
+47037,Davidson County,2014,1,1,DOLLAR GENERAL CORP,DG,0000029534,sec_pit_0121,1.0,report_only_candidate_pending_source_maturity_gate,False
+47187,Williamson County,2014,1,1,TRACTOR SUPPLY CO /DE/,TSCO,0000916365,sec_pit_0196,1.0,report_only_candidate_pending_source_maturity_gate,False
+48113,Dallas County,2014,1,1,ATMOS ENERGY CORP,ATO,0000731802,sec_pit_0021,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2014,1,1,Chord Energy Corp,CHRD,0001486159,sec_pit_0095,1.0,report_only_candidate_pending_source_maturity_gate,False
+55025,Dane County,2014,1,1,ALLIANT ENERGY CORP,LNT,0000352541,sec_pit_0013,1.0,report_only_candidate_pending_source_maturity_gate,False
+06085,Santa Clara County,2015,1,2,Apple Inc.,AAPL,0000320193,sec_pit_0231; sec_pit_0032,0.98,report_only_candidate_pending_source_maturity_gate,False
+25013,Hampden County,2015,1,1,EVERSOURCE ENERGY,ES,0000072741,sec_pit_0146,1.0,report_only_candidate_pending_source_maturity_gate,False
+26075,Jackson County,2015,1,1,CMS ENERGY CORP,CMS,0000811156,sec_pit_0076,0.98,report_only_candidate_pending_source_maturity_gate,False
+47037,Davidson County,2015,1,1,DOLLAR GENERAL CORP,DG,0000029534,sec_pit_0122,1.0,report_only_candidate_pending_source_maturity_gate,False
+47059,"Greene County, Tennessee",2015,1,1,FORWARD AIR CORP,FWRD,0000912728,sec_pit_0175,0.92,report_only_candidate_pending_source_maturity_gate,False
+47157,Shelby County,2015,1,2,FEDEX CORP,FDX,0001048911,sec_pit_0370; sec_pit_0169,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2015,2,2,"Cheniere Energy, Inc.; CENTERPOINT ENERGY INC",LNG; CNP,0000003570; 0001130310,sec_pit_0287; sec_pit_0070,1.0,report_only_candidate_pending_source_maturity_gate,False
+34021,Mercer County,2016,1,1,"Clearway Energy, Inc.",CWEN,0001567683,sec_pit_0300,1.0,report_only_candidate_pending_source_maturity_gate,False
+40109,"Oklahoma County, Oklahoma",2016,1,1,EXPAND ENERGY Corp,EXE,0000895126,sec_pit_0148,0.92,report_only_candidate_pending_source_maturity_gate,False
+42077,"Lehigh County, Pennsylvania",2016,1,1,"Air Products & Chemicals, Inc.",APD,0000002969,sec_pit_0227,0.88,report_only_candidate_pending_source_maturity_gate,False
+47059,"Greene County, Tennessee",2016,1,1,FORWARD AIR CORP,FWRD,0000912728,sec_pit_0176,0.92,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2016,1,1,"Cheniere Energy, Inc.",LNG,0000003570,sec_pit_0092,1.0,report_only_candidate_pending_source_maturity_gate,False
+48329,Midland County,2016,1,1,"Diamondback Energy, Inc.",FANG,0001539838,sec_pit_0329,1.0,report_only_candidate_pending_source_maturity_gate,False
+53033,King County,2016,1,1,"ALASKA AIR GROUP, INC.",ALK,0000766421,sec_pit_0212,0.95,report_only_candidate_pending_source_maturity_gate,False
+05007,Benton County,2017,1,1,HUNT J B TRANSPORT SERVICES INC,JBHT,0000728535,sec_pit_0399,1.0,report_only_candidate_pending_source_maturity_gate,False
+16001,Ada County,2017,1,2,MICRON TECHNOLOGY INC,MU,0000723125,sec_pit_0401; sec_pit_0192,1.0,report_only_candidate_pending_source_maturity_gate,False
+34021,Mercer County,2017,1,1,"Clearway Energy, Inc.",CWEN,0001567683,sec_pit_0103,1.0,report_only_candidate_pending_source_maturity_gate,False
+47157,Shelby County,2017,1,1,AUTOZONE INC,AZO,0000866787,sec_pit_0025,1.0,report_only_candidate_pending_source_maturity_gate,False
+48329,Midland County,2017,1,1,"Diamondback Energy, Inc.",FANG,0001539838,sec_pit_0134,1.0,report_only_candidate_pending_source_maturity_gate,False
+51760,Richmond city,2017,1,1,"DOMINION ENERGY, INC",D,0000715957,sec_pit_0319,1.0,report_only_candidate_pending_source_maturity_gate,False
+53033,King County,2017,1,1,"ALASKA AIR GROUP, INC.",ALK,0000766421,sec_pit_0011,0.95,report_only_candidate_pending_source_maturity_gate,False
+01069,Houston County,2018,1,2,"Construction Partners, Inc.",ROAD,0001718227,sec_pit_0306; sec_pit_0109,1.0,report_only_candidate_pending_source_maturity_gate,False
+06085,"Santa Clara County, California",2018,2,2,"Tesla, Inc.; Bloom Energy Corp",TSLA; BE,0001318605; 0001664703,sec_pit_0409; sec_pit_0257,0.92,report_only_candidate_pending_source_maturity_gate,False
+12086,"Miami-Dade County, Florida",2018,1,1,Blue Star Foods Corp.,BSFC,0001730773,sec_pit_0060,0.92,report_only_candidate_pending_source_maturity_gate,False
+12099,Palm Beach County,2018,1,1,Blue Star Foods Corp.,BSFC,0001730773,sec_pit_0259,0.95,report_only_candidate_pending_source_maturity_gate,False
+26163,Wayne County,2018,1,1,DTE ENERGY CO,DTE,0000936340,sec_pit_0128,0.98,report_only_candidate_pending_source_maturity_gate,False
+34013,Essex County,2018,1,2,AUTOMATIC DATA PROCESSING INC,ADP,0000008670,sec_pit_0224; sec_pit_0023,1.0,report_only_candidate_pending_source_maturity_gate,False
+47157,Shelby County,2018,1,1,AUTOZONE INC,AZO,0000866787,sec_pit_0026,1.0,report_only_candidate_pending_source_maturity_gate,False
+51760,Richmond city,2018,1,1,"DOMINION ENERGY, INC",D,0000715957,sec_pit_0124,1.0,report_only_candidate_pending_source_maturity_gate,False
+06085,Santa Clara County,2019,1,1,Bloom Energy Corp,BE,0001664703,sec_pit_0058,1.0,report_only_candidate_pending_source_maturity_gate,False
+06085,"Santa Clara County, California",2019,1,1,"Tesla, Inc.",TSLA,0001318605,sec_pit_0200,0.92,report_only_candidate_pending_source_maturity_gate,False
+12086,"Miami-Dade County, Florida",2019,1,1,Blue Star Foods Corp.,BSFC,0001730773,sec_pit_0061,0.92,report_only_candidate_pending_source_maturity_gate,False
+37119,Mecklenburg County,2019,1,1,Duke Energy CORP,DUK,0001326160,sec_pit_0140,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,"Harris County, Texas",2019,1,1,Epsilon Energy Ltd.,EPSN,0001726126,sec_pit_0163,0.86,report_only_candidate_pending_source_maturity_gate,False
+06085,Santa Clara County,2020,1,1,NVIDIA CORP,NVDA,0001045810,sec_pit_0403,1.0,report_only_candidate_pending_source_maturity_gate,False
+06085,"Santa Clara County, California",2020,1,1,"Tesla, Inc.",TSLA,0001318605,sec_pit_0201,0.92,report_only_candidate_pending_source_maturity_gate,False
+36061,"New York County, New York",2020,1,1,"Eos Energy Enterprises, Inc.",EOSE,0001805077,sec_pit_0362,0.92,report_only_candidate_pending_source_maturity_gate,False
+53033,King County,2020,1,1,AMAZON COM INC,AMZN,0001018724,sec_pit_0218,1.0,report_only_candidate_pending_source_maturity_gate,False
+06037,Los Angeles County,2021,1,1,"Consensus Cloud Solutions, Inc.",CCSI,0001866633,sec_pit_0302,1.0,report_only_candidate_pending_source_maturity_gate,False
+06085,Santa Clara County,2021,1,1,NVIDIA CORP,NVDA,0001045810,sec_pit_0194,1.0,report_only_candidate_pending_source_maturity_gate,False
+18097,"Marion County, Indiana",2021,1,1,"Energy Vault Holdings, Inc.",NRGV,0001828536,sec_pit_0156,0.92,report_only_candidate_pending_source_maturity_gate,False
+34023,Middlesex County,2021,1,1,"Eos Energy Enterprises, Inc.",EOSE,0001805077,sec_pit_0161,1.0,report_only_candidate_pending_source_maturity_gate,False
+36061,"New York County, New York",2021,2,2,"Dragonfly Energy Holdings Corp.; GCT Semiconductor Holding, Inc.",DFLI; GCTS,0001847986; 0001851961,sec_pit_0333; sec_pit_0395,0.9,report_only_candidate_pending_source_maturity_gate,False
+51013,Arlington County,2021,1,1,"Fluence Energy, Inc.",FLNC,0001868941,sec_pit_0180,1.0,report_only_candidate_pending_source_maturity_gate,False
+53033,King County,2021,1,1,AMAZON COM INC,AMZN,0001018724,sec_pit_0017,1.0,report_only_candidate_pending_source_maturity_gate,False
+06037,Los Angeles County,2022,1,1,"Consensus Cloud Solutions, Inc.",CCSI,0001866633,sec_pit_0105,1.0,report_only_candidate_pending_source_maturity_gate,False
+24510,Baltimore city,2022,1,1,Constellation Energy Corp,CEG,0001868275,sec_pit_0107,0.95,report_only_candidate_pending_source_maturity_gate,False
+32003,"Clark County, Nevada",2022,1,1,Barrel Energy Inc.,BRLL,0001631463,sec_pit_0051,0.92,report_only_candidate_pending_source_maturity_gate,False
+36061,"New York County, New York",2022,1,1,"GCT Semiconductor Holding, Inc.",GCTS,0001851961,sec_pit_0186,0.92,report_only_candidate_pending_source_maturity_gate,False
+40143,Tulsa County,2022,1,1,"Circle Energy, Inc./NV",CRCE,0001911467,sec_pit_0290,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2022,1,1,Crescent Energy Co,CRGY,0001866175,sec_pit_0111,1.0,report_only_candidate_pending_source_maturity_gate,False
+48339,Montgomery County,2022,1,1,"Excelerate Energy, Inc.",EE,0001888447,sec_pit_0368,1.0,report_only_candidate_pending_source_maturity_gate,False
+37119,"Mecklenburg County, North Carolina",2023,1,1,CHEETAH NET SUPPLY CHAIN SERVICE INC.,CTNT,0001951667,sec_pit_0269,0.92,report_only_candidate_pending_source_maturity_gate,False
+40143,Tulsa County,2023,1,1,"Circle Energy, Inc./NV",CRCE,0001911467,sec_pit_0097,1.0,report_only_candidate_pending_source_maturity_gate,False
+41017,Deschutes County,2023,1,1,BranchOut Food Inc.,BOF,0001962481,sec_pit_0260,1.0,report_only_candidate_pending_source_maturity_gate,False
+48339,Montgomery County,2023,1,1,"Excelerate Energy, Inc.",EE,0001888447,sec_pit_0167,1.0,report_only_candidate_pending_source_maturity_gate,False
+48453,Travis County,2023,1,1,Atlas Energy Solutions Inc.,AESI,0001984060,sec_pit_0233,1.0,report_only_candidate_pending_source_maturity_gate,False
+01117,Shelby County,2024,1,1,Diversified Energy Co,DEC,0001922446,sec_pit_0136,1.0,report_only_candidate_pending_source_maturity_gate,False
+36047,"Kings County, New York",2024,1,1,DT Cloud Star Acquisition Corp,DTSQ,0002017950,sec_pit_0321,0.92,report_only_candidate_pending_source_maturity_gate,False
+37119,"Mecklenburg County, North Carolina",2024,1,1,CHEETAH NET SUPPLY CHAIN SERVICE INC.,CTNT,0001951667,sec_pit_0074,0.92,report_only_candidate_pending_source_maturity_gate,False
+38015,Burleigh County,2024,1,1,"Everus Construction Group, Inc.",ECG,0002015845,sec_pit_0366,1.0,report_only_candidate_pending_source_maturity_gate,False
+41017,Deschutes County,2024,1,1,BranchOut Food Inc.,BOF,0001962481,sec_pit_0063,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2024,1,1,CO2 Energy Transition Corp.,NOEM,0001956648,sec_pit_0273,1.0,report_only_candidate_pending_source_maturity_gate,False
+48453,Travis County,2024,1,1,Atlas Energy Solutions Inc.,AESI,0001984060,sec_pit_0034,1.0,report_only_candidate_pending_source_maturity_gate,False
+01069,Houston County,2025,1,1,"Construction Partners, Inc.",ROAD,0001718227,sec_pit_0110,1.0,report_only_candidate_pending_source_maturity_gate,False
+05143,"Washington County, Arkansas",2025,1,1,"TYSON FOODS, INC.",TSN,0000100493,sec_pit_0199,0.92,report_only_candidate_pending_source_maturity_gate,False
+06037,Los Angeles County,2025,1,1,"Capstone Energy Plus, Inc.",CGEH,0001009759,sec_pit_0087,1.0,report_only_candidate_pending_source_maturity_gate,False
+06059,Orange County,2025,1,2,"Clean Energy Technologies, Inc.",CETY,0001329606,sec_pit_0102; sec_pit_0295,1.0,report_only_candidate_pending_source_maturity_gate,False
+06085,Santa Clara County,2025,2,2,Apple Inc.; ALPHA & OMEGA SEMICONDUCTOR Ltd,AAPL; AOSL,0000320193; 0001387467,sec_pit_0033; sec_pit_0016,0.99,report_only_candidate_pending_source_maturity_gate,False
+09190,Western Connecticut Planning Region,2025,1,1,FUELCELL ENERGY INC,FCEL,0000886128,sec_pit_0179,1.0,report_only_candidate_pending_source_maturity_gate,False
+16001,Ada County,2025,1,1,MICRON TECHNOLOGY INC,MU,0000723125,sec_pit_0193,1.0,report_only_candidate_pending_source_maturity_gate,False
+28089,Madison County,2025,1,1,CAL-MAINE FOODS INC,CALM,0000016160,sec_pit_0066,1.0,report_only_candidate_pending_source_maturity_gate,False
+34013,Essex County,2025,1,1,AUTOMATIC DATA PROCESSING INC,ADP,0000008670,sec_pit_0024,1.0,report_only_candidate_pending_source_maturity_gate,False
+36047,"Kings County, New York",2025,1,1,DT Cloud Star Acquisition Corp,DTSQ,0002017950,sec_pit_0126,0.92,report_only_candidate_pending_source_maturity_gate,False
+36059,Nassau County,2025,1,1,"Beyond Air, Inc.",XAIR,0001641631,sec_pit_0053,1.0,report_only_candidate_pending_source_maturity_gate,False
+36061,"New York County, New York",2025,1,1,Energy Transition Special Opportunities,ETSS,0002085932,sec_pit_0357,0.92,report_only_candidate_pending_source_maturity_gate,False
+37119,Mecklenburg County,2025,1,1,AIR T INC,AIRT,0000353184,sec_pit_0010,1.0,report_only_candidate_pending_source_maturity_gate,False
+38015,Burleigh County,2025,1,1,"Everus Construction Group, Inc.",ECG,0002015845,sec_pit_0165,1.0,report_only_candidate_pending_source_maturity_gate,False
+42077,Lehigh County,2025,1,1,"Air Products & Chemicals, Inc.",APD,0000002969,sec_pit_0029,0.95,report_only_candidate_pending_source_maturity_gate,False
+47157,Shelby County,2025,2,2,AUTOZONE INC; FEDEX CORP,AZO; FDX,0000866787; 0001048911,sec_pit_0027; sec_pit_0170,1.0,report_only_candidate_pending_source_maturity_gate,False
+48113,Dallas County,2025,1,1,ATMOS ENERGY CORP,ATO,0000731802,sec_pit_0022,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2025,1,1,CO2 Energy Transition Corp.,NOEM,0001956648,sec_pit_0078,1.0,report_only_candidate_pending_source_maturity_gate,False
+48453,"Travis County, Texas",2025,1,2,Alussa Energy Acquisition Corp. II,ALUB,0002041493,sec_pit_0504; sec_pit_0502,0.88,report_only_candidate_pending_source_maturity_gate,False
+51013,Arlington County,2025,1,1,"Fluence Energy, Inc.",FLNC,0001868941,sec_pit_0181,1.0,report_only_candidate_pending_source_maturity_gate,False
+54011,Cabell County,2025,1,1,Energy Services of America CORP,ESOA,0001357971,sec_pit_0153,1.0,report_only_candidate_pending_source_maturity_gate,False
+01069,Houston County,2026,1,1,"Construction Partners, Inc.",ROAD,0001718227,sec_pit_0307,1.0,report_only_candidate_pending_source_maturity_gate,False
+01117,Shelby County,2026,1,3,Diversified Energy Co,DEC,0001922446,sec_pit_0137; sec_pit_0331; sec_pit_0332,1.0,report_only_candidate_pending_source_maturity_gate,False
+05007,Benton County,2026,2,3,Walmart Inc.; HUNT J B TRANSPORT SERVICES INC,WMT; JBHT,0000104169; 0000728535,sec_pit_0205; sec_pit_0410; sec_pit_0400,0.9866666666666667,report_only_candidate_pending_source_maturity_gate,False
+05143,"Washington County, Arkansas",2026,1,1,"TYSON FOODS, INC.",TSN,0000100493,sec_pit_0408,0.92,report_only_candidate_pending_source_maturity_gate,False
+06001,Alameda County,2026,2,4,"Energy Recovery, Inc.; Enphase Energy, Inc.",ERII; ENPH,0001421517; 0001463101,sec_pit_0151; sec_pit_0350; sec_pit_0160; sec_pit_0361,1.0,report_only_candidate_pending_source_maturity_gate,False
+06037,Los Angeles County,2026,3,5,"Capstone Energy Plus, Inc.; BARFRESH FOOD GROUP INC.; Consensus Cloud Solutions, Inc.",CGEH; BRFH; CCSI,0001009759; 0001487197; 0001866633,sec_pit_0282; sec_pit_0040; sec_pit_0237; sec_pit_0106; sec_pit_0303,1.0,report_only_candidate_pending_source_maturity_gate,False
+06059,Orange County,2026,3,6,Bimergen Energy Corp; Clean Energy Fuels Corp.; CHEETAH NET SUPPLY CHAIN SERVICE INC.,BESS; CLNE; CTNT,0001066764; 0001368265; 0001951667,sec_pit_0057; sec_pit_0252; sec_pit_0100; sec_pit_0293; sec_pit_0075; sec_pit_0270,1.0,report_only_candidate_pending_source_maturity_gate,False
+06085,Santa Clara County,2026,4,7,"Apple Inc.; NVIDIA CORP; Bloom Energy Corp; GCT Semiconductor Holding, Inc.",AAPL; NVDA; BE; GCTS,0000320193; 0001045810; 0001664703; 0001851961,sec_pit_0232; sec_pit_0195; sec_pit_0404; sec_pit_0059; sec_pit_0258; sec_pit_0187; sec_pit_0396,0.9971428571428572,report_only_candidate_pending_source_maturity_gate,False
+06111,"Ventura County, California",2026,1,2,"Energy Vault Holdings, Inc.",NRGV,0001828536,sec_pit_0158; sec_pit_0359,0.92,report_only_candidate_pending_source_maturity_gate,False
+08031,Denver County,2026,1,1,ADVANCED ENERGY INDUSTRIES INC,AEIS,0000927003,sec_pit_0208,1.0,report_only_candidate_pending_source_maturity_gate,False
+08031,"Denver County, Colorado",2026,1,2,ADVANCED ENERGY INDUSTRIES INC,AEIS,0000927003,sec_pit_0005; sec_pit_0207,0.95,report_only_candidate_pending_source_maturity_gate,False
+08059,Jefferson County,2026,1,3,ENERGY FUELS INC,UUUU,0001385849,sec_pit_0145; sec_pit_0339; sec_pit_0340,1.0,report_only_candidate_pending_source_maturity_gate,False
+09190,Western Connecticut Planning Region,2026,3,6,"FUELCELL ENERGY INC; Chefs' Warehouse, Inc.; Energy Transition Special Opportunities",FCEL; CHEF; ETSS,0000886128; 0001517175; 0002085932,sec_pit_0377; sec_pit_0378; sec_pit_0089; sec_pit_0284; sec_pit_0355; sec_pit_0356,1.0,report_only_candidate_pending_source_maturity_gate,False
+10003,"New Castle County, Delaware",2026,1,2,"ACORN ENERGY, INC.",ACFN,0000880984,sec_pit_0003; sec_pit_0206,0.95,report_only_candidate_pending_source_maturity_gate,False
+12086,"Miami-Dade County, Florida",2026,1,1,Blue Star Foods Corp.,BSFC,0001730773,sec_pit_0062,0.92,report_only_candidate_pending_source_maturity_gate,False
+13121,Fulton County,2026,1,1,"DELTA AIR LINES, INC.",DAL,0000027904,sec_pit_0315,1.0,report_only_candidate_pending_source_maturity_gate,False
+13275,Thomas County,2026,1,2,FLOWERS FOODS INC,FLO,0001128928,sec_pit_0172; sec_pit_0373,1.0,report_only_candidate_pending_source_maturity_gate,False
+16001,Ada County,2026,1,1,MICRON TECHNOLOGY INC,MU,0000723125,sec_pit_0402,1.0,report_only_candidate_pending_source_maturity_gate,False
+24510,Baltimore city,2026,1,3,Constellation Energy Corp,CEG,0001868275,sec_pit_0108; sec_pit_0305; sec_pit_0304,0.9499999999999998,report_only_candidate_pending_source_maturity_gate,False
+25013,Hampden County,2026,1,2,EVERSOURCE ENERGY,ES,0000072741,sec_pit_0147; sec_pit_0342,1.0,report_only_candidate_pending_source_maturity_gate,False
+26075,Jackson County,2026,2,3,CONSUMERS ENERGY CO; CMS ENERGY CORP,CMS-PB; CMS,0000201533; 0000811156,sec_pit_0081; sec_pit_0276; sec_pit_0077; sec_pit_0271; sec_pit_0272,0.9800000000000001,report_only_candidate_pending_source_maturity_gate,False
+26163,Wayne County,2026,1,3,DTE ENERGY CO,DTE,0000936340,sec_pit_0129; sec_pit_0323; sec_pit_0324,0.98,report_only_candidate_pending_source_maturity_gate,False
+28089,Madison County,2026,1,1,CAL-MAINE FOODS INC,CALM,0000016160,sec_pit_0263,1.0,report_only_candidate_pending_source_maturity_gate,False
+29095,Jackson County,2026,1,2,"Custom Truck One Source, Inc.",CTOS,0001709682,sec_pit_0114; sec_pit_0311,1.0,report_only_candidate_pending_source_maturity_gate,False
+29510,"St. Louis city, Missouri",2026,1,1,BUILD-A-BEAR WORKSHOP INC,BBW,0001113809,sec_pit_0049,0.88,report_only_candidate_pending_source_maturity_gate,False
+32003,"Clark County, Nevada",2026,1,1,Barrel Energy Inc.,BRLL,0001631463,sec_pit_0246,0.82,report_only_candidate_pending_source_maturity_gate,False
+32031,Washoe County,2026,1,2,Dragonfly Energy Holdings Corp.,DFLI,0001847986,sec_pit_0139; sec_pit_0334,1.0,report_only_candidate_pending_source_maturity_gate,False
+32031,"Washoe County, Nevada",2026,1,2,Eagle Nuclear Energy Corp.,NUCL,0002089283,sec_pit_0346; sec_pit_0347,0.92,report_only_candidate_pending_source_maturity_gate,False
+34013,Essex County,2026,1,1,AUTOMATIC DATA PROCESSING INC,ADP,0000008670,sec_pit_0225,1.0,report_only_candidate_pending_source_maturity_gate,False
+34013,"Essex County, New Jersey",2026,1,1,"Allied Energy, Inc.",AGGI,0001109262,sec_pit_0501,0.92,report_only_candidate_pending_source_maturity_gate,False
+34021,Mercer County,2026,1,2,"Clearway Energy, Inc.",CWEN,0001567683,sec_pit_0104; sec_pit_0301,1.0,report_only_candidate_pending_source_maturity_gate,False
+34023,Middlesex County,2026,1,2,"Eos Energy Enterprises, Inc.",EOSE,0001805077,sec_pit_0162; sec_pit_0363,1.0,report_only_candidate_pending_source_maturity_gate,False
+34027,Morris County,2026,1,2,"B&G Foods, Inc.",BGS,0001278027,sec_pit_0038; sec_pit_0235,1.0,report_only_candidate_pending_source_maturity_gate,False
+36059,Nassau County,2026,1,1,"Beyond Air, Inc.",XAIR,0001641631,sec_pit_0248,1.0,report_only_candidate_pending_source_maturity_gate,False
+36061,New York County,2026,2,4,Data Storage Corp; DT Cloud Star Acquisition Corp,DTST; DTSQ,0001419951; 0002017950,sec_pit_0131; sec_pit_0326; sec_pit_0127; sec_pit_0322,0.9750000000000001,report_only_candidate_pending_source_maturity_gate,False
+36061,"New York County, New York",2026,1,1,Energy Transition Special Opportunities,ETSS,0002085932,sec_pit_0358,0.92,report_only_candidate_pending_source_maturity_gate,False
+36103,Suffolk County,2026,1,2,AIR INDUSTRIES GROUP,AIRI,0001009891,sec_pit_0008; sec_pit_0209,1.0,report_only_candidate_pending_source_maturity_gate,False
+36119,Westchester County,2026,2,2,GABELLI UTILITY TRUST; GABELLI GLOBAL UTILITY & INCOME TRUST,GUT; GLU,0001080720; 0001282957,sec_pit_0394; sec_pit_0390,1.0,report_only_candidate_pending_source_maturity_gate,False
+37119,Mecklenburg County,2026,2,4,AIR T INC; Duke Energy CORP,AIRT; DUK,0000353184; 0001326160,sec_pit_0211; sec_pit_0141; sec_pit_0335; sec_pit_0336,1.0,report_only_candidate_pending_source_maturity_gate,False
+38015,Burleigh County,2026,1,2,"Everus Construction Group, Inc.",ECG,0002015845,sec_pit_0166; sec_pit_0367,1.0,report_only_candidate_pending_source_maturity_gate,False
+39035,Cuyahoga County,2026,1,1,"ENERGY FOCUS, INC/DE",EFOI,0000924168,sec_pit_0143,1.0,report_only_candidate_pending_source_maturity_gate,False
+39035,"Cuyahoga County, Ohio",2026,1,1,"ENERGY FOCUS, INC/DE",EFOI,0000924168,sec_pit_0338,0.92,report_only_candidate_pending_source_maturity_gate,False
+40109,"Oklahoma County, Oklahoma",2026,2,2,EXPAND ENERGY Corp; DEVON ENERGY CORP/DE,EXE; DVN,0000895126; 0001090012,sec_pit_0149; sec_pit_0316,0.92,report_only_candidate_pending_source_maturity_gate,False
+40143,Tulsa County,2026,1,2,"Circle Energy, Inc./NV",CRCE,0001911467,sec_pit_0098; sec_pit_0291,1.0,report_only_candidate_pending_source_maturity_gate,False
+41017,Deschutes County,2026,1,1,BranchOut Food Inc.,BOF,0001962481,sec_pit_0261,1.0,report_only_candidate_pending_source_maturity_gate,False
+41017,"Deschutes County, Oregon",2026,1,1,BranchOut Food Inc.,BOF,0001962481,sec_pit_0064,0.92,report_only_candidate_pending_source_maturity_gate,False
+42007,Beaver County,2026,1,2,"Big Digital Energy, Inc.",BGDE,0001218683,sec_pit_0055; sec_pit_0250,1.0,report_only_candidate_pending_source_maturity_gate,False
+42077,Lehigh County,2026,1,1,"Air Products & Chemicals, Inc.",APD,0000002969,sec_pit_0228,0.95,report_only_candidate_pending_source_maturity_gate,False
+47037,Davidson County,2026,2,4,"DOLLAR GENERAL CORP; Delek Logistics Partners, LP",DG; DKL,0000029534; 0001552797,sec_pit_0123; sec_pit_0318; sec_pit_0133; sec_pit_0328,1.0,report_only_candidate_pending_source_maturity_gate,False
+47065,Hamilton County,2026,1,2,"COVENANT LOGISTICS GROUP, INC.",CVLG,0000928658,sec_pit_0083; sec_pit_0278,1.0,report_only_candidate_pending_source_maturity_gate,False
+47157,Shelby County,2026,3,4,"AUTOZONE INC; FEDEX CORP; FedEx Freight Holding Company, Inc.",AZO; FDX; FDXF,0000866787; 0001048911; 0002082247,sec_pit_0226; sec_pit_0371; sec_pit_0379; sec_pit_0380,1.0,report_only_candidate_pending_source_maturity_gate,False
+47187,Williamson County,2026,1,2,TRACTOR SUPPLY CO /DE/,TSCO,0000916365,sec_pit_0197; sec_pit_0406,1.0,report_only_candidate_pending_source_maturity_gate,False
+48113,Dallas County,2026,3,6,ATMOS ENERGY CORP; FORWARD AIR CORP; Energy Transfer LP,ATO; FWRD; ET,0000731802; 0000912728; 0001276187,sec_pit_0223; sec_pit_0222; sec_pit_0177; sec_pit_0376; sec_pit_0155; sec_pit_0354,0.9666666666666667,report_only_candidate_pending_source_maturity_gate,False
+48157,Fort Bend County,2026,1,3,CVR ENERGY INC,CVI,0001376139,sec_pit_0085; sec_pit_0279; sec_pit_0280,1.0,report_only_candidate_pending_source_maturity_gate,False
+48201,Harris County,2026,14,32,"Cheniere Energy, Inc.; BLUE DOLPHIN ENERGY CO; EXPAND ENERGY Corp; GENESIS ENERGY LP; DEVON ENERGY CORP/DE; CENTERPOINT ENERGY INC; Cheniere Energy Partners, L.P.; FORUM ENERGY TECHNOLOGIES, INC.; Chord Energy Corp; Amplify Energy Corp.; Epsilon Energy Ltd.; Fervo Energy Co; Crescent Energy Co; CO2 Energy Transition Corp.",LNG; BDCO; EXE; GEL; DVN; CNP; CQP; FET; CHRD; AMPY; EPSN; FRVO; CRGY; NOEM,0000003570; 0000793306; 0000895126; 0001022321; 0001090012; 0001130310; 0001383650; 0001401257; 0001486159; 0001533924; 0001726126; 0001853868; 0001866175; 0001956648,sec_pit_0093; sec_pit_0288; sec_pit_0042; sec_pit_0239; sec_pit_0344; sec_pit_0343; sec_pit_0189; sec_pit_0398; sec_pit_0317; sec_pit_0071; sec_pit_0265; sec_pit_0266; sec_pit_0091; sec_pit_0286; sec_pit_0174; sec_pit_0375; sec_pit_0096; sec_pit_0289; sec_pit_0031; sec_pit_0230; sec_pit_0164; sec_pit_0364; sec_pit_0365; sec_pit_0382; sec_pit_0383; sec_pit_0384; sec_pit_0381; sec_pit_0112; sec_pit_0308; sec_pit_0309; sec_pit_0079; sec_pit_0274,0.9984375,report_only_candidate_pending_source_maturity_gate,False
+48201,"Harris County, Texas",2026,1,2,"CAMBER ENERGY, INC.",CEIN,0001309082,sec_pit_0069; sec_pit_0264,0.88,report_only_candidate_pending_source_maturity_gate,False
+48329,Midland County,2026,1,2,"Diamondback Energy, Inc.",FANG,0001539838,sec_pit_0135; sec_pit_0330,1.0,report_only_candidate_pending_source_maturity_gate,False
+48339,Montgomery County,2026,2,3,"Freight Technologies, Inc.; Excelerate Energy, Inc.",FRGT; EE,0001687542; 0001888447,sec_pit_0185; sec_pit_0168; sec_pit_0369,1.0,report_only_candidate_pending_source_maturity_gate,False
+48453,Travis County,2026,3,6,"ASURE SOFTWARE INC; Tesla, Inc.; Atlas Energy Solutions Inc.",ASUR; TSLA; AESI,0000884144; 0001318605; 0001984060,sec_pit_0020; sec_pit_0220; sec_pit_0221; sec_pit_0202; sec_pit_0035; sec_pit_0234,0.9916666666666667,report_only_candidate_pending_source_maturity_gate,False
+48453,"Travis County, Texas",2026,1,2,Alussa Energy Acquisition Corp. II,ALUB,0002041493,sec_pit_0421; sec_pit_0503,0.88,report_only_candidate_pending_source_maturity_gate,False
+51013,Arlington County,2026,1,2,"Fluence Energy, Inc.",FLNC,0001868941,sec_pit_0385; sec_pit_0386,1.0,report_only_candidate_pending_source_maturity_gate,False
+51760,Richmond city,2026,1,2,"DOMINION ENERGY, INC",D,0000715957,sec_pit_0125; sec_pit_0320,1.0,report_only_candidate_pending_source_maturity_gate,False
+53033,King County,2026,3,7,"DATA I/O CORP; ALASKA AIR GROUP, INC.; AMAZON COM INC",DAIO; ALK; AMZN,0000351998; 0000766421; 0001018724,sec_pit_0116; sec_pit_0312; sec_pit_0313; sec_pit_0012; sec_pit_0213; sec_pit_0018; sec_pit_0219,0.9857142857142858,report_only_candidate_pending_source_maturity_gate,False
+54011,Cabell County,2026,1,2,Energy Services of America CORP,ESOA,0001357971,sec_pit_0351; sec_pit_0352,1.0,report_only_candidate_pending_source_maturity_gate,False
+55025,Dane County,2026,1,2,ALLIANT ENERGY CORP,LNT,0000352541,sec_pit_0014; sec_pit_0215,1.0,report_only_candidate_pending_source_maturity_gate,False

@@ -1,0 +1,2 @@
+cms_provider_number,npi,nppes_query_url,nppes_fetch_status,nppes_result_count,nppes_organization_name,nppes_other_names,nppes_status,nppes_taxonomy,nppes_location_address,nppes_location_city,nppes_location_state,nppes_location_postal_code,nppes_location_telephone
+464007,1407832249,https://npiregistry.cms.hhs.gov/api/?number=1407832249&version=2.1,found,1,"BENCHMARK BEHAVIORAL HEALTH SYSTEM, INC.",BENCHMARK BEHAVIORAL HEALTH SYSTEMS,A,Psychiatric Hospital,592 W 1350 S,WOODS CROSS,UT,840108180,801-299-5300

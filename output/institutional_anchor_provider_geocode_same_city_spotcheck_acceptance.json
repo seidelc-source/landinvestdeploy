@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-06-04T15:44:21.447355+00:00",
+  "status": "same_city_spotcheck_overrides_accepted_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "same_city_review_packet": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_same_city_review_packet.csv",
+    "manual_overrides": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/data/raw/institutional_anchors/cms_hcris_provider_geocode_overrides.csv"
+  },
+  "metrics": {
+    "target_review_rows": 20,
+    "accepted_override_rows": 19,
+    "accepted_provider_years": 19,
+    "accepted_candidate_counties": 16,
+    "same_fips_spotcheck_accepted_rows": 18,
+    "non_exact_conflict_corrected_rows": 1,
+    "held_or_rejected_rows": 1,
+    "skipped_existing_override_rows": 0,
+    "skipped_duplicate_agrees_rows": 0,
+    "external_or_manual_rows_not_in_scope": 36,
+    "manual_override_rows_before": 418,
+    "manual_override_rows_after": 437
+  },
+  "decision": "Accepted only street/intersection-supported Census non-exact same-city spot-check rows in report-only overrides.",
+  "next_action": "Rerun institutional panel, provider review, same-city packet, source maturity, registry, Evidence Center, and deploy bundle. Held same-city rows should move to manual/external geocode review.",
+  "outputs": {
+    "audit_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_same_city_spotcheck_acceptance.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_same_city_spotcheck_acceptance.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_same_city_spotcheck_acceptance.md"
+  }
+}

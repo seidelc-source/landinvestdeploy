@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-06-03T21:07:45.213914+00:00",
+  "status": "strict_census_county_closeout_accepted_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "county_closeout_candidates": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_candidates.csv",
+    "county_reference": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/county_rankings_2024.csv"
+  },
+  "metrics": {
+    "input_rows": 25,
+    "strict_census_candidate_rows": 15,
+    "accepted_strict_census_rows": 15,
+    "accepted_strict_census_address_keys": 9,
+    "accepted_strict_census_counties": 7,
+    "held_local_same_zip_candidate_rows": 2,
+    "held_snapshot_only_support_rows": 8,
+    "held_census_snapshot_conflict_rows": 0,
+    "held_operator_review_rows": 10,
+    "rejected_strict_candidate_rows": 0
+  },
+  "acceptance_status_counts": {
+    "accepted_strict_census_same_county": 15,
+    "held_local_same_zip_candidate": 2,
+    "held_snapshot_only_support": 8
+  },
+  "decision": "Accepted only strict Census same-county auto-reuse closeout rows. Local same-ZIP candidates, snapshot-only support rows, and Census/snapshot conflicts remain held for operator review.",
+  "next_action": "Rerun SEC review queues, source maturity, scale-up gate, source registry, Evidence Center, and deploy bundle. Keep SEC report-only while current-address snapshot semantics and held rows remain open.",
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_acceptance.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_acceptance.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_acceptance.md"
+  }
+}

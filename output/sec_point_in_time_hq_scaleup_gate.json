@@ -1,0 +1,105 @@
+{
+  "generated_at": "2026-06-04T04:07:01.490480+00:00",
+  "status": "scaleup_county_year_ready_source_maturity_blocked",
+  "production_model_rank_or_dashboard_change": false,
+  "metrics": {
+    "filing_queue_rows": 521,
+    "parsed_vintage_rows": 521,
+    "parsed_point_in_time_ready_rows": 367,
+    "reviewed_point_in_time_ready_rows": 367,
+    "geocode_ready_rows": 367,
+    "parse_review_rows": 154,
+    "parse_review_pattern_candidate_rows": 7,
+    "parse_review_manual_rows": 96,
+    "county_year_candidate_rows": 216,
+    "county_year_candidate_counties": 69,
+    "auto_snapshot_reuse_rows": 282,
+    "auto_snapshot_reuse_spotcheck_accepted_rows": 203,
+    "auto_snapshot_reuse_spotcheck_base_accepted_rows": 178,
+    "auto_snapshot_reuse_spotcheck_strict_census_accepted_rows": 15,
+    "auto_snapshot_reuse_spotcheck_open_rows_before_county_acceptance": 25,
+    "auto_snapshot_reuse_spotcheck_open_rows_before_held_resolution": 10,
+    "auto_snapshot_reuse_spotcheck_held_resolution_accepted_rows": 6,
+    "auto_snapshot_reuse_spotcheck_open_rows_before_final_external_evidence": 4,
+    "auto_snapshot_reuse_spotcheck_final_external_evidence_accepted_rows": 4,
+    "auto_snapshot_reuse_spotcheck_open_rows": 0,
+    "auto_snapshot_reuse_county_closeout_candidate_rows": 17,
+    "auto_snapshot_reuse_county_closeout_strict_census_rows": 15,
+    "auto_snapshot_reuse_county_closeout_local_same_zip_rows": 2,
+    "auto_snapshot_reuse_county_closeout_remaining_rows": 8,
+    "auto_snapshot_reuse_county_closeout_conflict_rows": 0,
+    "auto_snapshot_reuse_county_closeout_held_rows": 10,
+    "auto_snapshot_reuse_held_resolution_rows_after_resolution": 4,
+    "auto_snapshot_reuse_final_external_evidence_rows_after_resolution": 0,
+    "manual_applied_review_rows": 85,
+    "pending_point_in_time_geocode_rows": 0,
+    "pending_geocode_candidate_matched_rows": 9,
+    "pending_geocode_candidate_unresolved_rows": 0,
+    "pending_geocode_override_candidate_rows": 6,
+    "accepted_pending_geocode_override_rows": 6,
+    "accepted_pending_geocode_queue_rows": 9,
+    "accepted_residual_geocode_override_rows": 12,
+    "accepted_residual_geocode_queue_rows": 14
+  },
+  "parse_status_counts": {
+    "fetch_failed_or_missing": 4,
+    "parse_review_needed": 150,
+    "parsed_principal_office_city_zip_context": 41,
+    "parsed_principal_office_marker": 303,
+    "parsed_principal_office_marker_snapshot_zip_fallback": 5,
+    "parsed_snapshot_address_text_match": 18
+  },
+  "geocode_status_counts": {
+    "manual_review_matched": 85,
+    "not_attempted": 154,
+    "snapshot_geocode_reused_same_city_state_zip": 282
+  },
+  "decision": "SEC point-in-time HQ remains report-only. Accepted Census-backed geocode candidates reduce open geocode review, and the auto-reuse spot-check / county-closeout / held-row packets reduce the open review queue, but current-address snapshot semantics and any remaining auto-reuse spot checks still block source promotion.",
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_scaleup_gate.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_scaleup_gate.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_scaleup_gate.md"
+  },
+  "lanes": [
+    {
+      "lane": "filing_queue",
+      "status": "available",
+      "rows": 521,
+      "ready_rows": 410,
+      "blocker": "none",
+      "next_action": "continue bounded parse batches"
+    },
+    {
+      "lane": "address_parse",
+      "status": "report_only_address_parse_batch_built",
+      "rows": 521,
+      "ready_rows": 367,
+      "blocker": "parse review rows open",
+      "next_action": "implement parser patterns for 7 candidate rows; keep 96 rows in manual/alternate-document review"
+    },
+    {
+      "lane": "geocode_review",
+      "status": "report_only_geocode_review_applied",
+      "rows": 521,
+      "ready_rows": 367,
+      "blocker": "none",
+      "next_action": "auto same-city/state/ZIP reuse spot checks accepted"
+    },
+    {
+      "lane": "county_year_candidates",
+      "status": "built",
+      "rows": 216,
+      "ready_rows": 216,
+      "blocker": "none",
+      "next_action": "keep report-only until SEC source maturity passes"
+    },
+    {
+      "lane": "source_maturity",
+      "status": "source_maturity_blocked",
+      "rows": 216,
+      "ready_rows": 367,
+      "blocker": "current_address_snapshot_not_point_in_time",
+      "next_action": "Geocode review and first county-year candidates are ready; extend the filing parse batch and rerun source maturity before promotion review."
+    }
+  ]
+}

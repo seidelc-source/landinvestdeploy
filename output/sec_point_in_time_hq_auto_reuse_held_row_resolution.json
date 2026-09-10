@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-06-03T21:29:54.292045+00:00",
+  "status": "held_row_resolution_ready_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "source": {
+    "census_url": "https://geocoding.geo.census.gov/geocoder/geographies/addressbatch",
+    "benchmark": "Public_AR_Current",
+    "vintage": "Current_Current",
+    "documentation": "https://geocoding.geo.census.gov/geocoder/Geocoding_Services_API.html"
+  },
+  "inputs": {
+    "held_acceptance_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_acceptance.csv",
+    "prior_county_closeout_attempts_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_attempts.csv",
+    "prior_county_closeout_raw_results_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_raw_results.csv"
+  },
+  "metrics": {
+    "held_input_rows": 10,
+    "supplemental_attempt_rows": 14,
+    "supplemental_census_submitted": true,
+    "supplemental_census_result_rows": 14,
+    "supplemental_census_match_attempt_rows": 8,
+    "accepted_held_resolution_rows": 6,
+    "accepted_supplemental_filing_census_same_county_rows": 2,
+    "accepted_parser_fragment_snapshot_census_same_county_rows": 4,
+    "held_rows_after_resolution": 4,
+    "held_local_same_zip_candidate_rows": 2,
+    "held_snapshot_support_not_parser_fragment_rows": 2,
+    "held_supplemental_conflict_rows": 0,
+    "parser_fragment_rows": 4,
+    "accepted_counties": 4
+  },
+  "held_resolution_status_counts": {
+    "accepted_parser_fragment_snapshot_census_same_county": 4,
+    "accepted_supplemental_filing_census_same_county": 2,
+    "held_local_same_zip_candidate": 2,
+    "held_snapshot_support_not_parser_fragment": 2
+  },
+  "parser_fragment_status_counts": {
+    "accepted_parser_fragment_snapshot_census_same_county": 4
+  },
+  "submit_error": "",
+  "decision": "Accepted only held rows with supplemental filing-derived Census same-county evidence or parser-fragment snapshot-street Census support. Remaining local same-ZIP and plausible alternate-street snapshot-only rows stay held.",
+  "next_action": "Rerun SEC review queues, source maturity, scale-up gate, source registry, Evidence Center, and deploy bundle. Keep SEC report-only while current-address snapshot semantics and parse-review rows remain open.",
+  "outputs": {
+    "census_input": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_held_row_resolution_census_input.csv",
+    "attempts_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_held_row_resolution_attempts.csv",
+    "raw_results_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_held_row_resolution_raw_results.csv",
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_held_row_resolution.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_held_row_resolution.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_held_row_resolution.md"
+  }
+}

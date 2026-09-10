@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-06-06T04:00:20.546540+00:00",
+  "status": "same_city_review_packet_ready_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "closeout_packet": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_closeout_packet.csv",
+    "census_candidates": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_census_candidates.csv"
+  },
+  "metrics": {
+    "same_city_review_rows": 18,
+    "strict_conflict_correction_candidate_rows": 0,
+    "strict_non_exact_same_fips_candidate_rows": 0,
+    "operator_spot_check_census_context_same_fips_rows": 1,
+    "manual_same_city_census_conflict_review_rows": 0,
+    "operator_spot_check_census_context_other_rows": 0,
+    "external_or_manual_geocode_required_rows": 17
+  },
+  "same_city_review_action_counts": {
+    "external_or_manual_geocode_required": 17,
+    "operator_spot_check_census_context_same_fips": 1
+  },
+  "census_candidate_status_counts": {
+    "same_city_census_context_only": 1,
+    "unresolved_after_census_batch": 17
+  },
+  "decision": "Residual same-city rows are staged for controlled review; strict exact conflicts, strict same-FIPS context rows, and street/intersection-supported spot-check rows have separate report-only acceptance scripts.",
+  "next_action": "Run the next applicable acceptance or geocode-review packet, then rebuild institutional panel, review, closeout, source maturity, registry, and Evidence Center artifacts.",
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_same_city_review_packet.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_same_city_review_packet.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_same_city_review_packet.md"
+  }
+}

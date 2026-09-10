@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-06-05T03:25:51.325711+00:00",
+  "status": "external_manual_overrides_accepted_report_only",
+  "apply": true,
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "results_template": "output/institutional_anchor_provider_geocode_external_manual_osm_geocode_results.csv",
+    "external_manual_packet": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_packet.csv",
+    "manual_overrides": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/data/raw/institutional_anchors/cms_hcris_provider_geocode_overrides.csv"
+  },
+  "metrics": {
+    "result_rows": 83,
+    "packet_rows": 116,
+    "reviewer_accept_rows": 32,
+    "pending_review_rows": 0,
+    "accepted_override_rows": 32,
+    "accepted_provider_years": 32,
+    "accepted_candidate_counties": 32,
+    "held_or_rejected_rows": 51,
+    "skipped_existing_override_rows": 0,
+    "skipped_duplicate_agrees_rows": 0,
+    "rejected_conflict_rows": 0,
+    "manual_override_rows_before": 478,
+    "manual_override_rows_after": 510
+  },
+  "acceptance_status_counts": {
+    "accepted": 32,
+    "held_or_rejected": 51
+  },
+  "decision": "Validated reviewed external/manual geocode rows. Accepted rows are report-only provider-year overrides only when reviewer decision, FIPS/state, confidence, source, match type, reviewer, and note checks pass.",
+  "next_action": "Rerun the institutional official panel, provider review, closeout packet, external/manual packet, source maturity gate, registry, Evidence Center, and deploy bundle.",
+  "outputs": {
+    "audit_csv": "output/institutional_anchor_provider_geocode_external_manual_osm_geocode_acceptance.csv",
+    "json": "output/institutional_anchor_provider_geocode_external_manual_osm_geocode_acceptance.json",
+    "markdown": "output/institutional_anchor_provider_geocode_external_manual_osm_geocode_acceptance.md",
+    "manual_overrides": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/data/raw/institutional_anchors/cms_hcris_provider_geocode_overrides.csv"
+  }
+}

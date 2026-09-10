@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-06-03T01:48:23.129809+00:00",
+  "status": "candidate_overrides_accepted_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "candidates": "output/sec_point_in_time_hq_residual_geocode_override_candidates.csv",
+    "manual_overrides": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/data/raw/sec_edgar_hq/sec_point_in_time_hq_manual_geocode_overrides.csv",
+    "county_reference": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/county_rankings_2024.csv"
+  },
+  "metrics": {
+    "candidate_override_rows": 12,
+    "manual_override_rows_before": 64,
+    "accepted_override_rows": 12,
+    "accepted_queue_rows": 14,
+    "accepted_candidate_counties": 8,
+    "skipped_existing_rows": 0,
+    "rejected_rows": 0,
+    "manual_override_rows_after": 76,
+    "accepted_min_confidence": 0.82,
+    "accepted_mean_confidence": 0.8383333333333334
+  },
+  "decision": "Accepted validated candidate override rows into the report-only SEC point-in-time manual override file.",
+  "next_action": "Rerun SEC geocode review, review queues, source maturity, scale-up gate, source registry, Evidence Center, and deploy bundle.",
+  "outputs": {
+    "csv": "output/sec_point_in_time_hq_residual_geocode_acceptance.csv",
+    "json": "output/sec_point_in_time_hq_residual_geocode_acceptance.json",
+    "markdown": "output/sec_point_in_time_hq_residual_geocode_acceptance.md"
+  }
+}

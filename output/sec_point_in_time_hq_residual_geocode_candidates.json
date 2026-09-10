@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-06-03T01:48:06.637072+00:00",
+  "status": "residual_geocode_candidates_ready_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "pending_geocode_queue": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_pending_geocode_queue.csv",
+    "county_reference": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/county_rankings_2024.csv"
+  },
+  "metrics": {
+    "pending_geocode_rows": 14,
+    "residual_override_candidate_rows": 12,
+    "residual_queue_rows": 14,
+    "residual_candidate_counties": 8,
+    "missing_assignment_rows": 0,
+    "unused_assignment_rows": 0,
+    "county_reference_missing_rows": 0
+  },
+  "missing_assignments": [],
+  "unused_assignments": [],
+  "decision": "Residual candidates are ready for report-only acceptance; no rows are applied by this builder.",
+  "next_action": "Run the candidate acceptance helper against the residual candidate CSV, then rebuild SEC gates.",
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_residual_geocode_override_candidates.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_residual_geocode_candidates.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_residual_geocode_candidates.md"
+  }
+}

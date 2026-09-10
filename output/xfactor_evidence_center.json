@@ -1,0 +1,149 @@
+{
+  "generated_at": "2026-06-06T04:02:06.368357+00:00",
+  "status": "report_only_evidence_center_ready",
+  "production_model_rank_or_dashboard_change": false,
+  "metrics": {
+    "surfaces": 18,
+    "evidence_panel_surfaces": 13,
+    "research_queue_surfaces": 5,
+    "high_risk_surfaces": 5
+  },
+  "top_surfaces": [
+    {
+      "evidence_center_rank": 1,
+      "surface": "Guarded pre-boom two-score blend",
+      "family": "preboom_shortlist",
+      "status": "opt_in_evidence_panel_ready",
+      "allowed_use": "opt-in report-only panel",
+      "display_surface": "County Evidence Panel",
+      "blocker": "guarded_shortlist_only",
+      "next_action": "Show in opt-in evidence panel with report-only label.",
+      "risk_level": "medium",
+      "evidence_strength": 7.27827954526763,
+      "evidence_center_priority": 100.0
+    },
+    {
+      "evidence_center_rank": 2,
+      "surface": "Land optionality breakout V1",
+      "family": "analog_label",
+      "status": "operator_review_before_display",
+      "allowed_use": "memo/context or research queue",
+      "display_surface": "County Evidence Panel",
+      "blocker": "source_and_false_positive_review_required",
+      "next_action": "Review false-positive/already-hot behavior before display expansion.",
+      "risk_level": "medium",
+      "evidence_strength": 1.0,
+      "evidence_center_priority": 97.0
+    },
+    {
+      "evidence_center_rank": 3,
+      "surface": "Quiet breakout label V1",
+      "family": "analog_label",
+      "status": "operator_review_before_display",
+      "allowed_use": "memo/context or research queue",
+      "display_surface": "County Evidence Panel",
+      "blocker": "source_and_false_positive_review_required",
+      "next_action": "Review false-positive/already-hot behavior before display expansion.",
+      "risk_level": "medium",
+      "evidence_strength": 0.7011607332061878,
+      "evidence_center_priority": 67.12
+    },
+    {
+      "evidence_center_rank": 4,
+      "surface": "Announcement anchor events",
+      "family": "corporate_anchor_event",
+      "status": "report_only_display_gate_spec_ready_default_rank_blocked",
+      "allowed_use": "opt-in display with source/status labels",
+      "display_surface": "Evidence Panel: Events",
+      "blocker": "default_product_rank_or_score_influence",
+      "next_action": "opt_in_report_only_event_evidence_panel_or_packet_section",
+      "risk_level": "medium",
+      "evidence_strength": 0.58,
+      "evidence_center_priority": 55.0
+    },
+    {
+      "evidence_center_rank": 5,
+      "surface": "Institutional anchor official panel",
+      "family": "institutional_anchor",
+      "status": "source_maturity_match_gate_ready_provider_geocode_review_open",
+      "allowed_use": "report-only evidence and archetype review",
+      "display_surface": "Evidence Panel / archetype queue",
+      "blocker": "19 provider geocode rows (4 ZIP, 18 city, 0 external; 22 local closeout candidates); 184 same-ZIP and 77 Census-confirmed same-city overrides accepted report-only; 4 exact Census same-city conflict corrections accepted report-only; 14 non-exact same-FIPS Census context overrides accepted report-only; 18 same-FIPS spot-check rows and 1 non-exact conflict corrections accepted report-only; 139 external Census overrides accepted report-only from 139 staged candidates; 18 residual rows packaged for external/manual geocoding (1 weak same-FIPS context, 17 same-city unresolved, 0 external geocoder); latest validator has 0 pending review rows, 29 accepted overrides, and 128 held rows; residual Census retry matched 42 rows and accepted 4 exact conflict corrections with 124 held; residual context spot-check reviewed 26 rows, accepted 8, and held 18; OSM external geocoder reviewed 83 rows, accepted 32, and held 51; OSM same-city geocoder reviewed 32 rows, accepted 12, and held 20; residual triage packet has 18 rows, 0 external follow-up rows, and 0 P0 rows; CMS HGI P0 review accepted 24 rows, applied 24, and held 1; CMS HGI P1 review accepted 12 rows, applied 12, and held 6; CMS HGI P1 territory review accepted 4 rows, applied 4, and held 1; P1 Guayama authoritative review accepted 1 rows, applied 1, and held 0; authoritative P0 review accepted 1 rows, applied 1, and held 0; P2 authoritative review accepted 8 rows, applied 8, and held 0; external/manual total accepted overrides now 135; training_blocked_insufficient_historical_observed_years",
+      "next_action": "Run the 18-row external/manual geocoder packet, dry-run the acceptance validator, accept only reviewed county assignments, and keep default feature columns at 0 until ablation gates clear.",
+      "risk_level": "high",
+      "evidence_strength": 0.7,
+      "evidence_center_priority": 50.0
+    },
+    {
+      "evidence_center_rank": 6,
+      "surface": "5yr rank-band boundary gate",
+      "family": "rank_stability",
+      "status": "report_only_rank_band_gate_built_no_promotion",
+      "allowed_use": "operator-review labels only",
+      "display_surface": "Evidence Panel: 5yr Boundary",
+      "blocker": "10 inside do-not-promote boundary rows",
+      "next_action": "Use top-25 only for operator acceptance; keep top-50/top-100 blocked where do-not-promote rows remain.",
+      "risk_level": "medium",
+      "evidence_strength": 0.48,
+      "evidence_center_priority": 45.0
+    },
+    {
+      "evidence_center_rank": 7,
+      "surface": "College/medical archetype gap closure",
+      "family": "institutional_anchor",
+      "status": "report_only_college_medical_archetype_gap_closure_ready",
+      "allowed_use": "shortlist/review queue only",
+      "display_surface": "Research queue",
+      "blocker": "source maturity and model-impact gates not cleared",
+      "next_action": "Review top 100 gap-closure rows for geographic and false-positive behavior.",
+      "risk_level": "medium",
+      "evidence_strength": 0.62,
+      "evidence_center_priority": 44.0
+    },
+    {
+      "evidence_center_rank": 8,
+      "surface": "Pre-boom archetype diversity queue",
+      "family": "preboom_archetypes",
+      "status": "report_only_diversity_followup_ready_no_promotion",
+      "allowed_use": "balanced review queue",
+      "display_surface": "Research queue",
+      "blocker": "2 archetype gaps remain",
+      "next_action": "Backfill remaining energy/logistics archetype gaps before treating archetype coverage as complete.",
+      "risk_level": "medium",
+      "evidence_strength": 0.55,
+      "evidence_center_priority": 37.0
+    },
+    {
+      "evidence_center_rank": 9,
+      "surface": "Anchor/halo support x land optionality",
+      "family": "xfactor_interaction",
+      "status": "report_only_memo_context",
+      "allowed_use": "memo/context or research queue",
+      "display_surface": "County Evidence Panel",
+      "blocker": "model-ablation-candidate",
+      "next_action": "Keep as memo/context evidence; do not promote into default rank.",
+      "risk_level": "high",
+      "evidence_strength": 0.5570469798657718,
+      "evidence_center_priority": 35.7
+    },
+    {
+      "evidence_center_rank": 10,
+      "surface": "Anchor/halo support x buildability",
+      "family": "xfactor_interaction",
+      "status": "research_queue",
+      "allowed_use": "memo/context or research queue",
+      "display_surface": "County Evidence Panel",
+      "blocker": "report-only",
+      "next_action": "Keep in research queue and gather cleaner evidence.",
+      "risk_level": "medium",
+      "evidence_strength": 0.3422818791946309,
+      "evidence_center_priority": 31.23
+    }
+  ],
+  "decision": "Use this as the report-only operating center for x-factor evidence. Keep all default model/rank promotions behind source, rank, and ablation gates.",
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_evidence_center.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_evidence_center.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/xfactor_evidence_center.md"
+  }
+}

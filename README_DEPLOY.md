@@ -42,6 +42,11 @@ streamlit run dashboard.py
 4. In Streamlit Community Cloud, choose the repo and set the main file to `dashboard.py`.
 5. Deploy.
 
+## Data boundary (2026-09-09)
+
+- `output/recal/county_briefs.parquet` is now part of the bundle (tracked in git) so the hosted demo needs no data build.
+- The bundle script strips every AirROI column (`str_*`, except the free NES host proxy) by default because AirROI's terms allow redistribution of aggregates only under a separately executed addendum. Build with `INCLUDE_AIRROI=1 bash scripts/build_streamlit_deploy_bundle.sh` for an internal-only build; never deploy that build publicly.
+
 ## Important Notes
 
 - This is a demo/review app. It should not run source ingestion, feature engineering, or model training remotely.

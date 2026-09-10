@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-06-03T22:26:45.735525+00:00",
+  "status": "census_candidates_ready_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "source": {
+    "census_url": "https://geocoding.geo.census.gov/geocoder/geographies/addressbatch",
+    "benchmark": "Public_AR_Current",
+    "vintage": "Current_Current",
+    "documentation": "https://geocoding.geo.census.gov/geocoder/Geocoding_Services_API.html"
+  },
+  "inputs": {
+    "pending_geocode_queue": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_pending_geocode_queue.csv",
+    "county_reference": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/county_rankings_2024.csv"
+  },
+  "metrics": {
+    "pending_geocode_rows": 9,
+    "census_attempt_rows": 14,
+    "census_submitted": true,
+    "census_result_rows": 14,
+    "census_match_attempt_rows": 14,
+    "snapshot_repair_candidate_rows": 0,
+    "candidate_matched_rows": 9,
+    "candidate_census_matched_rows": 9,
+    "candidate_snapshot_repair_rows": 0,
+    "candidate_unresolved_rows": 0,
+    "override_candidate_rows": 6,
+    "candidate_counties": 3,
+    "conflicting_fips_queue_rows": 0
+  },
+  "submit_error": "",
+  "decision": "External geocode candidates are staged for operator review only; no candidate is applied automatically.",
+  "next_action": "Review the override-candidate CSV, copy accepted rows into the manual override file, then rerun the SEC geocode review and source maturity gates.",
+  "outputs": {
+    "census_input": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_pending_geocode_census_input.csv",
+    "attempts_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_pending_geocode_census_attempts.csv",
+    "raw_results_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_pending_geocode_census_raw_results.csv",
+    "candidates_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_pending_geocode_candidates.csv",
+    "override_candidates_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_pending_geocode_override_candidates.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_pending_geocode_census_batch.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_pending_geocode_census_batch.md"
+  }
+}

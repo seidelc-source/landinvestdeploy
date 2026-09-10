@@ -1,0 +1,88 @@
+{
+  "generated_at": "2026-06-03T22:07:23.333946+00:00",
+  "status": "final_held_external_evidence_ready_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "held_resolution_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_held_row_resolution.csv"
+  },
+  "metrics": {
+    "open_input_rows": 4,
+    "external_evidence_source_rows": 4,
+    "accepted_external_evidence_rows": 4,
+    "accepted_external_evidence_address_keys": 2,
+    "held_rows_after_external_evidence": 0,
+    "accepted_counties": 2
+  },
+  "external_evidence_status_counts": {
+    "accepted_external_address_county_same_fips": 4
+  },
+  "external_evidence_sources": [
+    {
+      "evidence_id": "apple_infinite_loop_osm_nominatim_20260603",
+      "entity_pattern": "\\bApple Inc\\.?",
+      "street_pattern": "\\bInfinite Loop\\b",
+      "city": "Cupertino",
+      "state": "CA",
+      "candidate_fips": "06085",
+      "candidate_county_name": "Santa Clara County, California",
+      "source_name": "OpenStreetMap Nominatim",
+      "source_url": "https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=3&q=1%20Infinite%20Loop%2C%20Cupertino%2C%20CA%2095014",
+      "source_category": "external_address_geocoder",
+      "evidence_note": "Nominatim returned an exact addressdetails result for Infinite Loop 1 at 1 Infinite Loop, Cupertino, Santa Clara County, CA 95014.",
+      "evidence_strength": 0.86,
+      "limitation": "OpenStreetMap/Nominatim is an external community geocoder, not the Census geographies endpoint. Use only after local same-city/state/ZIP support and no conflicting county evidence."
+    },
+    {
+      "evidence_id": "apple_infinite_loop_commons_location_20260603",
+      "entity_pattern": "\\bApple Inc\\.?",
+      "street_pattern": "\\bInfinite Loop\\b",
+      "city": "Cupertino",
+      "state": "CA",
+      "candidate_fips": "06085",
+      "candidate_county_name": "Santa Clara County, California",
+      "source_name": "Wikimedia Commons Infinite Loop category",
+      "source_url": "https://commons.wikimedia.org/wiki/Category:Infinite_Loop_(street)",
+      "source_category": "public_location_corroboration",
+      "evidence_note": "The public location page identifies Infinite Loop at Apple Campus in Cupertino, Santa Clara County, CA.",
+      "evidence_strength": 0.72,
+      "limitation": "Public corroboration only; not a parcel or government address geocoder."
+    },
+    {
+      "evidence_id": "clearway_nj_dep_804_carnegie_20260603",
+      "entity_pattern": "\\bClearway Energy\\b",
+      "street_pattern": "\\b804 Carnegie Center\\b",
+      "city": "Princeton",
+      "state": "NJ",
+      "candidate_fips": "34021",
+      "candidate_county_name": "Mercer County, New Jersey",
+      "source_name": "New Jersey Department of Environmental Protection 2017 news release archive",
+      "source_url": "https://dep.nj.gov/newsrel/category/2017/",
+      "source_category": "government_exact_address_county_corroboration",
+      "evidence_note": "NJ DEP describes NRG Energy's 804 Carnegie Center building in Princeton, Mercer County.",
+      "evidence_strength": 0.94,
+      "limitation": "Government documentary evidence for the building/county; the source is not a geocoder response."
+    },
+    {
+      "evidence_id": "clearway_njparcels_804_carnegie_20260603",
+      "entity_pattern": "\\bClearway Energy\\b",
+      "street_pattern": "\\b804 Carnegie Center\\b",
+      "city": "Princeton",
+      "state": "NJ",
+      "candidate_fips": "34021",
+      "candidate_county_name": "Mercer County, New Jersey",
+      "source_name": "NJParcels parcel record",
+      "source_url": "https://vpc24.njparcels.com/property/1113/7.13/12.05",
+      "source_category": "parcel_exact_address_county_corroboration",
+      "evidence_note": "NJParcels identifies 804 Carnegie Center as Block 7.13, Lot 12.05 in West Windsor Twp, Mercer County.",
+      "evidence_strength": 0.88,
+      "limitation": "Parcel aggregator sourced from public parcel records; use as corroboration with NJ DEP documentary evidence."
+    }
+  ],
+  "decision": "Accepted only rows whose reviewed current snapshot county FIPS is corroborated by external address/county evidence. This closes the remaining auto-reuse spot-check queue for report-only source review, but it does not make SEC source-mature.",
+  "next_action": "Rerun SEC review queues, source maturity, scale-up gate, source registry, Evidence Center, and deploy bundle. Keep SEC report-only while current-address snapshot semantics and parse-review backlog remain unresolved.",
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_final_held_external_evidence.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_final_held_external_evidence.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_final_held_external_evidence.md"
+  }
+}

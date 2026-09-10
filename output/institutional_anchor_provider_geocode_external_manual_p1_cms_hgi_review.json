@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-06-06T02:05:11.362467+00:00",
+  "status": "cms_hgi_p1_review_has_accepted_rows",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "triage_external_followup": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_triage_external_followup.csv",
+    "cms_hgi_dataset": "https://data.cms.gov/provider-data/dataset/xubh-q36u",
+    "cms_hgi_api": "https://data.cms.gov/provider-data/api/1/datastore/query/xubh-q36u/0"
+  },
+  "metrics": {
+    "target_priority": "P1",
+    "target_rows": 18,
+    "cms_hgi_found_rows": 18,
+    "cms_hgi_fips_mapped_rows": 13,
+    "reviewer_accept_rows": 12,
+    "held_rows": 6,
+    "accepted_candidate_counties": 8,
+    "production_model_rank_or_dashboard_change": false
+  },
+  "decision": "Prepared validator-ready reviewed results only for P0 rows where official CMS Hospital General Information returned a same-state Facility ID county/parish mapping.",
+  "next_action": "Dry-run `scripts/accept_institutional_anchor_provider_geocode_external_manual_results.py` against the CMS HGI reviewed-results file, apply only if accepted metrics and conflicts are clean, then rebuild institutional source-maturity artifacts.",
+  "outputs": {
+    "cms_hgi_rows": "output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_rows.csv",
+    "review_csv": "output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_review.csv",
+    "validator_results_csv": "output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_results.csv",
+    "json": "output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_review.json",
+    "markdown": "output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_review.md"
+  }
+}

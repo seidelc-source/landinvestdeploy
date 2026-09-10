@@ -1,0 +1,243 @@
+{
+  "generated_at": "2026-06-06T03:59:08.285962+00:00",
+  "status": "p2_authoritative_review_has_accepted_rows",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "triage_external_followup": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_residual_triage_external_followup.csv",
+    "nppes_api": "https://npiregistry.cms.hhs.gov/api/",
+    "source_catalog_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_sources.csv"
+  },
+  "sources": [
+    {
+      "cms_provider_number": "400115",
+      "fiscal_year": "2023",
+      "provider_year_key": "400115__2023",
+      "source_id": "hospital_wilma_n_vazquez_contact",
+      "source_label": "Hospital Wilma N. Vazquez provider site",
+      "url": "https://www.wilmamed.com/contacto",
+      "evidence_summary": "Provider contact page lists the hospital at Carr. Num. 2 Km. 39.5 in Vega Baja, PR.",
+      "supports_fips": "72145",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400115",
+      "fiscal_year": "2023",
+      "provider_year_key": "400115__2023",
+      "source_id": "census_tigerweb_pr_vega_baja",
+      "source_label": "U.S. Census TIGERweb Puerto Rico county-equivalents",
+      "url": "https://tigerweb.geo.census.gov/tigerwebmain/Files/acs24/tigerweb_acs24_county_2020_tab20_pr.html",
+      "evidence_summary": "Official Census TIGERweb county table maps Vega Baja Municipio to GEOID 72145.",
+      "supports_fips": "72145",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "480002",
+      "fiscal_year": "2023",
+      "provider_year_key": "480002__2023",
+      "source_id": "jfl_guest_services_contact",
+      "source_label": "Gov. Juan F. Luis Hospital provider site",
+      "url": "https://jflusvi.org/guest-services/",
+      "evidence_summary": "Provider site contact block lists 4007 Estate Diamond Ruby, Christiansted, St. Croix USVI.",
+      "supports_fips": "78010",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "480002",
+      "fiscal_year": "2023",
+      "provider_year_key": "480002__2023",
+      "source_id": "census_tigerweb_vi_st_croix",
+      "source_label": "U.S. Census TIGERweb U.S. Virgin Islands county-equivalents",
+      "url": "https://tigerweb.geo.census.gov/tigerwebmain/TIGERweb_tabblock_census2020_vi.html",
+      "evidence_summary": "Official Census TIGERweb county-based files list St. Croix as county-equivalent GEOID 78010.",
+      "supports_fips": "78010",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "224039",
+      "fiscal_year": "2023",
+      "provider_year_key": "224039__2023",
+      "source_id": "haverhill_pavilion_provider_location",
+      "source_label": "Haverhill Pavilion provider site",
+      "url": "https://www.haverhillpavilion.com/about/location/",
+      "evidence_summary": "Provider site lists Haverhill Pavilion Behavioral Health Hospital at 76 Summer St, Haverhill, MA 01830.",
+      "supports_fips": "25009",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "224039",
+      "fiscal_year": "2023",
+      "provider_year_key": "224039__2023",
+      "source_id": "mma_haverhill_county_reference",
+      "source_label": "Massachusetts Municipal Association",
+      "url": "https://www.mma.org/community/haverhill/",
+      "evidence_summary": "MMA community profile identifies Haverhill's county as Essex.",
+      "supports_fips": "25009",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "403027",
+      "fiscal_year": "2023",
+      "provider_year_key": "403027__2023",
+      "source_id": "nppes_multy_medical_1891120648",
+      "source_label": "NPPES/NPI Registry API",
+      "url": "https://npiregistry.cms.hhs.gov/api/?number=1891120648&version=2.1",
+      "evidence_summary": "NPPES lists Multy Medical Facilities Corp / Multy Medical Physical Rehabilitation Hospital at 402 Munoz Rivera Ave, San Juan, PR.",
+      "supports_fips": "72127",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "403027",
+      "fiscal_year": "2023",
+      "provider_year_key": "403027__2023",
+      "source_id": "census_tigerweb_pr_san_juan",
+      "source_label": "U.S. Census TIGERweb Puerto Rico county-equivalents",
+      "url": "https://tigerweb.geo.census.gov/tigerwebmain/Files/acs24/tigerweb_acs24_county_2020_tab20_pr.html",
+      "evidence_summary": "Official Census TIGERweb county table maps San Juan Municipio to GEOID 72127.",
+      "supports_fips": "72127",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400122",
+      "fiscal_year": "2024",
+      "provider_year_key": "400122__2024",
+      "source_id": "professional_hospital_provider_site",
+      "source_label": "Professional Hospital provider site",
+      "url": "https://professionalhospital.net/",
+      "evidence_summary": "Provider site states Professional Hospital Guaynabo is on Avenida Las Cumbres in Guaynabo.",
+      "supports_fips": "72061",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400122",
+      "fiscal_year": "2024",
+      "provider_year_key": "400122__2024",
+      "source_id": "nppes_professional_hospital_1922254952",
+      "source_label": "NPPES/NPI Registry API",
+      "url": "https://npiregistry.cms.hhs.gov/api/?number=1922254952&version=2.1",
+      "evidence_summary": "NPPES lists Professional Hospital Guaynabo Inc at Ave Las Cumbres / Street 199 Km 1.2, Guaynabo, PR.",
+      "supports_fips": "72061",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400122",
+      "fiscal_year": "2024",
+      "provider_year_key": "400122__2024",
+      "source_id": "census_tigerweb_pr_guaynabo",
+      "source_label": "U.S. Census TIGERweb Puerto Rico county-equivalents",
+      "url": "https://tigerweb.geo.census.gov/tigerwebmain/Files/acs24/tigerweb_acs24_county_2020_tab20_pr.html",
+      "evidence_summary": "Official Census TIGERweb county table maps Guaynabo Municipio to GEOID 72061.",
+      "supports_fips": "72061",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400137",
+      "fiscal_year": "2023",
+      "provider_year_key": "400137__2023",
+      "source_id": "doctors_center_dorado_contact",
+      "source_label": "Doctors' Center Hospital provider site",
+      "url": "https://www.doctorscenterhospital.com/contact-us",
+      "evidence_summary": "Provider contact page lists Doctors' Center Hospital Dorado facility and phone.",
+      "supports_fips": "72051",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400137",
+      "fiscal_year": "2023",
+      "provider_year_key": "400137__2023",
+      "source_id": "nppes_doctors_center_dorado_1194480806",
+      "source_label": "NPPES/NPI Registry API",
+      "url": "https://npiregistry.cms.hhs.gov/api/?number=1194480806&version=2.1",
+      "evidence_summary": "NPPES lists Doctors' Center Hospital - Orlando Health - Dorado at Road 696 / Ave Efron, Dorado, PR.",
+      "supports_fips": "72051",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400137",
+      "fiscal_year": "2023",
+      "provider_year_key": "400137__2023",
+      "source_id": "census_tigerweb_pr_dorado",
+      "source_label": "U.S. Census TIGERweb Puerto Rico county-equivalents",
+      "url": "https://tigerweb.geo.census.gov/tigerwebmain/Files/acs24/tigerweb_acs24_county_2020_tab20_pr.html",
+      "evidence_summary": "Official Census TIGERweb county table maps Dorado Municipio to GEOID 72051.",
+      "supports_fips": "72051",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400012",
+      "fiscal_year": "2024",
+      "provider_year_key": "400012__2024",
+      "source_id": "uicc_hospital_oncologico_location",
+      "source_label": "UICC member profile",
+      "url": "https://www.uicc.org/membership/liga-puertorriquena-contra-el-cancer-y-su-hospital-oncologico-dr-isaac-gonzalez-martinez",
+      "evidence_summary": "UICC profile places Hospital Oncologico Dr. Isaac Gonzalez Martinez in the Puerto Rico Medical Center in San Juan.",
+      "supports_fips": "72127",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400012",
+      "fiscal_year": "2024",
+      "provider_year_key": "400012__2024",
+      "source_id": "nppes_hospital_oncologico_1407852338",
+      "source_label": "NPPES/NPI Registry API",
+      "url": "https://npiregistry.cms.hhs.gov/api/?number=1407852338&version=2.1",
+      "evidence_summary": "NPPES lists Hospital Oncologico Dr. Isaac Gonzalez Martinez at Bo Monacillos / Ave Americo Miranda, San Juan, PR.",
+      "supports_fips": "72127",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400012",
+      "fiscal_year": "2024",
+      "provider_year_key": "400012__2024",
+      "source_id": "census_tigerweb_pr_san_juan",
+      "source_label": "U.S. Census TIGERweb Puerto Rico county-equivalents",
+      "url": "https://tigerweb.geo.census.gov/tigerwebmain/Files/acs24/tigerweb_acs24_county_2020_tab20_pr.html",
+      "evidence_summary": "Official Census TIGERweb county table maps San Juan Municipio to GEOID 72127.",
+      "supports_fips": "72127",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400010",
+      "fiscal_year": "2023",
+      "provider_year_key": "400010__2023",
+      "source_id": "puerto_rico_health_directory_castaner",
+      "source_label": "Puerto Rico Department of Health HIV Services Directory",
+      "url": "https://directoriovih.salud.pr.gov/Home/Detalles/4503221",
+      "evidence_summary": "Puerto Rico health directory lists Hospital General Castaner at Carr. 135 Km. 4.5, Castaner Lares, PR 00631 and PO Box 1003.",
+      "supports_fips": "72081",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    },
+    {
+      "cms_provider_number": "400010",
+      "fiscal_year": "2023",
+      "provider_year_key": "400010__2023",
+      "source_id": "census_tigerweb_pr_lares",
+      "source_label": "U.S. Census TIGERweb Puerto Rico county-equivalents",
+      "url": "https://tigerweb.geo.census.gov/tigerwebmain/Files/acs24/tigerweb_acs24_county_2020_tab20_pr.html",
+      "evidence_summary": "Official Census TIGERweb county table maps Lares Municipio to GEOID 72081.",
+      "supports_fips": "72081",
+      "reviewed_at": "2026-06-06T03:59:08.285962+00:00"
+    }
+  ],
+  "metrics": {
+    "target_priority": "P2",
+    "target_rows": 8,
+    "authoritative_source_rows": 19,
+    "nppes_configured_rows": 5,
+    "nppes_found_rows": 5,
+    "authority_fips_mapped_rows": 8,
+    "reviewer_accept_rows": 8,
+    "held_rows": 0,
+    "accepted_candidate_counties": 7,
+    "production_model_rank_or_dashboard_change": false
+  },
+  "decision": "Prepared validator-ready reviewed results for the P2 external-follow-up rows using provider-site, NPPES where available, and official county-equivalent references.",
+  "next_action": "Dry-run `scripts/accept_institutional_anchor_provider_geocode_external_manual_results.py` against the P2 authoritative results file, apply only if accepted metrics and conflicts are clean, then rebuild institutional source-maturity artifacts.",
+  "outputs": {
+    "sources_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_sources.csv",
+    "nppes_rows": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_nppes_rows.csv",
+    "review_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_review.csv",
+    "validator_results_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_results.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_review.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_review.md"
+  }
+}

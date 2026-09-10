@@ -1,0 +1,86 @@
+{
+  "generated_at": "2026-09-09T19:01:38.436409+00:00",
+  "boundary": "report-only; regenerate with scripts/build_honest_coordinates.py",
+  "classifier": {
+    "honest_held_out_capture_at_100": 0.1493,
+    "vs_random_multiple": 4.69,
+    "naive_argmax": 0.1753,
+    "class_median": 0.1678,
+    "vs_best_baseline_ratio": 1.74,
+    "claim": "Ensemble-class recall of curated narrative-boom counties; selection-bias-corrected held-out figure; never a named lane.",
+    "measured_on": "2025-vintage clean panel + audited (D2) labels, full config; vintage-stable (honest 0.149-0.157 across four surfaces)",
+    "sources": [
+      "output/champion_selection_bias.json",
+      "output/v6_2025_remeasure/v6_2025_full.json"
+    ],
+    "as_of": "2026-09-08"
+  },
+  "regression": {
+    "horizons": {
+      "1yr": {
+        "embargoed_median_spearman": 0.347,
+        "positive_fold_share": 0.81,
+        "status": "ordinal-only (top-K unproven)"
+      },
+      "3yr": {
+        "embargoed_median_spearman": -0.259,
+        "positive_fold_share": 0.25,
+        "status": "falsified \u2014 never present as a forecast"
+      },
+      "5yr": {
+        "embargoed_median_spearman": -0.154,
+        "positive_fold_share": 0.0,
+        "status": "falsified \u2014 never present as a forecast"
+      }
+    },
+    "method": "walk-forward, embargo=H, PIT-enforced (selective) clean panel",
+    "sources": [
+      "output/embargo_walkforward_clean_pit_sel_read.json"
+    ],
+    "as_of": "2026-09-02"
+  },
+  "operator_review": {
+    "operator_precision": 0.7692,
+    "accepted": 30,
+    "rejected": 9,
+    "held": 25,
+    "caveat": "operator-JUDGED proxy, not realized-outcome precision",
+    "sources": [
+      "output/boom_onset_operator_precision_report.json"
+    ],
+    "as_of": "2026-09-09"
+  },
+  "forward_validation": {
+    "snapshots": [
+      {
+        "snapshot": "snapshot_20260716",
+        "days_elapsed": 55,
+        "post_snapshot_sales_pick": 0,
+        "post_snapshot_sales_control": 0,
+        "last_read": "2026-09-09"
+      },
+      {
+        "snapshot": "snapshot_20260904",
+        "days_elapsed": 4,
+        "post_snapshot_sales_pick": 0,
+        "post_snapshot_sales_control": 0,
+        "last_read": "2026-09-09"
+      },
+      {
+        "snapshot": "snapshot_20260908",
+        "days_elapsed": 0,
+        "post_snapshot_sales_pick": 0,
+        "post_snapshot_sales_control": 0,
+        "last_read": "2026-09-09"
+      },
+      {
+        "snapshot": "snapshot_20260909",
+        "days_elapsed": 0,
+        "post_snapshot_sales_pick": 0,
+        "post_snapshot_sales_control": 0,
+        "last_read": "2026-09-09"
+      }
+    ],
+    "note": "realized validation clock \u2014 sparse by design early; no realized outcome has graded the shortlist yet"
+  }
+}

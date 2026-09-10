@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-06-04T13:22:53.922253+00:00",
+  "status": "census_candidates_ready_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "closeout_packet": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_closeout_packet.csv",
+    "actions": [
+      "external_geocode_required",
+      "spot_check_same_city_candidate_before_assignment"
+    ],
+    "census_url": "https://geocoding.geo.census.gov/geocoder/geographies/addressbatch",
+    "benchmark": "Public_AR_Current",
+    "vintage": "Current_Current"
+  },
+  "metrics": {
+    "input_provider_rows": 413,
+    "same_city_input_rows": 152,
+    "external_input_rows": 261,
+    "census_attempt_rows": 432,
+    "census_submitted": true,
+    "raw_result_rows": 432,
+    "matched_result_rows": 316,
+    "candidate_rows": 413,
+    "same_city_census_confirmed_rows": 77,
+    "same_city_census_conflict_rows": 5,
+    "external_census_candidate_ready_rows": 139,
+    "unresolved_rows": 106
+  },
+  "status_counts": {
+    "external_census_candidate_ready": 139,
+    "external_census_context_only": 53,
+    "same_city_census_confirms_candidate": 77,
+    "same_city_census_conflicts_candidate": 5,
+    "same_city_census_context_only": 33,
+    "unresolved_after_census_batch": 106
+  },
+  "submit_error": "",
+  "decision": "Census geocoder candidates are staged for institutional provider source review only.",
+  "next_action": "Accept only same-city Census-confirmed rows through the controlled acceptance script; keep external candidates staged for separate policy review.",
+  "outputs": {
+    "census_input": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_census_input.csv",
+    "attempts_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_census_attempts.csv",
+    "raw_results_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_census_raw_results.csv",
+    "candidates_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_census_candidates.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_census_batch.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_census_batch.md"
+  }
+}

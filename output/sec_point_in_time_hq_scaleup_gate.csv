@@ -1,0 +1,6 @@
+lane,status,rows,ready_rows,blocker,next_action
+filing_queue,available,521,410,none,continue bounded parse batches
+address_parse,report_only_address_parse_batch_built,521,367,parse review rows open,implement parser patterns for 7 candidate rows; keep 96 rows in manual/alternate-document review
+geocode_review,report_only_geocode_review_applied,521,367,none,auto same-city/state/ZIP reuse spot checks accepted
+county_year_candidates,built,216,216,none,keep report-only until SEC source maturity passes
+source_maturity,source_maturity_blocked,216,367,current_address_snapshot_not_point_in_time,Geocode review and first county-year candidates are ready; extend the filing parse batch and rerun source maturity before promotion review.

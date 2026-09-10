@@ -1,0 +1,49 @@
+{
+  "generated_at": "2026-06-04T04:06:35.937291+00:00",
+  "status": "sec_point_in_time_review_queues_ready_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "metrics": {
+    "reviewed_rows": 521,
+    "point_in_time_ready_rows": 367,
+    "geocode_ready_rows": 367,
+    "manual_or_matched_geocode_ready_rows": 85,
+    "auto_snapshot_reuse_rows": 282,
+    "auto_snapshot_reuse_spotcheck_accepted_rows": 203,
+    "auto_snapshot_reuse_spotcheck_base_accepted_rows": 178,
+    "auto_snapshot_reuse_spotcheck_strict_census_accepted_rows": 15,
+    "auto_snapshot_reuse_spotcheck_open_rows_before_county_acceptance": 25,
+    "auto_snapshot_reuse_spotcheck_open_rows_before_held_resolution": 10,
+    "auto_snapshot_reuse_spotcheck_held_resolution_accepted_rows": 6,
+    "auto_snapshot_reuse_spotcheck_open_rows_before_final_external_evidence": 4,
+    "auto_snapshot_reuse_spotcheck_final_external_evidence_accepted_rows": 4,
+    "auto_snapshot_reuse_spotcheck_open_rows": 0,
+    "pending_geocode_rows": 0,
+    "parse_review_rows": 154,
+    "county_year_candidate_rows": 216
+  },
+  "auto_reuse_priority_counts": {
+    "low": 161,
+    "high": 69,
+    "medium": 52
+  },
+  "pending_geocode_reason_counts": {},
+  "parse_review_category_counts": {
+    "address_marker_or_address_text_not_found": 98,
+    "city_zip_found_street_pattern_unclear": 29,
+    "snapshot_address_text_found_needs_parser_pattern": 23,
+    "fetch_or_cache_failure": 4
+  },
+  "decision": "Use these queues for operator review before any SEC source-promotion review.",
+  "next_action": "Review 0 open auto snapshot reuses after strict Census and held-row resolution, keep parsed geocode review closed, and decide whether parser-pattern work is worth doing for the remaining parse-review rows.",
+  "outputs": {
+    "auto_reuse_spotcheck_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_spotcheck_queue.csv",
+    "pending_geocode_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_pending_geocode_queue.csv",
+    "parse_triage_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_parse_review_triage.csv",
+    "auto_reuse_spotcheck_acceptance_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_spotcheck_acceptance.json",
+    "auto_reuse_county_closeout_acceptance_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_acceptance.json",
+    "auto_reuse_held_resolution_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_held_row_resolution.json",
+    "auto_reuse_final_external_evidence_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_final_held_external_evidence.json",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_review_queue_summary.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_review_queue_summary.md"
+  }
+}

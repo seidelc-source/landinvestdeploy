@@ -1,0 +1,2 @@
+cms_provider_number,census_query_url,census_fetch_status,census_match_count,census_input_address,census_matched_address,census_coordinates,census_county_fips,census_county_name,census_county_state
+464007,https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?address=592+W+1350+S%2C+Woods+Cross%2C+UT+84010&benchmark=Public_AR_Current&vintage=Current_Current&format=json,matched,1,"592 W 1350 S, Woods Cross, UT 84010","592 W 1350 S, WOODS CROSS, UT, 84010","{""x"": -111.895131894763, ""y"": 40.877009343662}",49011,Davis County,49

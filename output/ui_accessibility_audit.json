@@ -1,0 +1,412 @@
+{
+  "generated_at": "2026-06-06T04:02:25.090226+00:00",
+  "status": "pass",
+  "contrast": [
+    {
+      "name": "Light body text",
+      "foreground": "#0f172a",
+      "background": "#ffffff",
+      "ratio": 17.85,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Light secondary text",
+      "foreground": "#334155",
+      "background": "#ffffff",
+      "ratio": 10.35,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Light muted text",
+      "foreground": "#475569",
+      "background": "#ffffff",
+      "ratio": 7.58,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Light subtle label",
+      "foreground": "#64748b",
+      "background": "#ffffff",
+      "ratio": 4.76,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Light primary accent",
+      "foreground": "#0f766e",
+      "background": "#ffffff",
+      "ratio": 5.47,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Light primary button text",
+      "foreground": "#ffffff",
+      "background": "#0f766e",
+      "ratio": 5.47,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Light Plotly default label",
+      "foreground": "#2a3f5f",
+      "background": "#ffffff",
+      "ratio": 10.63,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Light custom chart label",
+      "foreground": "#0f172a",
+      "background": "#f8fafc",
+      "ratio": 17.06,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Dark body text",
+      "foreground": "#f8fafc",
+      "background": "#0e1117",
+      "ratio": 18.06,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Dark secondary text",
+      "foreground": "#cbd5e1",
+      "background": "#0e1117",
+      "ratio": 12.73,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Dark control text",
+      "foreground": "#e5e7eb",
+      "background": "#262730",
+      "ratio": 11.98,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Dark selected tab accent",
+      "foreground": "#5eead4",
+      "background": "#0e1117",
+      "ratio": 12.77,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Dark active segmented tab",
+      "foreground": "#ffffff",
+      "background": "#0f766e",
+      "ratio": 5.47,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Dark Plotly label override",
+      "foreground": "#e5e7eb",
+      "background": "#0f172a",
+      "ratio": 14.42,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Dark Plotly grid stroke",
+      "foreground": "#94a3b8",
+      "background": "#0f172a",
+      "ratio": 6.96,
+      "threshold": 3.0,
+      "status": "pass"
+    },
+    {
+      "name": "Vaporwave body text",
+      "foreground": "#f8f7ff",
+      "background": "#10002b",
+      "ratio": 18.68,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Vaporwave secondary text",
+      "foreground": "#e9d5ff",
+      "background": "#10002b",
+      "ratio": 14.6,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Vaporwave cyan accent",
+      "foreground": "#67e8f9",
+      "background": "#10002b",
+      "ratio": 13.71,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Vaporwave magenta accent",
+      "foreground": "#ff4fd8",
+      "background": "#10002b",
+      "ratio": 6.97,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Vaporwave active control",
+      "foreground": "#10002b",
+      "background": "#67e8f9",
+      "ratio": 13.71,
+      "threshold": 4.5,
+      "status": "pass"
+    },
+    {
+      "name": "Focus ring",
+      "foreground": "#fbbf24",
+      "background": "#0f172a",
+      "ratio": 10.69,
+      "threshold": 3.0,
+      "status": "pass"
+    }
+  ],
+  "source_patterns": [
+    {
+      "check": "skip_link",
+      "pattern": "skip-link",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "main_anchor",
+      "pattern": "landinvest-main",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "focus_visible",
+      "pattern": ":focus-visible",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "customer_empty_state",
+      "pattern": "customer-empty-state",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "aria_live_status",
+      "pattern": "aria-live=\"polite\"",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "banner_role",
+      "pattern": "role=\"banner\"",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "selected_county_region",
+      "pattern": "aria-label=\"Selected county map summary\"",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "plotly_dark_text_override",
+      "pattern": ".js-plotly-plot svg text",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "mobile_media_query",
+      "pattern": "@media (max-width: 720px)",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "segmented_dark_override",
+      "pattern": "stBaseButton-segmented_controlActive",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "customer_vaporwave_theme",
+      "pattern": "customer-theme-vaporwave",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "customer_visual_skin_control",
+      "pattern": "Visual skin",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "No counties match this Customer setup",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "No opportunity cards match this search",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "No County Story match",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "Choose counties to compare",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "Your Customer watchlist is empty",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "Packet has no watchlist counties yet",
+      "status": "pass",
+      "path": "dashboard.py"
+    },
+    {
+      "check": "skip_link",
+      "pattern": "skip-link",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "main_anchor",
+      "pattern": "landinvest-main",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "focus_visible",
+      "pattern": ":focus-visible",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "customer_empty_state",
+      "pattern": "customer-empty-state",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "aria_live_status",
+      "pattern": "aria-live=\"polite\"",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "banner_role",
+      "pattern": "role=\"banner\"",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "selected_county_region",
+      "pattern": "aria-label=\"Selected county map summary\"",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "plotly_dark_text_override",
+      "pattern": ".js-plotly-plot svg text",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "mobile_media_query",
+      "pattern": "@media (max-width: 720px)",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "segmented_dark_override",
+      "pattern": "stBaseButton-segmented_controlActive",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "customer_vaporwave_theme",
+      "pattern": "customer-theme-vaporwave",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "customer_visual_skin_control",
+      "pattern": "Visual skin",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "No counties match this Customer setup",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "No opportunity cards match this search",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "No County Story match",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "Choose counties to compare",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "Your Customer watchlist is empty",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    },
+    {
+      "check": "customer_empty_state_marker",
+      "pattern": "Packet has no watchlist counties yet",
+      "status": "pass",
+      "path": "deploy/streamlit_app/dashboard.py"
+    }
+  ],
+  "app_tests": [
+    {
+      "path": "dashboard.py",
+      "status": "pass",
+      "exceptions": []
+    },
+    {
+      "path": "deploy/streamlit_app/dashboard.py",
+      "status": "pass",
+      "exceptions": []
+    }
+  ],
+  "browser_qa_targets": [
+    "/?experience=customer&workspace=Radar",
+    "/?experience=customer&workspace=Opportunities",
+    "/?experience=customer&workspace=County%20Story",
+    "/?experience=customer&workspace=Watchlist",
+    "/?experience=customer&workspace=Packet",
+    "/?experience=product"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "generated_at": "2026-06-02T20:08:15.144722+00:00",
+  "status": "report_only_rank_band_gate_built_no_promotion",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "boundary_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/fiveyr_boundary_review_packet.csv",
+    "midrank_review_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/fiveyr_midrank_stability_review.json",
+    "boundary_audit_json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/fiveyr_disagreement_interval_boundary_audit.json"
+  },
+  "metrics": {
+    "rank_bands": 3,
+    "ready_bands": 0,
+    "watch_bands": 1,
+    "blocked_bands": 2,
+    "boundary_review_rows": 87,
+    "inside_boundary_rows": 45,
+    "inside_do_not_promote_rows": 10
+  },
+  "decision": "Keep active 5yr default unchanged. Use rank-band gates only as report-only operator review policy.",
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/fiveyr_rank_band_promotion_gate.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/fiveyr_rank_band_promotion_gate.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/fiveyr_rank_band_promotion_gate.md"
+  },
+  "rank_band_rows": [
+    {
+      "boundary_name": "top_25",
+      "boundary_n": 25,
+      "review_rows": 21,
+      "inside_rows": 11,
+      "inside_stable_rows": 7,
+      "inside_watch_rows": 4,
+      "inside_do_not_promote_rows": 0,
+      "outside_rows": 10,
+      "outside_watch_or_block_rows": 6,
+      "inside_stable_share": 0.6363636363636364,
+      "max_inside_risk_points": 2.0,
+      "dominant_inside_issue": "interval_uncertainty",
+      "top_inside_examples": "#19 Lucas County, Ohio (watch); #22 Cambria County, Pennsylvania (watch); #23 Douglas County, Illinois (watch); #25 Williamson County, Illinois (watch); #18 Schuylkill County, Pennsylvania (stable)",
+      "gate_status": "operator_acceptance_only_watch_rows_open",
+      "recommended_action": "Use as operator-review context only; watch rows need source/model review before any policy change."
+    },
+    {
+      "boundary_name": "top_50",
+      "boundary_n": 50,
+      "review_rows": 25,
+      "inside_rows": 13,
+      "inside_stable_rows": 5,
+      "inside_watch_rows": 6,
+      "inside_do_not_promote_rows": 2,
+      "outside_rows": 12,
+      "outside_watch_or_block_rows": 7,
+      "inside_stable_share": 0.38461538461538464,
+      "max_inside_risk_points": 4.0,
+      "dominant_inside_issue": "interval_uncertainty",
+      "top_inside_examples": "#39 Allegany County, New York (do_not_promote_boundary); #47 Lunenburg County, Virginia (do_not_promote_boundary); #43 Wood County, Wisconsin (watch); #50 Northumberland County, Pennsylvania (watch); #40 Wise County, Virginia (watch)",
+      "gate_status": "blocked_do_not_promote_inside_band",
+      "recommended_action": "Do not use this rank band for promotion policy; reconcile do-not-promote boundary rows first."
+    },
+    {
+      "boundary_name": "top_100",
+      "boundary_n": 100,
+      "review_rows": 41,
+      "inside_rows": 21,
+      "inside_stable_rows": 6,
+      "inside_watch_rows": 7,
+      "inside_do_not_promote_rows": 8,
+      "outside_rows": 20,
+      "outside_watch_or_block_rows": 19,
+      "inside_stable_share": 0.2857142857142857,
+      "max_inside_risk_points": 6.0,
+      "dominant_inside_issue": "interval_uncertainty",
+      "top_inside_examples": "#92 Tolland County, Connecticut (do_not_promote_boundary); #96 Westmoreland County, Pennsylvania (do_not_promote_boundary); #86 Ogemaw County, Michigan (do_not_promote_boundary); #82 Mercer County, West Virginia (do_not_promote_boundary); #88 Parke County, Indiana (do_not_promote_boundary)",
+      "gate_status": "blocked_do_not_promote_inside_band",
+      "recommended_action": "Do not use this rank band for promotion policy; reconcile do-not-promote boundary rows first."
+    }
+  ]
+}

@@ -1,0 +1,1477 @@
+{
+  "generated_at": "2026-06-06T04:02:31.027685+00:00",
+  "status": "working_batch_left_unstaged_by_design",
+  "production_model_rank_or_dashboard_change": false,
+  "git_branch": "Baseline",
+  "changed_paths": 291,
+  "class_counts": {
+    "documentation_or_checkpoint": 1,
+    "dashboard_source": 4,
+    "data_source_or_registry": 1,
+    "deploy_bundle": 236,
+    "source_script": 49
+  },
+  "rows": [
+    {
+      "status_code": " M",
+      "path": "AGENTS.md",
+      "class": "documentation_or_checkpoint"
+    },
+    {
+      "status_code": " M",
+      "path": "dashboard.py",
+      "class": "dashboard_source"
+    },
+    {
+      "status_code": " M",
+      "path": "dashboard_modules/evidence_panel.py",
+      "class": "dashboard_source"
+    },
+    {
+      "status_code": " M",
+      "path": "data/source_registry.yaml",
+      "class": "data_source_or_registry"
+    },
+    {
+      "status_code": " M",
+      "path": "deploy/streamlit_app/dashboard.py",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": " M",
+      "path": "deploy/streamlit_app/dashboard_modules/evidence_panel.py",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": " M",
+      "path": "deploy/streamlit_app/output/xfactor_command_loop.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": " M",
+      "path": "scripts/apply_sec_point_in_time_hq_geocode_review.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": " M",
+      "path": "scripts/audit_streamlit_ui_accessibility.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": " M",
+      "path": "scripts/build_sec_edgar_hq_source_maturity_refresh.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": " M",
+      "path": "scripts/build_streamlit_deploy_bundle.sh",
+      "class": "source_script"
+    },
+    {
+      "status_code": " M",
+      "path": "scripts/build_xfactor_command_loop.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": " M",
+      "path": "scripts/run_sec_point_in_time_hq_address_parse_batch.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "dashboard_modules/county_memo.py",
+      "class": "dashboard_source"
+    },
+    {
+      "status_code": "??",
+      "path": "dashboard_modules/customer_story.py",
+      "class": "dashboard_source"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/dashboard_modules/county_memo.py",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/dashboard_modules/customer_story.py",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/controlled_xfactor_ablation_sprint.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/controlled_xfactor_ablation_sprint.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/controlled_xfactor_ablation_sprint.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/fiveyr_boundary_review_packet.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/fiveyr_boundary_review_packet.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/fiveyr_boundary_review_packet.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/fiveyr_rank_band_promotion_gate.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/fiveyr_rank_band_promotion_gate.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/fiveyr_rank_band_promotion_gate.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_archetype_gap_closure_2024.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_archetype_gap_closure_2024.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_archetype_gap_closure_2024.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_county_provider_review_queue.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_leakage_gate.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_leakage_gate.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_missingness_by_state.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_official_county_year.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_official_source_panel.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_official_source_panel.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_census_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_census_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_census_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_census_attempts.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_census_batch.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_census_batch.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_census_candidates.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_census_input.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_census_raw_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_closeout_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_closeout_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_closeout_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_closeout_packet.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_closeout_packet.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_closeout_packet.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_census_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_census_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_census_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_census_context_review.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_census_context_review.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_census_context_review.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_geocoder_input.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_geocode_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_geocode_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_geocode_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_geocode_attempts.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_geocode_batch.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_geocode_batch.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_geocode_candidates.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_geocode_raw_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_geocode_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_same_city_geocode_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_same_city_geocode_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_same_city_geocode_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_same_city_geocode_attempts.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_same_city_geocode_batch.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_same_city_geocode_batch.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_same_city_geocode_candidates.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_same_city_geocode_raw_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_osm_same_city_geocode_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_census_rows.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_nppes_rows.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_review.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_review.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_authoritative_review.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_review.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_review.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_review.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_rows.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_review.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_review.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_review.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_cms_hgi_rows.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_guayama_authoritative_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_guayama_authoritative_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_guayama_authoritative_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_guayama_authoritative_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_guayama_authoritative_review.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_guayama_authoritative_review.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_guayama_authoritative_review.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_guayama_authoritative_sources.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_territory_cms_hgi_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_territory_cms_hgi_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_territory_cms_hgi_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_territory_cms_hgi_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_territory_cms_hgi_review.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_territory_cms_hgi_review.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p1_territory_cms_hgi_review.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_nppes_rows.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_review.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_review.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_review.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_p2_authoritative_sources.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_packet.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_packet.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_packet.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_attempts.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_candidates.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_input.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_raw_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_context_spotcheck.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_context_spotcheck.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_context_spotcheck.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_context_spotcheck_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_context_spotcheck_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_context_spotcheck_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_context_spotcheck_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_triage_external_followup.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_triage_manual_review.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_triage_packet.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_triage_packet.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_triage_packet.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_residual_triage_summary_by_state.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_results_CENSUS_CONTEXT_REVIEW.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_results_TEMPLATE.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_external_manual_summary_by_state.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_review.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_review.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_review.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_conflict_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_conflict_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_conflict_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_context_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_context_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_context_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_review_packet.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_review_packet.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_review_packet.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_spotcheck_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_spotcheck_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_provider_geocode_same_city_spotcheck_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_source_maturity_gate.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/institutional_anchor_source_maturity_gate.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/preboom_archetype_diversity_followup_2024.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/preboom_archetype_diversity_followup_2024.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/preboom_archetype_diversity_followup_2024.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/preboom_archetype_diversity_gap_queue_2024.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_edgar_hq_source_maturity_refresh.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_edgar_hq_source_maturity_refresh.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_conflict_override_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_conflict_override_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_conflict_override_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_county_closeout.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_county_closeout.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_county_closeout_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_county_closeout_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_county_closeout_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_county_closeout_attempts.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_county_closeout_candidates.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_county_closeout_census_input.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_county_closeout_packet.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_county_closeout_raw_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_final_held_external_evidence.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_final_held_external_evidence.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_final_held_external_evidence.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_held_row_resolution.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_held_row_resolution.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_held_row_resolution.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_held_row_resolution_attempts.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_held_row_resolution_census_input.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_held_row_resolution_raw_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_spotcheck_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_spotcheck_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_spotcheck_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_auto_reuse_spotcheck_queue.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_county_year_candidates.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_geocode_review_applied.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_geocode_review_applied.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_geocode_review_applied.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_parse_review_pattern_candidates.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_parse_review_pattern_candidates.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_parse_review_pattern_candidates.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_parse_review_triage.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_candidate_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_candidate_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_candidate_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_candidates.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_census_attempts.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_census_batch.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_census_batch.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_census_input.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_census_raw_results.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_override_candidates.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_pending_geocode_queue.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_residual_geocode_acceptance.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_residual_geocode_acceptance.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_residual_geocode_acceptance.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_residual_geocode_candidates.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_residual_geocode_candidates.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_residual_geocode_override_candidates.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_review_queue_summary.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_review_queue_summary.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_scaleup_gate.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_scaleup_gate.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/sec_point_in_time_hq_scaleup_gate.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/source_registry_report.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/source_registry_report.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/source_registry_report.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/ui_accessibility_audit.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/ui_accessibility_audit.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/working_tree_hygiene_checkpoint.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/working_tree_hygiene_checkpoint.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/xfactor_command_loop.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/xfactor_command_loop.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/xfactor_evidence_center.csv",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/xfactor_evidence_center.json",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "deploy/streamlit_app/output/xfactor_evidence_center.md",
+      "class": "deploy_bundle"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/accept_institutional_anchor_provider_geocode_census_candidates.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/accept_institutional_anchor_provider_geocode_closeout.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/accept_institutional_anchor_provider_geocode_external_census_candidates.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/accept_institutional_anchor_provider_geocode_external_manual_results.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/accept_institutional_anchor_provider_geocode_same_city_conflict_census_candidates.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/accept_institutional_anchor_provider_geocode_same_city_context_census_candidates.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/accept_institutional_anchor_provider_geocode_same_city_spotcheck_candidates.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/accept_sec_point_in_time_hq_auto_reuse_conflict_overrides.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/accept_sec_point_in_time_hq_auto_reuse_county_closeout.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/accept_sec_point_in_time_hq_pending_geocode_candidates.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_controlled_xfactor_ablation_sprint.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_fiveyr_boundary_review_packet.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_fiveyr_rank_band_promotion_gate.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_archetype_gap_closure.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_leakage_gate.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_official_source_panel.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_closeout_packet.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_external_manual_census_context_review.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_external_manual_p0_authoritative_review.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_review.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_external_manual_p1_guayama_authoritative_review.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_external_manual_p2_authoritative_review.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_external_manual_packet.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_external_manual_residual_context_spotcheck.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_external_manual_residual_triage_packet.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_review.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_provider_geocode_same_city_review_packet.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_institutional_anchor_source_maturity_gate.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_preboom_archetype_diversity_followup.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_sec_point_in_time_hq_auto_reuse_county_closeout.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_sec_point_in_time_hq_auto_reuse_final_held_external_evidence.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_sec_point_in_time_hq_auto_reuse_held_row_resolution.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_sec_point_in_time_hq_auto_reuse_spotcheck_acceptance.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_sec_point_in_time_hq_parse_review_pattern_candidates.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_sec_point_in_time_hq_residual_geocode_candidates.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_sec_point_in_time_hq_review_queues.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_sec_point_in_time_hq_scaleup_gate.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_working_tree_hygiene_checkpoint.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/build_xfactor_evidence_center.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/run_institutional_anchor_provider_geocode_census_batch.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/run_institutional_anchor_provider_geocode_external_manual_osm_batch.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/run_institutional_anchor_provider_geocode_external_manual_residual_census_retry.py",
+      "class": "source_script"
+    },
+    {
+      "status_code": "??",
+      "path": "scripts/run_sec_point_in_time_hq_pending_geocode_census_batch.py",
+      "class": "source_script"
+    }
+  ],
+  "decision": "No files were staged or committed by this checkpoint. The working batch remains available for operator review.",
+  "recommended_next_action": "After reviewing generated outputs, stage source scripts/dashboard modules plus selected lightweight deploy artifacts; keep raw data and ignored heavy outputs out of Git.",
+  "outputs": {
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/working_tree_hygiene_checkpoint.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/working_tree_hygiene_checkpoint.md"
+  }
+}

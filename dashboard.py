@@ -8,6 +8,7 @@ import html
 import json
 import re
 import sqlite3
+import sys
 from pathlib import Path
 from datetime import datetime
 from urllib.parse import urlencode
@@ -18,12 +19,21 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+APP_ROOT = Path(__file__).resolve().parent
+if str(APP_ROOT) not in sys.path:
+    sys.path.insert(0, str(APP_ROOT))
+
+from dashboard_modules.evidence_panel import render_county_evidence_panel
+from dashboard_modules.county_memo import render_county_memo_markdown
+from dashboard_modules.customer_story import customer_signal_radar_figure, customer_signal_table, customer_story_hero_html
+from dashboard_modules.parcel_explorer import render_parcel_explorer_tab
+
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
 
-DATA_PATH = Path(__file__).resolve().parent / "output" / "county_rankings_2024.parquet"
-ASSETS_PATH = Path(__file__).resolve().parent / "assets"
+DATA_PATH = APP_ROOT / "output" / "county_rankings_2025.parquet"  # 2025 vintage refresh 2026-09-04
+ASSETS_PATH = APP_ROOT / "assets"
 BRAND_LOGO_PATH = ASSETS_PATH / "landinvest-logo.svg"
 COUNTY_GEOJSON_PATH = ASSETS_PATH / "geojson-counties-fips.json"
 COUNTY_GEOJSON_URL = "https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json"
@@ -59,8 +69,40 @@ KNOWN_ANALOG_SUITE_PATH = OUTPUT_PATH / "known_boom_analog_suite.json"
 XFACTOR_INTERACTION_SCOREBOARD_PATH = OUTPUT_PATH / "xfactor_interaction_validation_scoreboard.json"
 XFACTOR_INTERACTION_ABLATION_QUEUE_PATH = OUTPUT_PATH / "xfactor_interaction_ablation_queue.json"
 XFACTOR_INTERACTION_PROMOTION_GATE_PATH = OUTPUT_PATH / "xfactor_interaction_promotion_gate.json"
+XFACTOR_COMMAND_LOOP_CSV_PATH = OUTPUT_PATH / "xfactor_command_loop.csv"
+XFACTOR_EVIDENCE_CENTER_CSV_PATH = OUTPUT_PATH / "xfactor_evidence_center.csv"
+SOURCE_CONFIDENCE_WEIGHTING_CSV_PATH = OUTPUT_PATH / "source_confidence_weighting.csv"
+ANNOUNCEMENT_ANCHOR_EVENT_LATEST_CSV_PATH = OUTPUT_PATH / "announcement_anchor_event_latest_2024.csv"
+FIVEYR_BOUNDARY_REVIEW_CSV_PATH = OUTPUT_PATH / "fiveyr_boundary_review_packet.csv"
+BOOM_ONSET_ARCHETYPE_LENS_CSV_PATH = OUTPUT_PATH / "boom_onset_archetype_lens_latest.csv"
+WATCHLIST_ALERT_EVENTS_PATH = OUTPUT_PATH / "watchlist_alert_events.json"
 DEMO_READINESS_REPORT_PATH = OUTPUT_PATH / "demo_readiness_report.json"
+TOKENIZATION_READINESS_PACKET_PATH = OUTPUT_PATH / "tokenization_readiness_packet.json"
 USER_DATA_PATH = OUTPUT_PATH / "dashboard_user_data.json"
+# RECAL-1 (2026-09-09, operator D-D): three-layer surfaces published by scripts/publish_recal_surfaces.py
+RECAL_BRIEFS_PATH = OUTPUT_PATH / "recal" / "county_briefs.parquet"
+RECAL_READS_PATH = OUTPUT_PATH / "recal" / "reads.json"
+RECAL_SHORTLIST_PATH = OUTPUT_PATH / "recal" / "universe_b_shortlist.csv"
+RECAL_BRIEF_COLUMNS = [
+    "fips", "universe_A", "universe_B", "universe_C", "density_pct", "rucc_code", "population",
+    "zhvi_end", "home_value_pct", "price_to_income", "fmr_2br", "fmr_fiscal_year", "fmr_gross_yield", "rent_yield_pct",
+    "rent_yield_pct_in_rucc_band", "fmr_growth3_log", "rent_price_divergence3", "zori_gross_yield", "acs_gross_yield",
+    "nass_cash_rent_cropland_nonirr", "nass_cash_rent_pasture", "nass_land_value_per_acre", "nass_land_value_year",
+    "aei_land_value_per_acre", "farm_cap_rate_proxy", "land_value_pct", "land_cheapness_pct", "prime_farmland_share",
+    "gdp_total", "gdp_per_capita", "growth3_total", "share_retail", "share_real_estate", "share_construction",
+    "share_manufacturing", "share_accommodation_food", "bea_year", "establishments_per_1k", "tourism_gdp_share",
+    "retail_est_per_1k", "real_estate_est_per_1k", "arts_recreation_est_per_1k", "manufacturing_est_per_1k", "health_care_est_per_1k",
+    "cbp_total_est_growth3_log", "cbp_retail_est_growth3_log", "cbp_real_estate_est_growth3_log", "cbp_vintage",
+    "qcew_sector_hospitality_employment_share", "seasonal_home_share", "usda_natural_amenity_scale", "nps_visits_50km",
+    "nps_visits_per_capita_50km", "nps_nearest_unit_name", "nps_nearest_unit_km", "str_host_proxy_per_1k_units",
+    "nes721_growth3_log", "tourism_intensity_index", "str_occupancy", "str_adr", "str_revpar", "str_revenue_per_listing_annual",
+    "str_active_listings_mapped", "str_localities_mapped", "str_as_of", "str_revpar_growth_1yr", "str_revpar_growth_3yr", "str_listings_growth_3yr",
+    "str_demand_pressure_3yr", "str_history_as_of", "str_history_thin", "nri_risk_score", "usfs_wildfire_risk_score", "coastal_exposure_score",
+    "qcew_commodity_cycle_flag", "momentum_rank_pct", "quiet_now", "demand_floor_ok", "boom_onset_score",
+    "timing_class_median_rank_pct", "timing_champion_lane", "timing_rank_in_universe_B", "archetype_lens_best",
+    "operator_review_2024", "operator_review_2025", "forward_snapshot_20260908_role", "forward_snapshot_20260909_role", "badge_urban_core",
+    "badge_tiny_market", "badge_already_hot", "badge_declining", "badge_commodity_cycle", "badge_no_demand_signal",
+]
 USER_DATA_DB_PATH = OUTPUT_PATH / "dashboard_user_data.sqlite3"
 HORIZONS = [1, 3, 5]
 MIN_CAL_SHIFT = {1: 0.05, 3: 0.10, 5: 0.15}
@@ -68,6 +110,25 @@ MAX_CAL_SHIFT = {1: 0.20, 3: 0.40, 5: 0.70}
 RISK_COLOR_LOW = "#1f9d55"
 RISK_COLOR_MED = "#f59e0b"
 RISK_COLOR_HIGH = "#dc2626"
+
+
+def _timing_chip_text(honest: dict | None) -> str:
+    """Header chip for the boom-onset timing engine (replaces the retired 3yr-health chip); reads the published honest coordinates."""
+    h = honest or {}
+    h = h.get("classifier") if isinstance(h.get("classifier"), dict) else h
+    cap = next((h[k] for k in ("honest_held_out_capture_at_100", "quiet_capture_100", "capture_100") if isinstance(h.get(k), (int, float))), None)
+    mult = next((h[k] for k in ("vs_random_multiple", "multiple_vs_random", "x_random") if isinstance(h.get(k), (int, float))), None)
+    if cap is None:
+        return "ensemble class (report-only)"
+    return f"capture {cap:.3f}" + (f" ≈ {mult:.1f}× random" if mult else "")
+
+
+def _fmt_timing(value) -> str:
+    """Boom-onset timing score (0–1) for memo/report text; report-only, never a forecast."""
+    try:
+        return "—" if value is None or pd.isna(value) else f"{float(value):.2f}"
+    except (TypeError, ValueError):
+        return "—"
 
 
 def _fmt_pct(x) -> str:
@@ -145,19 +206,24 @@ def _build_county_narrative(row: pd.Series, history_row: pd.Series | None = None
     bullets_good: list[str] = []
     bullets_caution: list[str] = []
 
-    pred5 = row.get("pred_avg_5yr")
-    pred3 = row.get("pred_policy_3yr", row.get("pred_avg_3yr"))
     risk = row.get("composite_risk")
     conf = row.get("confidence", "unknown")
     fallback = bool(row.get("use_stable_3yr_fallback", False))
     interval = row.get("quantile_interval_width_mean", row.get("pred_std"))
 
-    if pd.notna(pred5):
-        bullets_good.append(f"Long-horizon upside remains strong at {_fmt_pct(pred5)} on the active 5-year blend.")
-    if pd.notna(pred3):
-        bullets_good.append(f"Medium-term policy signal is {_fmt_pct(pred3)}, which helps confirm the near-to-mid path.")
+    pred1 = row.get("pred_avg_1yr")
+    if pd.notna(pred1):
+        bullets_good.append(
+            f"1yr relative-appreciation signal is {_fmt_pct(pred1)} — an ordering read against other counties, "
+            "not a forecast (top-of-list precision is unproven)."
+        )
+    bos = row.get("boom_onset_score")
+    if pd.notna(bos):
+        rank_b = row.get("timing_rank_in_universe_B")
+        rank_txt = f" — #{int(rank_b)} in the investable universe" if pd.notna(rank_b) else ""
+        bullets_good.append(f"Boom-onset timing score is {float(bos):.2f}{rank_txt} — resemblance to the quiet years before past booms (report-only, not a forecast).")
     for feat, val in positives_5[:2]:
-        bullets_good.append(f"`{feat}` is one of the strongest long-horizon positive drivers ({val:+.3f} SHAP).")
+        bullets_good.append(f"`{feat}` is one of the strongest positive model drivers ({val:+.3f} SHAP — attribution, not causation).")
     for feat, val in positives_3[:1]:
         if feat not in [x[0] for x in positives_5[:2]]:
             bullets_good.append(f"`{feat}` also supports the 3-year view ({val:+.3f} SHAP).")
@@ -172,7 +238,7 @@ def _build_county_narrative(row: pd.Series, history_row: pd.Series | None = None
     if pd.notna(interval) and float(interval) > 0.20:
         bullets_caution.append(f"Prediction uncertainty is relatively wide ({float(interval):.3f}), so ranking confidence should be treated cautiously.")
     for feat, val in negatives_5[:2]:
-        bullets_caution.append(f"`{feat}` is a notable long-horizon drag ({val:+.3f} SHAP).")
+        bullets_caution.append(f"`{feat}` is a notable negative model driver ({val:+.3f} SHAP — attribution, not causation).")
     if history_row is not None and not history_row.empty:
         std_rank = history_row.get("std_rank")
         top25_share = history_row.get("top25_presence_share")
@@ -189,8 +255,9 @@ def _build_county_narrative(row: pd.Series, history_row: pd.Series | None = None
             bullets_good.append(f"Current live rank is #{int(latest_rank)}.")
 
     summary = (
-        f"{row.get('county_name', 'This county')} is currently a `{conf}`-confidence long-horizon opportunity. "
-        f"The main case is strong 5-year upside with supportive structural drivers, while the main question is "
+        f"{row.get('county_name', 'This county')} is currently a `{conf}`-confidence entry on the strategy list. "
+        f"The main case is a strong relative model signal with supportive structural drivers (context, not a "
+        f"multi-year forecast), while the main question is "
         f"{'medium-term fallback reliance' if fallback else 'whether the current rank remains stable across runs'}."
     )
 
@@ -372,8 +439,6 @@ def _build_wave3_decision_narrative(row: pd.Series) -> dict[str, object]:
     fragility = row.get("land_fragility_pressure")
     developability = row.get("land_developability_index")
     site_support = row.get("site_thesis_support_index")
-    pred5 = row.get("pred_avg_5yr")
-    pred3 = row.get("pred_policy_3yr")
     risk = row.get("composite_risk")
 
     support_v = float(support) if pd.notna(support) else None
@@ -393,10 +458,9 @@ def _build_wave3_decision_narrative(row: pd.Series) -> dict[str, object]:
         verdict = "mixed but usable"
 
     thesis_bits: list[str] = []
-    if pd.notna(pred5):
-        thesis_bits.append(f"5yr upside is {_fmt_pct(pred5)}")
-    if pd.notna(pred3):
-        thesis_bits.append(f"3yr policy signal is {_fmt_pct(pred3)}")
+    bos = row.get("boom_onset_score")
+    if pd.notna(bos):
+        thesis_bits.append(f"boom-onset timing score is {float(bos):.2f} (report-only)")
     if support_v is not None and brake_v is not None:
         thesis_bits.append(f"structural support/brake balance is {support_v:.3f}/{brake_v:.3f}")
     if pd.notna(base_rank) and pd.notna(overlay_rank):
@@ -608,6 +672,7 @@ def _default_user_data() -> dict:
         "diligence_evidence": {},
         "parcel_checklists": {},
         "watchlist_alert_state": {},
+        "customer_tour_dismissed": False,
         "watchlist_settings": {
             "top_rank_strong": 25,
             "top_rank_watch": 100,
@@ -616,8 +681,10 @@ def _default_user_data() -> dict:
             "calm_std_rank": 12.0,
             "volatile_std_rank": 25.0,
             "sharp_rank_move": 10.0,
-            "strong_5yr_upside": 0.15,
+            "strong_5yr_upside": 0.15,  # legacy key kept for stored user settings; no longer read
             "weak_5yr_upside": 0.05,
+            "strong_timing_score": 0.75,
+            "weak_timing_score": 0.40,
             "elevated_risk": 60.0,
             "alert_rank_exit_boundary": 50,
         },
@@ -725,6 +792,7 @@ def _save_current_user_state() -> None:
             "parcel_checklists": st.session_state.parcel_checklists,
             "watchlist_alert_state": st.session_state.watchlist_alert_state,
             "watchlist_settings": st.session_state.watchlist_settings,
+            "customer_tour_dismissed": bool(st.session_state.get("customer_tour_dismissed", False)),
         }
     )
 
@@ -767,8 +835,8 @@ def _build_watchlist_markdown(
             f"- `{row.get('county_name')}, {row.get('state')}` [FIPS {fips}]"
             f": rank `#{int(row.get('overall_rank'))}`"
             f", opportunity `{_fmt_score(row.get('opportunity_score'))}`"
-            f", 3yr `{_fmt_pct(row.get('pred_policy_3yr'))}`"
-            f", 5yr `{_fmt_pct(row.get('pred_avg_5yr'))}`"
+            f", 1yr (ordinal) `{_fmt_pct(row.get('pred_avg_1yr'))}`"
+            f", timing `{_fmt_timing(row.get('boom_onset_score'))}`"
             f", risk `{_fmt_score(row.get('composite_risk'))}`"
             f", confidence `{row.get('confidence', '—')}`"
         )
@@ -1111,8 +1179,8 @@ def _build_watchlist_latest_run_summary(
             lines.append(
                 f"- `{rec['county_name']}, {rec['state']}` [FIPS {rec['fips']}]"
                 f": {rank_part}"
-                f" | 5yr `{_fmt_pct(rec.get('pred_avg_5yr'))}`"
-                f" | 3yr `{_fmt_pct(rec.get('pred_policy_3yr'))}`"
+                f" | 1yr (ordinal) `{_fmt_pct(rec.get('pred_avg_1yr'))}`"
+                f" | timing `{_fmt_timing(rec.get('boom_onset_score'))}`"
                 f" | opp `{_fmt_score(rec.get('opportunity_score'))}`"
             )
             if rec.get("explanation"):
@@ -1163,7 +1231,7 @@ def _build_watchlist_share_template(
             decision = _build_wave3_decision_narrative(row)
             lines.append(
                 f"- `{row['county_name']}, {row['state']}`: rank `#{int(row['overall_rank'])}`, "
-                f"5yr `{_fmt_pct(row.get('pred_avg_5yr'))}`, 3yr `{_fmt_pct(row.get('pred_policy_3yr'))}`, "
+                f"1yr (ordinal) `{_fmt_pct(row.get('pred_avg_1yr'))}`, timing `{_fmt_timing(row.get('boom_onset_score'))}`, "
                 f"risk `{_fmt_score(row.get('composite_risk'))}`"
             )
             lines.append(f"  - Structural read: {wave3_note['summary']}")
@@ -1210,7 +1278,7 @@ def _build_watchlist_share_template(
                     f"- `{rec['county_name']}, {rec['state']}` [FIPS {rec['fips']}]: "
                     f"rank `#{int(rec['current_rank'])}`"
                     f", movement `{rec['movement']}`"
-                    f", 5yr `{_fmt_pct(rec.get('pred_avg_5yr'))}`"
+                    f", timing `{_fmt_timing(rec.get('boom_onset_score'))}`"
                     f", 3yr `{_fmt_pct(rec.get('pred_policy_3yr'))}`"
                 )
                 if rec.get("explanation"):
@@ -1303,7 +1371,7 @@ def _build_wave3_shortlist_brief(
             lines.append(
                 f"- `{rec['county_name']}, {rec['state']}` [FIPS {rec['fips']}]"
                 f": rank `#{int(rec['overall_rank'])}`"
-                f", 5yr `{_fmt_pct(rec.get('pred_avg_5yr'))}`"
+                f", timing `{_fmt_timing(rec.get('boom_onset_score'))}`"
                 f", support `{rec.get('wave3_support_short', '—')}`"
                 f", brakes `{rec.get('wave3_brake_short', '—')}`"
             )
@@ -1638,14 +1706,14 @@ def _classify_watchlist_health(row: pd.Series, settings: dict | None = None) -> 
             concern += 1
             reasons.append("dropped sharply in the latest run")
 
-    pred5 = row.get("pred_avg_5yr")
-    if pd.notna(pred5):
-        if float(pred5) >= float(cfg["strong_5yr_upside"]):
+    bos = row.get("boom_onset_score")
+    if pd.notna(bos):
+        if float(bos) >= float(cfg.get("strong_timing_score", 0.75)):
             strength += 1
-            reasons.append("still has strong long-horizon upside")
-        elif float(pred5) <= float(cfg["weak_5yr_upside"]):
+            reasons.append("boom-onset timing score is still high (quiet-shortlist territory)")
+        elif float(bos) <= float(cfg.get("weak_timing_score", 0.40)):
             concern += 1
-            reasons.append("now has muted long-horizon upside")
+            reasons.append("boom-onset timing score has faded")
 
     risk = row.get("composite_risk")
     if pd.notna(risk) and float(risk) >= float(cfg["elevated_risk"]):
@@ -1907,6 +1975,24 @@ def load_wave3_structural_overlay_summary(_mtime: float) -> dict | None:
 
 
 @st.cache_data
+def load_recal_briefs(_mtime: float) -> pd.DataFrame | None:
+    """RECAL-1 county briefs (universe flags, facts by category, timing, badges); report-only."""
+    if not RECAL_BRIEFS_PATH.exists():
+        return None
+    try:
+        out = pd.read_parquet(RECAL_BRIEFS_PATH)
+    except Exception:
+        return None
+    out["fips"] = out["fips"].astype(str).str.zfill(5)
+    return out
+
+
+@st.cache_data
+def load_recal_reads(_mtime: float) -> dict | None:
+    return _safe_json_load(RECAL_READS_PATH)
+
+
+@st.cache_data
 def load_preboom_surface_df(path_str: str, _mtime: float) -> pd.DataFrame | None:
     path = Path(path_str)
     if not path.exists():
@@ -1937,6 +2023,44 @@ def load_xfactor_interaction_promotion_gate(_mtime: float) -> dict | None:
 @st.cache_data
 def load_demo_readiness_report(_mtime: float) -> dict | None:
     return _safe_json_load(DEMO_READINESS_REPORT_PATH)
+
+
+@st.cache_data
+def load_tokenization_readiness_packet(_mtime: float) -> dict | None:
+    return _safe_json_load(TOKENIZATION_READINESS_PACKET_PATH)
+
+
+def load_watchlist_alert_events(_mtime: float) -> list[dict]:
+    payload = _safe_json_load(WATCHLIST_ALERT_EVENTS_PATH)
+    if isinstance(payload, dict):
+        events = payload.get("events", [])
+        return events if isinstance(events, list) else []
+    return []
+
+
+def _render_watchlist_alerts(events: list[dict], watched_fips: set[str]) -> None:
+    """Report-only 'since you last looked' panel from the offline alert
+    evaluator. Filters the global event feed to the user's watched counties."""
+    relevant = [
+        e for e in events if str(e.get("fips", "")).zfill(5) in watched_fips
+    ] if watched_fips else []
+    with st.expander(f"Watchlist Alerts ({len(relevant)})", expanded=bool(relevant)):
+        st.caption(
+            "Offline alert feed refreshed with the monthly research run; report-only and "
+            "does not change production rank. Email delivery arrives with hosted accounts."
+        )
+        if not relevant:
+            st.caption("No new alerts for your watched counties since the last refresh.")
+            return
+        df = pd.DataFrame(relevant)
+        df["County"] = df["county"].astype(str) + ", " + df["state"].astype(str)
+        view = df.rename(columns={"type": "Alert", "severity": "Severity", "detail": "Detail", "as_of": "As Of"})
+        st.dataframe(
+            view[["County", "Alert", "Severity", "Detail", "As Of"]],
+            width="stretch",
+            hide_index=True,
+            height=240,
+        )
 
 
 @st.cache_data
@@ -1985,98 +2109,20 @@ def _confidence_numeric(series: pd.Series) -> pd.Series:
 
 
 def _product_thesis_presets() -> dict[str, dict]:
+    """RECAL-1 thesis presets (2026-09-09). Score components: timing (boom-onset resemblance, key
+    ``growth`` for saved-profile compatibility), value (yield & cheapness), risk control, land thesis,
+    confidence. ``h1`` = optional 1yr ordinal context; ``h3``/``h5`` are always 0 (falsified horizons)."""
+    base = {"h1": 0, "h3": 0, "h5": 0, "uncertainty": 0, "min_confidence": "Any", "universe_only": True, "quiet_only": True}
     return {
-        "Long-term appreciation": {
-            "h1": 0,
-            "h3": 10,
-            "h5": 90,
-            "growth": 75,
-            "risk": 15,
-            "structure": 5,
-            "confidence": 5,
-            "uncertainty": 5,
-            "max_risk": 70,
-            "min_confidence": "Any",
-            "structural_focus": "Overall land thesis",
-        },
-        "Low-risk compounder": {
-            "h1": 0,
-            "h3": 20,
-            "h5": 80,
-            "growth": 45,
-            "risk": 40,
-            "structure": 10,
-            "confidence": 5,
-            "uncertainty": 10,
-            "max_risk": 45,
-            "min_confidence": "MEDIUM+",
-            "structural_focus": "Overall land thesis",
-        },
-        "Distressed rebound": {
-            "h1": 20,
-            "h3": 20,
-            "h5": 60,
-            "growth": 80,
-            "risk": 5,
-            "structure": 5,
-            "confidence": 10,
-            "uncertainty": 5,
-            "max_risk": 75,
-            "min_confidence": "Any",
-            "structural_focus": "Overall land thesis",
-        },
-        "Land optionality": {
-            "h1": 0,
-            "h3": 15,
-            "h5": 85,
-            "growth": 45,
-            "risk": 15,
-            "structure": 35,
-            "confidence": 5,
-            "uncertainty": 5,
-            "max_risk": 65,
-            "min_confidence": "Any",
-            "structural_focus": "Optionality",
-        },
-        "Climate-resilient growth": {
-            "h1": 0,
-            "h3": 20,
-            "h5": 80,
-            "growth": 45,
-            "risk": 30,
-            "structure": 20,
-            "confidence": 5,
-            "uncertainty": 10,
-            "max_risk": 55,
-            "min_confidence": "MEDIUM+",
-            "structural_focus": "Low fragility",
-        },
-        "Recreation amenity": {
-            "h1": 0,
-            "h3": 15,
-            "h5": 85,
-            "growth": 50,
-            "risk": 15,
-            "structure": 30,
-            "confidence": 5,
-            "uncertainty": 5,
-            "max_risk": 65,
-            "min_confidence": "Any",
-            "structural_focus": "Recreation access",
-        },
-        "Buildable scarcity": {
-            "h1": 0,
-            "h3": 10,
-            "h5": 90,
-            "growth": 45,
-            "risk": 15,
-            "structure": 35,
-            "confidence": 5,
-            "uncertainty": 5,
-            "max_risk": 65,
-            "min_confidence": "Any",
-            "structural_focus": "Buildable scarcity",
-        },
+        "Quiet shortlist (classifier order)": {**base, "growth": 100, "value": 0, "value_focus": "Balanced", "risk": 0, "structure": 0, "confidence": 0, "max_risk": 100, "structural_focus": "Overall land thesis"},
+        "Quiet pre-boom (timing-led)": {**base, "growth": 80, "value": 10, "value_focus": "Balanced", "risk": 5, "structure": 0, "confidence": 5, "max_risk": 70, "structural_focus": "Overall land thesis"},
+        "Timing x value (balanced)": {**base, "growth": 50, "value": 30, "value_focus": "Balanced", "risk": 10, "structure": 5, "confidence": 5, "max_risk": 70, "structural_focus": "Overall land thesis"},
+        "Income first (rent yield)": {**base, "growth": 25, "value": 50, "value_focus": "Rent yield", "risk": 15, "structure": 5, "confidence": 5, "max_risk": 70, "structural_focus": "Overall land thesis"},
+        "Vacation land (tourism)": {**base, "growth": 40, "value": 15, "value_focus": "Balanced", "risk": 10, "structure": 30, "confidence": 5, "max_risk": 70, "structural_focus": "Tourism intensity"},
+        "Farmland & acreage": {**base, "growth": 30, "value": 40, "value_focus": "Farmland income", "risk": 10, "structure": 15, "confidence": 5, "max_risk": 70, "structural_focus": "Farmland income"},
+        "Low-risk compounder": {**base, "growth": 40, "value": 20, "value_focus": "Balanced", "risk": 30, "structure": 5, "confidence": 5, "max_risk": 48, "min_confidence": "MEDIUM+", "structural_focus": "Overall land thesis"},
+        "Buildable scarcity": {**base, "growth": 40, "value": 15, "value_focus": "Balanced", "risk": 10, "structure": 30, "confidence": 5, "max_risk": 65, "structural_focus": "Buildable scarcity"},
+        "Climate-resilient growth": {**base, "growth": 40, "value": 15, "value_focus": "Balanced", "risk": 25, "structure": 15, "confidence": 5, "max_risk": 55, "min_confidence": "MEDIUM+", "structural_focus": "Low fragility"},
     }
 
 
@@ -2091,6 +2137,12 @@ def _product_structural_score(df: pd.DataFrame, focus: str) -> pd.Series:
         fragility = pd.to_numeric(df.get("land_fragility_pressure", pd.Series(0.5, index=idx)), errors="coerce").fillna(0.5)
         environmental = pd.to_numeric(df.get("environmental_risk", pd.Series(50.0, index=idx)), errors="coerce").fillna(50.0)
         return (0.65 * (100.0 - 100.0 * fragility) + 0.35 * (100.0 - environmental)).clip(0, 100)
+    if focus == "Tourism intensity":
+        return (100.0 * pd.to_numeric(df.get("tourism_intensity_index", pd.Series(0.5, index=idx)), errors="coerce").fillna(0.5)).clip(0, 100)
+    if focus == "Farmland income":
+        prime = pd.to_numeric(df.get("prime_farmland_share", pd.Series(np.nan, index=idx)), errors="coerce").rank(pct=True).fillna(0.5)
+        cap = pd.to_numeric(df.get("farm_cap_rate_proxy", pd.Series(np.nan, index=idx)), errors="coerce").rank(pct=True).fillna(0.5)
+        return (100.0 * (0.5 * prime + 0.5 * cap)).clip(0, 100)
     if focus == "Buildable scarcity":
         developability = pd.to_numeric(df.get("land_developability_index", pd.Series(0.5, index=idx)), errors="coerce").fillna(0.5)
         scarcity = pd.to_numeric(df.get("scarcity_amenity_balance_index", pd.Series(0.5, index=idx)), errors="coerce").fillna(0.5)
@@ -2104,27 +2156,55 @@ def _product_structural_score(df: pd.DataFrame, focus: str) -> pd.Series:
     return (70.0 * support + 30.0 * (1.0 - brake)).clip(0, 100)
 
 
+def _recal_value_score(df: pd.DataFrame, focus: str) -> pd.Series:
+    """Value layer (observed facts, no forecast): higher = cheaper and earning more.
+    Rent yield = gross rent yield percentile within the county's RUCC band (+ national);
+    Farmland income = land cheapness + farm cap-rate percentiles; Balanced = yield-in-band,
+    home-value cheapness, land cheapness."""
+    idx = df.index
+    yield_band = _product_series(df, "rent_yield_pct_in_rucc_band", 0.5) * 100.0
+    yield_nat = _product_series(df, "rent_yield_pct", 0.5) * 100.0
+    cheap_home = (1.0 - _product_series(df, "home_value_pct", 0.5)) * 100.0
+    cheap_land = _product_series(df, "land_cheapness_pct", 0.5) * 100.0
+    cap = pd.to_numeric(df.get("farm_cap_rate_proxy", pd.Series(np.nan, index=idx)), errors="coerce").rank(pct=True).fillna(0.5) * 100.0
+    if focus == "Rent yield":
+        return (0.7 * yield_band + 0.3 * yield_nat).clip(0, 100)
+    if focus == "Farmland income":
+        return (0.5 * cheap_land + 0.5 * cap).clip(0, 100)
+    return (0.5 * yield_band + 0.25 * cheap_home + 0.25 * cheap_land).clip(0, 100)
+
+
+def _recal_timing_score(df: pd.DataFrame, one_year_weight: float = 0.0) -> pd.Series:
+    """Timing layer: the boom-onset classifier's champion-lane score rank within the scored year, with the
+    ensemble-class median rank as fallback; optional 1yr ordinal context blended in. Never 3yr/5yr (falsified).
+    Counties outside the quiet band are halved: a high resemblance score on an already-moving or
+    collapsing market is not a pre-boom read."""
+    idx = df.index
+    cls = pd.to_numeric(df.get("timing_class_median_rank_pct", pd.Series(np.nan, index=idx)), errors="coerce")
+    champ_raw = pd.to_numeric(df.get("boom_onset_score", pd.Series(np.nan, index=idx)), errors="coerce")
+    # min-max of the champion score (a within-year rank blend) keeps the spread at the top; a percentile would
+    # compress the top 50 into 98-100 and let any secondary weight decide the order
+    champ = _scale_0_100(champ_raw) / 100.0 if champ_raw.notna().any() else champ_raw
+    # Champion lane first so every surface (this table, the Quiet Shortlist tab, operator packets, the frozen
+    # forward-validation snapshots) ranks on the same basis; the lane-agnostic class rank is the fallback and is
+    # shown beside it. Skill CLAIMS stay at class level (never a named lane) — see the honest coordinates.
+    timing = champ.where(champ.notna(), cls).fillna(0.0) * 100.0
+    w = float(np.clip(one_year_weight, 0.0, 100.0)) / 100.0
+    if w > 0 and "pred_avg_1yr" in df.columns:
+        timing = (1.0 - w) * timing + w * _scale_0_100(df["pred_avg_1yr"])
+    if "quiet_now" in df.columns:
+        quiet = df["quiet_now"].fillna(False).astype(bool)
+        timing = timing.where(quiet, timing * 0.5)
+    return timing.clip(0, 100)
+
+
 def _simulate_strategy_rankings(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
+    """RECAL-1 strategy simulation: timing (classifier) x value (facts) x risk x land thesis x confidence.
+    A UI overlay only — production rank artifacts are unchanged."""
     out = df.copy()
-    h_weights = {
-        1: float(cfg.get("h1", 0)),
-        3: float(cfg.get("h3", 0)),
-        5: float(cfg.get("h5", 100)),
-    }
-    h_total = sum(h_weights.values()) or 1.0
-    h_weights = {h: w / h_total for h, w in h_weights.items()}
-
-    h_cols = {
-        1: "pred_avg_1yr",
-        3: "pred_policy_3yr" if "pred_policy_3yr" in out.columns else "pred_avg_3yr",
-        5: "pred_avg_5yr",
-    }
-    growth_parts = []
-    for h, col in h_cols.items():
-        if col in out.columns:
-            growth_parts.append(h_weights[h] * _scale_0_100(out[col]))
-    out["sim_growth_score"] = sum(growth_parts) if growth_parts else out.get("growth_score", 50.0)
-
+    out["sim_timing_score"] = _recal_timing_score(out, float(cfg.get("h1", 0)))
+    out["sim_growth_score"] = out["sim_timing_score"]  # legacy alias read by lenses, cards, and stress tests
+    out["sim_value_score"] = _recal_value_score(out, str(cfg.get("value_focus", "Balanced")))
     out["sim_risk_fit"] = (100.0 - pd.to_numeric(out.get("composite_risk", 50.0), errors="coerce").fillna(50.0)).clip(0, 100)
     out["sim_structure_score"] = _product_structural_score(out, str(cfg.get("structural_focus", "Overall land thesis")))
     out["sim_confidence_score"] = _confidence_numeric(out.get("confidence", pd.Series("MEDIUM", index=out.index)))
@@ -2134,9 +2214,10 @@ def _simulate_strategy_rankings(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
         out["sim_uncertainty_score"] = 0.0
 
     component_weights = {
-        "sim_growth_score": float(cfg.get("growth", 60)),
-        "sim_risk_fit": float(cfg.get("risk", 25)),
-        "sim_structure_score": float(cfg.get("structure", 10)),
+        "sim_timing_score": float(cfg.get("growth", 60)),
+        "sim_value_score": float(cfg.get("value", 15)),
+        "sim_risk_fit": float(cfg.get("risk", 15)),
+        "sim_structure_score": float(cfg.get("structure", 5)),
         "sim_confidence_score": float(cfg.get("confidence", 5)),
     }
     total = sum(max(v, 0.0) for v in component_weights.values()) or 1.0
@@ -2144,7 +2225,21 @@ def _simulate_strategy_rankings(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     for col, weight in component_weights.items():
         out["sim_score"] += (max(weight, 0.0) / total) * out[col]
     out["sim_score"] = (out["sim_score"] - float(cfg.get("uncertainty", 0)) * out["sim_uncertainty_score"] / 100.0).clip(0, 100)
-    out["sim_rank"] = out["sim_score"].rank(ascending=False, method="min").astype(int)
+    # Rank inside the active scope first (universe B / quiet-shortlist brakes), then everything else, so the
+    # scoped tables number consecutively from #1 and the rank means "rank within the scope you chose".
+    in_scope = pd.Series(True, index=out.index)
+    if cfg.get("universe_only", True) and "universe_B" in out.columns:
+        in_scope &= out["universe_B"].fillna(False).astype(bool)
+    if cfg.get("quiet_only", True) and "quiet_now" in out.columns:
+        in_scope &= out["quiet_now"].fillna(False).astype(bool)
+        if "population" in out.columns:
+            in_scope &= pd.to_numeric(out["population"], errors="coerce").fillna(0) >= 25_000
+        if "demand_floor_ok" in out.columns:
+            in_scope &= out["demand_floor_ok"].fillna(False).astype(bool)
+    out["sim_in_scope"] = in_scope
+    order = out.sort_values(["sim_in_scope", "sim_score"], ascending=[False, False]).index
+    out.loc[order, "sim_rank"] = np.arange(1, len(out) + 1)
+    out["sim_rank"] = out["sim_rank"].astype(int)
     if "overall_rank" in out.columns:
         out["sim_rank_delta"] = out["sim_rank"] - out["overall_rank"]
     else:
@@ -2153,8 +2248,19 @@ def _simulate_strategy_rankings(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     return out.sort_values("sim_rank")
 
 
-def _apply_product_filter(df: pd.DataFrame, states: list[str], max_risk: float, min_confidence: str) -> pd.DataFrame:
+def _apply_product_filter(df: pd.DataFrame, states: list[str], max_risk: float, min_confidence: str,
+                          universe_only: bool = False, quiet_only: bool = False) -> pd.DataFrame:
     out = df.copy()
+    if universe_only and "universe_B" in out.columns:
+        out = out[out["universe_B"].fillna(False).astype(bool)]
+    if quiet_only and "quiet_now" in out.columns:
+        # the classifier shortlist's own brakes: quiet band, population >= 25k, observed demand
+        brakes = out["quiet_now"].fillna(False).astype(bool)
+        if "population" in out.columns:
+            brakes &= pd.to_numeric(out["population"], errors="coerce").fillna(0) >= 25_000
+        if "demand_floor_ok" in out.columns:
+            brakes &= out["demand_floor_ok"].fillna(False).astype(bool)
+        out = out[brakes]
     if states:
         out = out[out["state"].isin(states)]
     if "composite_risk" in out.columns:
@@ -2169,8 +2275,8 @@ def _apply_product_filter(df: pd.DataFrame, states: list[str], max_risk: float, 
 def _product_table(df: pd.DataFrame, limit: int = 25) -> pd.DataFrame:
     cols = [
         "sim_rank", "overall_rank", "sim_rank_delta", "county_name", "state",
-        "sim_score", "opportunity_score", "pred_avg_5yr", "pred_policy_3yr",
-        "composite_risk", "confidence", "sim_structure_score", "opportunity_archetype",
+        "sim_score", "sim_timing_score", "sim_value_score", "fmr_gross_yield", "nass_land_value_per_acre",
+        "tourism_intensity_index", "composite_risk", "confidence", "sim_structure_score", "opportunity_archetype", "universe_B",
     ]
     show = df[[c for c in cols if c in df.columns]].head(limit).copy()
     rename = {
@@ -2180,21 +2286,30 @@ def _product_table(df: pd.DataFrame, limit: int = 25) -> pd.DataFrame:
         "county_name": "County",
         "state": "State",
         "sim_score": "Strategy Score",
-        "opportunity_score": "Production Score",
-        "pred_avg_5yr": "5yr",
-        "pred_policy_3yr": "3yr",
+        "sim_timing_score": "Timing",
+        "sim_value_score": "Value",
+        "fmr_gross_yield": "Gross Rent Yield",
+        "nass_land_value_per_acre": "Farm Land $/ac",
+        "tourism_intensity_index": "Tourism Idx",
+        "universe_B": "Universe B",
         "composite_risk": "Risk",
         "confidence": "Confidence",
         "sim_structure_score": "Thesis Fit",
         "opportunity_archetype": "Archetype",
     }
     show = show.rename(columns=rename)
-    for col in ["Strategy Score", "Production Score", "Risk", "Thesis Fit"]:
+    for col in ["Strategy Score", "Timing", "Value", "Risk", "Thesis Fit"]:
         if col in show.columns:
             show[col] = show[col].map(_fmt_score)
-    for col in ["5yr", "3yr"]:
+    for col in ["Gross Rent Yield"]:
         if col in show.columns:
             show[col] = show[col].map(_fmt_pct)
+    if "Farm Land $/ac" in show.columns:
+        show["Farm Land $/ac"] = show["Farm Land $/ac"].map(lambda x: f"${x:,.0f}" if pd.notna(x) else "—")
+    if "Tourism Idx" in show.columns:
+        show["Tourism Idx"] = show["Tourism Idx"].map(lambda x: f"{x:.2f}" if pd.notna(x) else "—")
+    if "Universe B" in show.columns:
+        show["Universe B"] = show["Universe B"].map(lambda x: "yes" if bool(x) else "no")
     if "Rank Delta" in show.columns:
         show["Rank Delta"] = show["Rank Delta"].map(lambda x: f"{int(x):+d}" if pd.notna(x) else "—")
     if "Sim Rank" in show.columns:
@@ -2295,7 +2410,7 @@ def _filter_product_table_rows(df: pd.DataFrame, key_prefix: str, *, expanded: b
                 out, source, "opportunity_score", "Production score", f"{key_prefix}_prod_score", step=0.5, fmt="%.1f"
             )
             out = _numeric_slider_filter(
-                out, source, "pred_avg_5yr", "5yr signal", f"{key_prefix}_pred_5yr", step=0.01, fmt="%.2f"
+                out, source, "pred_avg_1yr", "1yr signal (ordinal)", f"{key_prefix}_pred_1yr", step=0.01, fmt="%.2f"
             )
 
         if "use_stable_3yr_fallback" in source.columns:
@@ -2356,29 +2471,33 @@ def _product_series(df: pd.DataFrame, col: str, default: float) -> pd.Series:
 
 
 def _assign_opportunity_archetype(row: pd.Series) -> str:
-    pred5 = _product_numeric(row, "pred_avg_5yr", 0.0)
-    risk = _product_numeric(row, "composite_risk", 50.0)
-    structure = _product_numeric(row, "sim_structure_score", 50.0)
-    recreation = _product_numeric(row, "recreation_access_score", 0.0)
+    """RECAL-1 archetype labels: timing x value x category facts (no 5yr forecast anywhere)."""
+    timing = _product_numeric(row, "sim_timing_score", 50.0)
+    value = _product_numeric(row, "sim_value_score", 50.0)
+    quiet = bool(row.get("quiet_now")) if pd.notna(row.get("quiet_now")) else True
+    tourism = _product_numeric(row, "tourism_intensity_index", 0.5)
+    cap_rate = _product_numeric(row, "farm_cap_rate_proxy", np.nan)
     developability = _product_numeric(row, "land_developability_index", 0.5)
     scarcity = _product_numeric(row, "scarcity_amenity_balance_index", 0.5)
-    fragility = _product_numeric(row, "land_fragility_pressure", 0.5)
-    rank_delta = _product_numeric(row, "sim_rank_delta", 0.0)
-
-    if pred5 >= 0.12 and risk <= 42:
-        return "Low-risk compounder"
-    if pred5 >= 0.14 and (risk >= 50 or fragility >= 0.60):
-        return "High-upside fragile"
-    if recreation >= 0.66:
-        return "Amenity/recreation growth"
+    momentum = _product_numeric(row, "momentum_rank_pct", np.nan)
+    if pd.notna(momentum) and momentum > 2.0 / 3.0:
+        return "Already moving (not pre-boom)"
+    if not quiet:
+        return "Declining / outside quiet band"
+    if timing >= 85 and value >= 55:
+        return "Quiet pre-boom & cheap"
+    if timing >= 85:
+        return "Quiet pre-boom"
+    if tourism >= 0.8 and timing >= 60:
+        return "Vacation / tourism"
+    if pd.notna(cap_rate) and cap_rate >= 0.03 and value >= 55:
+        return "Farmland income"
+    if value >= 75:
+        return "Income & yield"
     if developability >= 0.65 and scarcity >= 0.60:
         return "Buildable scarcity"
-    if rank_delta <= -75:
-        return "Strategy mispriced"
-    if structure >= 70:
+    if timing >= 70:
         return "Structural thesis fit"
-    if pred5 >= 0.08:
-        return "Long-horizon growth"
     return "Watchlist candidate"
 
 
@@ -2423,14 +2542,16 @@ def _data_confidence_table(row: pd.Series, wave3_status: dict | None = None) -> 
 
 def _rank_explain_rows(row: pd.Series, cfg: dict) -> pd.DataFrame:
     weights = {
-        "Growth": float(cfg.get("growth", 60)),
-        "Risk control": float(cfg.get("risk", 25)),
-        "Land thesis": float(cfg.get("structure", 10)),
+        "Timing": float(cfg.get("growth", 60)),
+        "Value": float(cfg.get("value", 15)),
+        "Risk control": float(cfg.get("risk", 15)),
+        "Land thesis": float(cfg.get("structure", 5)),
         "Confidence": float(cfg.get("confidence", 5)),
     }
     total = sum(max(v, 0.0) for v in weights.values()) or 1.0
     components = [
-        ("Growth", "sim_growth_score"),
+        ("Timing", "sim_timing_score"),
+        ("Value", "sim_value_score"),
         ("Risk control", "sim_risk_fit"),
         ("Land thesis", "sim_structure_score"),
         ("Confidence", "sim_confidence_score"),
@@ -2518,7 +2639,7 @@ def _find_peer_sets(row: pd.Series, df: pd.DataFrame) -> dict[str, pd.DataFrame]
 
     metric_cols = [
         c for c in [
-            "sim_score", "composite_risk", "pred_avg_5yr", "pred_policy_3yr",
+            "sim_score", "composite_risk", "boom_onset_score", "pred_avg_1yr",
             "sim_structure_score", "rank_stability_spread",
         ] if c in base.columns and c in row.index
     ]
@@ -2541,10 +2662,10 @@ def _find_peer_sets(row: pd.Series, df: pd.DataFrame) -> dict[str, pd.DataFrame]
         risk_peers = base.assign(risk_distance=(pd.to_numeric(base["composite_risk"], errors="coerce") - risk_target).abs())
         peer_sets["Similar-risk alternatives"] = risk_peers.sort_values(["risk_distance", "sim_rank"]).head(8)
 
-    if "pred_avg_5yr" in base.columns:
-        growth_target = _product_numeric(row, "pred_avg_5yr", 0.0)
-        growth_peers = base.assign(growth_distance=(pd.to_numeric(base["pred_avg_5yr"], errors="coerce") - growth_target).abs())
-        peer_sets["Similar-growth alternatives"] = growth_peers.sort_values(["growth_distance", "sim_rank"]).head(8)
+    if "boom_onset_score" in base.columns:
+        timing_target = _product_numeric(row, "boom_onset_score", 0.0)
+        timing_peers = base.assign(timing_distance=(pd.to_numeric(base["boom_onset_score"], errors="coerce") - timing_target).abs())
+        peer_sets["Similar-timing alternatives"] = timing_peers.sort_values(["timing_distance", "sim_rank"]).head(8)
     return peer_sets
 
 
@@ -2837,25 +2958,21 @@ def _run_review_table(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _strategy_profile_description(cfg: dict) -> str:
-    h_bits = sorted(
-        [(int(cfg.get("h1", 0)), "1yr"), (int(cfg.get("h3", 0)), "3yr"), (int(cfg.get("h5", 0)), "5yr")],
-        reverse=True,
-    )
-    dominant_h = h_bits[0][1]
     focus = cfg.get("structural_focus", "overall land thesis")
-    risk = int(cfg.get("risk", 0))
-    growth = int(cfg.get("growth", 0))
-    structure = int(cfg.get("structure", 0))
-    parts = [f"favors {dominant_h} growth"]
-    if growth >= 65:
-        parts.append("leans aggressive on upside")
+    timing = int(cfg.get("growth", 0)); value = int(cfg.get("value", 0)); risk = int(cfg.get("risk", 0)); structure = int(cfg.get("structure", 0))
+    parts = []
+    parts.append("leads with boom-onset timing" if timing >= value else "leads with value (yield & cheapness)")
+    if value >= 35:
+        parts.append(f"weights {str(cfg.get('value_focus', 'balanced')).lower()} value heavily")
     if risk >= 30:
         parts.append("meaningfully rewards risk control")
     if structure >= 25:
         parts.append(f"puts real weight on {str(focus).lower()}")
-    if int(cfg.get("uncertainty", 0)) >= 10:
-        parts.append("penalizes wide uncertainty")
-    return "This profile " + ", ".join(parts) + "."
+    if int(cfg.get("h1", 0)) > 0:
+        parts.append("blends in 1yr ordinal context")
+    scope = "inside investable universe B" if cfg.get("universe_only", True) else "across all scored counties"
+    scope += ", with the quiet-shortlist brakes" if cfg.get("quiet_only", True) else ""
+    return "This profile " + ", ".join(parts) + f" — {scope}."
 
 
 def _add_product_lenses(df: pd.DataFrame) -> pd.DataFrame:
@@ -2908,9 +3025,10 @@ def _apply_natural_language_query(df: pd.DataFrame, query: str) -> tuple[pd.Data
     if "high risk" in q:
         out = out[out["composite_risk"] >= 55]
         notes.append("Applied high-risk filter.")
-    if "strong 5" in q or "5yr upside" in q or "5 year upside" in q or "5-year upside" in q or "high upside" in q:
-        out = out[out["pred_avg_5yr"] >= out["pred_avg_5yr"].quantile(0.75)]
-        notes.append("Kept upper-quartile 5yr signal.")
+    if ("strong 5" in q or "5yr upside" in q or "5 year upside" in q or "5-year upside" in q
+            or "high upside" in q or "growth signal" in q or "1yr signal" in q or "strong growth" in q):
+        out = out[out["pred_avg_1yr"] >= out["pred_avg_1yr"].quantile(0.75)]
+        notes.append("Kept upper-quartile 1yr relative signal (growth intent maps to the validated 1yr ordering read).")
     if "confidence" in q or "high conviction" in q:
         out = out[out["confidence"].astype(str).str.upper().eq("HIGH")]
         notes.append("Kept high-confidence counties.")
@@ -3141,6 +3259,127 @@ def _promotion_readiness_rows(status_bundle: dict | None) -> pd.DataFrame:
         },
     ]
     return pd.DataFrame(rows)
+
+
+def _render_xfactor_evidence_center_tab(
+    evidence_center_df: pd.DataFrame | None,
+    command_loop_df: pd.DataFrame | None = None,
+) -> None:
+    st.header("Evidence Center")
+    st.caption("Report-only source, rank, ablation, and X-factor evidence. Production rank and score are unchanged.")
+    if evidence_center_df is None or evidence_center_df.empty:
+        st.info("No X-factor Evidence Center artifact is available yet.")
+        return
+
+    df = evidence_center_df.copy()
+    for col in [
+        "surface",
+        "family",
+        "status",
+        "allowed_use",
+        "display_surface",
+        "blocker",
+        "next_action",
+        "risk_level",
+    ]:
+        if col not in df.columns:
+            df[col] = "n/a"
+    if "evidence_center_rank" not in df.columns:
+        df["evidence_center_rank"] = np.arange(1, len(df) + 1)
+    if "evidence_center_priority" not in df.columns:
+        df["evidence_center_priority"] = np.nan
+
+    display_series = df["display_surface"].astype(str)
+    risk_series = df["risk_level"].astype(str).str.lower()
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Surfaces", f"{len(df):,}")
+    m2.metric("Evidence Panels", f"{display_series.str.contains('Evidence Panel', case=False, na=False).sum():,}")
+    m3.metric("Research Queue", f"{display_series.eq('Research queue').sum():,}")
+    m4.metric("High Risk", f"{risk_series.eq('high').sum():,}")
+
+    f1, f2, f3 = st.columns(3)
+    families = sorted(df["family"].dropna().astype(str).unique().tolist())
+    allowed_uses = sorted(df["allowed_use"].dropna().astype(str).unique().tolist())
+    risks = sorted(df["risk_level"].dropna().astype(str).unique().tolist())
+    selected_families = f1.multiselect("Families", families, default=[], key="product_evidence_center_families")
+    selected_allowed = f2.multiselect("Allowed use", allowed_uses, default=[], key="product_evidence_center_allowed_use")
+    selected_risks = f3.multiselect("Risk", risks, default=[], key="product_evidence_center_risk")
+    view = df.copy()
+    if selected_families:
+        view = view[view["family"].astype(str).isin(selected_families)]
+    if selected_allowed:
+        view = view[view["allowed_use"].astype(str).isin(selected_allowed)]
+    if selected_risks:
+        view = view[view["risk_level"].astype(str).isin(selected_risks)]
+
+    sort_cols = [c for c in ["evidence_center_rank", "evidence_center_priority"] if c in view.columns]
+    if sort_cols:
+        view = view.sort_values(sort_cols, ascending=[True] * len(sort_cols))
+    show_cols = [
+        "evidence_center_rank",
+        "surface",
+        "family",
+        "status",
+        "allowed_use",
+        "display_surface",
+        "risk_level",
+        "blocker",
+        "next_action",
+        "evidence_center_priority",
+    ]
+    table = view[[c for c in show_cols if c in view.columns]].copy()
+    table = table.rename(
+        columns={
+            "evidence_center_rank": "Rank",
+            "surface": "Surface",
+            "family": "Family",
+            "status": "Status",
+            "allowed_use": "Allowed Use",
+            "display_surface": "Display",
+            "risk_level": "Risk",
+            "blocker": "Blocker",
+            "next_action": "Next Action",
+            "evidence_center_priority": "Priority",
+        }
+    )
+    if "Priority" in table.columns:
+        table["Priority"] = pd.to_numeric(table["Priority"], errors="coerce").map(lambda x: f"{x:.1f}" if pd.notna(x) else "n/a")
+    st.dataframe(table, width="stretch", hide_index=True, height=520)
+
+    b1, b2 = st.columns([1, 1])
+    with b1:
+        blockers = (
+            view["blocker"]
+            .fillna("n/a")
+            .astype(str)
+            .value_counts()
+            .head(8)
+            .reset_index()
+        )
+        blockers.columns = ["Blocker", "Surfaces"]
+        st.subheader("Blockers")
+        st.dataframe(blockers, width="stretch", hide_index=True, height=260)
+    with b2:
+        st.subheader("Export")
+        st.download_button(
+            "Evidence Center CSV",
+            data=view.to_csv(index=False).encode("utf-8"),
+            file_name="landinvest_xfactor_evidence_center.csv",
+            mime="text/csv",
+            key="product_evidence_center_csv",
+        )
+        if command_loop_df is not None and not command_loop_df.empty:
+            st.caption("Command loop snapshot")
+            command_cols = [
+                "command_rank",
+                "label",
+                "family",
+                "product_readiness",
+                "promotion_gate",
+                "recommended_action",
+            ]
+            command_view = command_loop_df[[c for c in command_cols if c in command_loop_df.columns]].head(6).copy()
+            st.dataframe(command_view, width="stretch", hide_index=True, height=220)
 
 
 def _run_review_narrative(latest_compare_rank_df: pd.DataFrame | None) -> list[str]:
@@ -3402,9 +3641,29 @@ def _score_glossary_table() -> pd.DataFrame:
                 "Production Status": "Production artifact",
             },
             {
+                "Term": "Timing",
+                "Plain-English Read": "Boom-onset classifier, ensemble-class within-year rank (0–100): how much this quiet county resembles the years before past booms. Halved outside the quiet band.",
+                "Production Status": "Research surface (report-only)",
+            },
+            {
+                "Term": "Value",
+                "Plain-English Read": "Observed cheapness and income: gross rent yield within the county's RUCC band, home-value and farm-land cheapness, farm cap-rate proxy. Facts, not a forecast.",
+                "Production Status": "Facts layer (vintage-stamped)",
+            },
+            {
+                "Term": "Universe B",
+                "Plain-English Read": "Investable universe: density percentile ≤ 0.95 and population < 1M. Scope rule adopted 2026-09-09 — not a model.",
+                "Production Status": "Scope rule",
+            },
+            {
+                "Term": "Gross Rent Yield",
+                "Plain-English Read": "HUD Fair Market Rent (2BR) × 12 ÷ ZHVI. Validated against market rents (Spearman 0.80 vs ZORI yield).",
+                "Production Status": "Facts layer",
+            },
+            {
                 "Term": "Opportunity Score",
-                "Plain-English Read": "Current production ranking score after growth, risk, uncertainty, and stability policy.",
-                "Production Status": "Production artifact",
+                "Plain-English Read": "Legacy production composite (5yr-weighted growth blend + risk). Its growth horizon has no validated forward skill — treat as context, not a forecast; county discovery lives on the Pre-Boom shortlist.",
+                "Production Status": "Production artifact (context-only)",
             },
             {
                 "Term": "Risk",
@@ -3418,7 +3677,7 @@ def _score_glossary_table() -> pd.DataFrame:
             },
             {
                 "Term": "X-Factor / Pre-Boom",
-                "Plain-English Read": "Research surfaces looking for structurally supported counties before momentum is obvious.",
+                "Plain-English Read": "The headline discovery surface: counties resembling the quiet years before past booms, found before momentum is obvious.",
                 "Production Status": "Report-only",
             },
             {
@@ -3496,21 +3755,21 @@ def _top_report_markdown(
         f"- Generated at: `{generated}`",
         f"- Ranking run: `{run_id}`",
         f"- Strategy preset: `{cfg.get('preset_name', 'Active strategy')}`",
-        f"- Horizon mix: 1yr `{cfg.get('h1')}`, 3yr `{cfg.get('h3')}`, 5yr `{cfg.get('h5')}`",
-        f"- Score mix: growth `{cfg.get('growth')}`, risk `{cfg.get('risk')}`, land thesis `{cfg.get('structure')}`, confidence `{cfg.get('confidence')}`",
+        f"- Scope: {'investable universe B' if cfg.get('universe_only', True) else 'all scored counties'}{', quiet-shortlist brakes (quiet band, >=25k pop, demand floor)' if cfg.get('quiet_only', True) else ''}",
+        f"- Score mix: timing `{cfg.get('growth')}`, value `{cfg.get('value')}` ({cfg.get('value_focus', 'Balanced')}), risk `{cfg.get('risk')}`, land thesis `{cfg.get('structure')}`, confidence `{cfg.get('confidence')}`, 1yr context `{cfg.get('h1')}`",
         "- Use: county-level screening and discussion; not investment advice or parcel-level diligence.",
         "",
         "## County List",
         "",
-        "| Strategy Rank | Production Rank | County | State | 5yr | Risk | Confidence | Archetype | First Diligence Check |",
-        "|---:|---:|---|---|---:|---:|---|---|---|",
+        "| Strategy Rank | Production Rank | County | State | Timing | Value | Gross Rent Yield | Risk | Confidence | Archetype | First Diligence Check |",
+        "|---:|---:|---|---|---:|---:|---:|---:|---|---|---|",
     ]
     for _, row in df.sort_values("sim_rank").head(limit).iterrows():
         _, actions = _parcel_readiness(row)
         lines.append(
             f"| {_rank_text(row.get('sim_rank'))} | {_rank_text(row.get('overall_rank'))} | "
-            f"{row.get('county_name', '')} | {row.get('state', '')} | {_fmt_pct(row.get('pred_avg_5yr'))} | "
-            f"{_fmt_score(row.get('composite_risk'))} | {row.get('confidence', 'n/a')} | "
+            f"{row.get('county_name', '')} | {row.get('state', '')} | {_fmt_score(row.get('sim_timing_score'))} | {_fmt_score(row.get('sim_value_score'))} | "
+            f"{_fmt_pct(row.get('fmr_gross_yield'))} | {_fmt_score(row.get('composite_risk'))} | {row.get('confidence', 'n/a')} | "
             f"{row.get('opportunity_archetype', 'n/a')} | {actions[0] if actions else 'n/a'} |"
         )
     lines.extend(
@@ -3539,7 +3798,7 @@ def _compare_set_markdown(compare_df: pd.DataFrame, cfg: dict, latest_run: dict 
         "",
         "## Counties",
         "",
-        "| Strategy Rank | Production Rank | County | State | 5yr | 3yr | Risk | Confidence | Best Read | Main Brake |",
+        "| Strategy Rank | Production Rank | County | State | Timing | Gross Rent Yield | Risk | Confidence | Best Read | Main Brake |",
         "|---:|---:|---|---|---:|---:|---:|---|---|---|",
     ]
     for _, row in compare_df.sort_values("sim_rank").iterrows():
@@ -3548,8 +3807,8 @@ def _compare_set_markdown(compare_df: pd.DataFrame, cfg: dict, latest_run: dict 
         brake = narrative["cautions"][0] if narrative["cautions"] else "n/a"
         lines.append(
             f"| {_rank_text(row.get('sim_rank'))} | {_rank_text(row.get('overall_rank'))} | "
-            f"{row.get('county_name', '')} | {row.get('state', '')} | {_fmt_pct(row.get('pred_avg_5yr'))} | "
-            f"{_fmt_pct(row.get('pred_policy_3yr'))} | {_fmt_score(row.get('composite_risk'))} | "
+            f"{row.get('county_name', '')} | {row.get('state', '')} | {_fmt_score(row.get('sim_timing_score'))} | "
+            f"{_fmt_pct(row.get('fmr_gross_yield'))} | {_fmt_score(row.get('composite_risk'))} | "
             f"{row.get('confidence', 'n/a')} | {support} | {brake} |"
         )
     return "\n".join(lines).rstrip() + "\n"
@@ -3674,15 +3933,24 @@ def _render_start_here_tab(
 ) -> None:
     st.header("Start Here")
     st.markdown(
-        "LandInvest ranks U.S. counties for land and home-value growth review, then explains the thesis, the brakes, "
-        "and the remaining diligence. Start with the highest strategy-fit counties, open a county memo, then export a shortlist."
+        "LandInvest works in three layers. **Universe**: counties where land can be bought at scale (density "
+        "percentile ≤ 0.95 and population under 1M — adopted 2026-09-09; removes cooled big-city cores, keeps 91% of "
+        "documented boom-family counties). **Value & yield facts** by category for every county (gross rent yield, "
+        "farm land value and cash rents, economy, tourism), observed and vintage-stamped — never forecast. **Timing**: "
+        "the boom-onset classifier's quiet shortlist (Discover → Quiet Shortlist). The strategy matches below rank on "
+        "timing × value inside that universe; open a county memo for the facts, then export."
+    )
+    st.caption(
+        "Product update (Sept 2026): timing comes from the boom-onset classifier (ensemble-class rank), value from "
+        "observed facts. No multi-year appreciation forecast is claimed anywhere — the 5yr/3yr horizons failed honest "
+        "validation; the 1yr signal is an optional ordering context only. Details: README §Model Outputs."
     )
     if filtered.empty:
         st.warning("No counties match the active strategy filters.")
         return
 
     s1, s2, s3 = st.columns(3)
-    s1.metric("View Top Opportunities", f"{min(len(filtered), 25)} counties")
+    s1.metric("View Top Strategy Matches", f"{min(len(filtered), 25)} counties")
     s2.metric("Explore Map", f"{filtered['state'].nunique()} states")
     s3.metric("Open County Memo", str(filtered.iloc[0].get("county_name", "Top county")))
 
@@ -3693,7 +3961,8 @@ def _render_start_here_tab(
     r3.markdown("**3. Build Watchlist**\n\nSave counties, stage diligence, and monitor rank or risk drift.")
     r4.markdown("**4. Export Reports**\n\nDownload shortlist, compare-set, and memo packages for review.")
 
-    st.subheader("Top Opportunities")
+    st.subheader("Top Strategy Matches")
+    st.caption("Ranked inside the active scope under the sidebar preset (timing x value x risk x land thesis). The pure classifier order, with facts and badges, is Discover → Quiet Shortlist.")
     st.dataframe(_product_table(filtered.sort_values("sim_rank"), limit=10), width="stretch", hide_index=True, height=360)
     top_row = filtered.sort_values("sim_rank").iloc[0]
     if st.button("Set top county as memo selection", key="start_set_top_memo", type="primary"):
@@ -3704,6 +3973,16 @@ def _render_start_here_tab(
     with g1:
         st.subheader("Score Glossary")
         st.dataframe(_score_glossary_table(), width="stretch", hide_index=True, height=310)
+        hc_path = OUTPUT_PATH / "honest_coordinates.json"
+        if hc_path.exists():
+            hc = json.loads(hc_path.read_text())
+            c, o = hc["classifier"], hc["operator_review"]
+            st.caption(
+                f"Honest skill coordinates ({hc['generated_at'][:10]}): shortlist capture "
+                f"{c['honest_held_out_capture_at_100']:.3f} ≈ {c['vs_random_multiple']}× random "
+                f"(held-out, selection-corrected); operator precision {o['operator_precision']:.2f} "
+                "(judged proxy). Full detail: Pro → Advanced → Validation."
+            )
     with g2:
         st.subheader("Current Research Gate")
         gate = xfactor_gate or {}
@@ -3729,8 +4008,8 @@ def _render_start_here_tab(
 
     st.download_button(
         "Export Top 25 report (Markdown)",
-        data=_top_report_markdown(filtered, cfg, latest_run, limit=25, title="LandInvest Top 25 Opportunity Report").encode("utf-8"),
-        file_name="landinvest_top25_opportunity_report.md",
+        data=_top_report_markdown(filtered, cfg, latest_run, limit=25, title="LandInvest Top 25 Strategy Report").encode("utf-8"),
+        file_name="landinvest_top25_strategy_report.md",
         mime="text/markdown",
     )
 
@@ -3752,63 +4031,153 @@ def _build_county_memo_markdown(
     preboom_rows = _preboom_signal_rows_for_county(row, preboom_surfaces)
     analog_rows = _analog_rows_for_county(row, analog_suite)
     readiness, actions = _parcel_readiness(row)
-
-    lines = [
-        f"# LandInvest County Memo: {row.get('county_name', 'County')}, {row.get('state', '')}",
-        "",
-        f"- FIPS: `{fips}`",
-        f"- Generated at: `{datetime.now().isoformat()}`",
-        "- Use: county-level screening memo, not investment advice or parcel-level diligence.",
-        "",
-        "## Summary Thesis",
-        "",
-        narrative["summary"],
-        "",
-        "## Score Snapshot",
-        "",
+    score_snapshot_lines = [
         f"- Strategy rank: `{_rank_text(row.get('sim_rank'))}`",
         f"- Production rank: `{_rank_text(row.get('overall_rank'))}`",
         f"- Strategy score: `{_fmt_score(row.get('sim_score'))}`",
         f"- 5yr signal: `{_fmt_pct(row.get('pred_avg_5yr'))}`",
         f"- Risk: `{_fmt_score(row.get('composite_risk'))}`",
         f"- Confidence read: `{confidence_label}`",
-        "",
-        "## Key Supports",
-        "",
     ]
-    lines.extend(f"- {item}" for item in narrative["positives"][:5])
-    lines.extend(["", "## Key Brakes", ""])
-    lines.extend(f"- {item}" for item in narrative["cautions"][:5])
-    lines.extend(["", "## X-Factor / Pre-Boom Signals", ""])
+    preboom_signal_lines: list[str] = []
     if preboom_rows.empty:
-        lines.append("- This county is not currently present in the loaded top pre-boom review surfaces.")
+        preboom_signal_lines.append("- This county is not currently present in the loaded top pre-boom review surfaces.")
     else:
         for _, rec in preboom_rows.iterrows():
-            lines.append(
+            preboom_signal_lines.append(
                 f"- `{rec['Surface']}`: rank `{rec['Review Rank']}`, breakout `{rec['Breakout Prob']}`, "
                 f"residual upside `{rec['Residual Upside']}`, prior momentum `{rec['Prior Momentum']}`."
             )
     score_rows = _top_xfactor_scoreboard_rows(xfactor_scoreboard)
+    xfactor_theme_lines: list[str] = []
     if not score_rows.empty:
-        lines.append("- Current validated interaction themes remain report-only:")
+        xfactor_theme_lines.append("- Current validated interaction themes remain report-only:")
         for _, rec in score_rows.iterrows():
-            lines.append(f"  - {rec['Interaction']}: quiet lift `{rec.get('Quiet Lift', 'n/a')}`, decision `{rec.get('Decision', 'report-only')}`.")
-    lines.extend(["", "## Structural Land Context", "", wave3_note["summary"], f"- Decision thesis: {decision['thesis']}"])
-    lines.extend(["", "## Risk And Uncertainty", ""])
-    lines.extend(f"- {item}" for item in confidence_bullets)
-    lines.extend(["", "## Similar Historical Analogs", ""])
+            xfactor_theme_lines.append(
+                f"  - {rec['Interaction']}: quiet lift `{rec.get('Quiet Lift', 'n/a')}`, decision `{rec.get('Decision', 'report-only')}`."
+            )
+    analog_lines: list[str] = []
     if analog_rows.empty:
-        lines.append("- No analog library context is currently available for this county.")
+        analog_lines.append("- No analog library context is currently available for this county.")
     else:
         for _, rec in analog_rows.iterrows():
-            lines.append(
+            analog_lines.append(
                 f"- `{rec['Analog Family']}` ({rec['Historical Window']}): {rec['Why Relevant']} "
                 f"Historical read: {rec['Historical Read']}; before-hot signal: {rec['Before-Hot Signal']}."
             )
-    lines.extend(["", "## Diligence Checklist", "", f"- Parcel readiness: `{readiness}`"])
-    lines.extend(f"- {item}" for item in actions)
-    lines.extend(["", "## What Would Make This Thesis Wrong", ""])
-    lines.extend(f"- {item}" for item in _why_not_bullets(row))
+    return render_county_memo_markdown(
+        county_name=str(row.get("county_name", "County")),
+        state=str(row.get("state", "")),
+        fips=fips,
+        generated_at=datetime.now().isoformat(),
+        summary=str(narrative["summary"]),
+        score_snapshot_lines=score_snapshot_lines,
+        support_lines=[f"- {item}" for item in narrative["positives"][:5]],
+        brake_lines=[f"- {item}" for item in narrative["cautions"][:5]],
+        preboom_signal_lines=preboom_signal_lines,
+        xfactor_theme_lines=xfactor_theme_lines,
+        structural_summary=str(wave3_note["summary"]),
+        decision_thesis=str(decision["thesis"]),
+        confidence_label=str(confidence_label),
+        confidence_lines=[f"- {item}" for item in confidence_bullets],
+        analog_lines=analog_lines,
+        parcel_readiness=str(readiness),
+        diligence_lines=[f"- {item}" for item in actions],
+        thesis_breaker_lines=[f"- {item}" for item in _why_not_bullets(row)],
+    )
+
+
+def _recal_fact_rows(row: pd.Series) -> dict[str, list[tuple[str, str]]]:
+    """Facts by category with vintages, from the RECAL-1 briefs merged into the scored frame."""
+    def money(v):
+        return f"${float(v):,.0f}" if pd.notna(v) else "—"
+    def num(v, d=2):
+        return f"{float(v):.{d}f}" if pd.notna(v) else "—"
+    def pct_or_dash(v):
+        return f"{100 * float(v):.0f}%" if pd.notna(v) else "—"
+    fy = row.get("fmr_fiscal_year"); fy = f"FY{int(fy)}" if pd.notna(fy) else "FY?"
+    ly = row.get("nass_land_value_year"); ly = int(ly) if pd.notna(ly) else "?"
+    by = row.get("bea_year"); by = int(by) if pd.notna(by) else "?"
+    scope = []
+    scope.append(("Investable universe B", "yes" if bool(row.get("universe_B")) and pd.notna(row.get("universe_B")) else "no"))
+    scope.append(("Quiet band (momentum rank)", f"{'yes' if bool(row.get('quiet_now')) else 'no'} ({num(row.get('momentum_rank_pct'))})"))
+    scope.append(("Density percentile / RUCC", f"{num(row.get('density_pct'))} / {num(row.get('rucc_code'), 0)}"))
+    scope.append(("Badges", _recal_badges(row)))
+    return {
+        "Scope & timing": scope + [
+            ("Timing (class rank)", _fmt_score(row.get("sim_timing_score"))),
+            ("Boom-onset score", num(row.get("boom_onset_score"), 3)),
+            ("Rank in universe B (quiet)", num(row.get("timing_rank_in_universe_B"), 0)),
+            ("Archetype lens", str(row.get("archetype_lens_best") or "—")),
+            ("Operator review 2024 / 2025", f"{row.get('operator_review_2024') or '—'} / {row.get('operator_review_2025') or '—'}"),
+        ],
+        "Homes & rent": [
+            ("ZHVI (2025)", money(row.get("zhvi_end"))), ("Home-value percentile", num(row.get("home_value_pct"))),
+            ("Price / income", num(row.get("price_to_income"), 1)), (f"FMR 2BR ({fy})", money(row.get("fmr_2br"))),
+            ("Gross rent yield", _fmt_pct(row.get("fmr_gross_yield"))), ("Yield pct within RUCC band", num(row.get("rent_yield_pct_in_rucc_band"))),
+            ("Rent growth 3y (log)", _fmt_pct(row.get("fmr_growth3_log"))), ("Rent–price divergence 3y", _fmt_pct(row.get("rent_price_divergence3"))),
+        ],
+        "Land": [
+            (f"Farm land $/ac (NASS {ly})", money(row.get("nass_land_value_per_acre"))), ("Residential land $/ac (AEI 2024)", money(row.get("aei_land_value_per_acre"))),
+            ("Cropland cash rent $/ac", money(row.get("nass_cash_rent_cropland_nonirr"))), ("Pasture rent $/ac", money(row.get("nass_cash_rent_pasture"))),
+            ("Farm cap-rate proxy", _fmt_pct(row.get("farm_cap_rate_proxy"))), ("Prime farmland share", _fmt_pct(row.get("prime_farmland_share"))),
+            ("Land cheapness percentile", num(row.get("land_cheapness_pct"))),
+        ],
+        "Economy (activity)": [
+            (f"GDP $M ({by})", f"{float(row.get('gdp_total')) / 1000:,.0f}" if pd.notna(row.get("gdp_total")) else "—"),
+            ("GDP per capita", money(row.get("gdp_per_capita"))), ("GDP growth 3y (log)", _fmt_pct(row.get("growth3_total"))),
+            ("Retail / real estate share", f"{_fmt_pct(row.get('share_retail'))} / {_fmt_pct(row.get('share_real_estate'))}"),
+            ("Construction / manufacturing share", f"{_fmt_pct(row.get('share_construction'))} / {_fmt_pct(row.get('share_manufacturing'))}"),
+            ("Establishments per 1k", num(row.get("establishments_per_1k"), 1)),
+            (f"Business activity per 1k (CBP {row.get('cbp_vintage') or 'n/a'}): retail / real estate / arts-rec",
+             f"{num(row.get('retail_est_per_1k'), 2)} / {num(row.get('real_estate_est_per_1k'), 2)} / {num(row.get('arts_recreation_est_per_1k'), 2)}"),
+            ("Establishment growth 3y (log): all / retail / real estate",
+             f"{_fmt_pct(row.get('cbp_total_est_growth3_log'))} / {_fmt_pct(row.get('cbp_retail_est_growth3_log'))} / {_fmt_pct(row.get('cbp_real_estate_est_growth3_log'))}"),
+            ("Commercial price", "not available at county grain — commercial is shown as activity, not price"),
+        ],
+        "Tourism": [
+            ("Tourism intensity index", num(row.get("tourism_intensity_index"))), ("Tourism GDP share", _fmt_pct(row.get("tourism_gdp_share"))),
+            ("Hospitality employment share", _fmt_pct(row.get("qcew_sector_hospitality_employment_share"))), ("Seasonal-home share", _fmt_pct(row.get("seasonal_home_share"))),
+            ("NPS visits within 50 km", f"{float(row.get('nps_visits_50km')):,.0f}" if pd.notna(row.get("nps_visits_50km")) else "—"),
+            ("Nearest NPS unit", f"{row.get('nps_nearest_unit_name') or '—'} ({num(row.get('nps_nearest_unit_km'), 0)} km)"),
+            ("STR-host proxy per 1k units", num(row.get("str_host_proxy_per_1k_units"), 1)), ("Natural amenity scale", num(row.get("usda_natural_amenity_scale"), 1)),
+            (f"STR occupancy (AirROI, {row.get('str_as_of') or 'n/a'})", pct_or_dash(row.get("str_occupancy"))),
+            ("STR nightly rate (ADR)", money(row.get("str_adr"))), ("STR RevPAR", money(row.get("str_revpar"))),
+            ("STR revenue per listing (annual)", money(row.get("str_revenue_per_listing_annual"))),
+            ("STR active listings (mapped localities)", f"{float(row.get('str_active_listings_mapped')):,.0f}" if pd.notna(row.get("str_active_listings_mapped")) else "—"),
+            ("STR localities mapped", str(row.get("str_localities_mapped") or "—")),
+            (f"STR RevPAR trend, 1y / 3y (AirROI, {row.get('str_history_as_of') or 'n/a'})", f"{_fmt_pct(row.get('str_revpar_growth_1yr'))} / {_fmt_pct(row.get('str_revpar_growth_3yr'))}"),
+            ("STR supply growth 3y (active listings)", _fmt_pct(row.get("str_listings_growth_3yr"))),
+            ("STR demand pressure 3y (RevPAR growth − supply growth)", "thin market (<30 listings in base window)" if bool(row.get("str_history_thin")) and pd.isna(row.get("str_demand_pressure_3yr")) else _fmt_pct(row.get("str_demand_pressure_3yr"))),
+        ],
+        "Risk facts": [
+            ("FEMA NRI score", num(row.get("nri_risk_score"), 1)), ("Wildfire risk score", num(row.get("usfs_wildfire_risk_score"))),
+            ("Coastal exposure", num(row.get("coastal_exposure_score"))), ("Commodity-cycle flag", "yes" if bool(row.get("qcew_commodity_cycle_flag")) and pd.notna(row.get("qcew_commodity_cycle_flag")) else "no"),
+        ],
+    }
+
+
+def _render_recal_facts_card(row: pd.Series) -> None:
+    if "universe_B" not in row.index:
+        return
+    st.subheader("Facts by category")
+    st.caption("Observed, vintage-stamped facts from primary sources (HUD, NASS, BEA, Census, NPS). Not forecasts. Commercial is an activity lens; no price series is claimed.")
+    groups = _recal_fact_rows(row)
+    cols = st.columns(3)
+    for i, (title, items) in enumerate(groups.items()):
+        with cols[i % 3]:
+            st.markdown(f"**{title}**")
+            st.dataframe(pd.DataFrame(items, columns=["Fact", "Value"]), width="stretch", hide_index=True, height=38 + 35 * len(items))
+
+
+def _recal_facts_markdown(row: pd.Series) -> str:
+    if "universe_B" not in row.index:
+        return ""
+    lines = ["## Facts By Category (observed, vintage-stamped; not forecasts)", ""]
+    for title, items in _recal_fact_rows(row).items():
+        lines.append(f"### {title}")
+        lines.extend(f"- {k}: {v}" for k, v in items)
+        lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -3829,7 +4198,7 @@ def _render_product_county_memo(
     k1.metric("Strategy Rank", f"#{int(row.get('sim_rank'))}" if pd.notna(row.get("sim_rank")) else "—")
     k2.metric("Production Rank", f"#{int(row.get('overall_rank'))}" if pd.notna(row.get("overall_rank")) else "—")
     k3.metric("Strategy Score", _fmt_score(row.get("sim_score")))
-    k4.metric("5yr Signal", _fmt_pct(row.get("pred_avg_5yr")))
+    k4.metric("Timing (class rank)", _fmt_score(row.get("sim_timing_score")))
     k5.metric("Risk", _fmt_score(row.get("composite_risk")))
 
     narrative = _build_county_narrative(row, history_row=history_row)
@@ -3845,6 +4214,8 @@ def _render_product_county_memo(
         analog_suite=analog_suite,
         xfactor_scoreboard=xfactor_scoreboard,
     )
+    memo_md = memo_md.rstrip() + "\n\n" + _recal_facts_markdown(row)
+    _render_recal_facts_card(row)
     with st.expander("How To Read This County Memo", expanded=True):
         st.markdown(
             "- `Strategy Rank` is the active Product Mode simulation under the sidebar settings; `Production Rank` is the unchanged scoring artifact.\n"
@@ -3911,24 +4282,22 @@ def _render_product_county_memo(
     preboom_rows = _preboom_signal_rows_for_county(row, preboom_surfaces)
     analog_rows = _analog_rows_for_county(row, analog_suite)
     score_rows = _top_xfactor_scoreboard_rows(xfactor_scoreboard)
-    xf1, xf2 = st.columns(2)
-    with xf1:
-        st.caption("X-Factor / Pre-Boom Signals")
-        if preboom_rows.empty:
-            st.info("This county is not currently present in the loaded top pre-boom review surfaces.")
-        else:
-            st.dataframe(preboom_rows, width="stretch", hide_index=True, height=220)
-        if not score_rows.empty:
-            with st.expander("Current validated interaction themes", expanded=False):
-                st.dataframe(score_rows, width="stretch", hide_index=True, height=180)
-                st.caption("These interaction themes are report-only validation context, not production scoring columns.")
-    with xf2:
-        st.caption("Similar Historical Analogs")
-        if analog_rows.empty:
-            st.info("No analog library context is currently available for this county.")
-        else:
-            st.dataframe(analog_rows, width="stretch", hide_index=True, height=260)
-            st.caption("Analogs are historical reference patterns; they are not a forecast or comparable transaction set.")
+    render_county_evidence_panel(
+        row,
+        preboom_rows=preboom_rows,
+        analog_rows=analog_rows,
+        command_loop_df=xfactor_command_loop_df,
+        source_confidence_df=source_confidence_weighting_df,
+        announcement_df=announcement_anchor_event_latest_df,
+        boundary_df=fiveyr_boundary_review_df,
+        archetype_df=boom_onset_archetype_lens_df,
+        expanded=False,
+        key_prefix=f"product_evidence_{fips}",
+    )
+    if not score_rows.empty:
+        with st.expander("Current validated interaction themes", expanded=False):
+            st.dataframe(score_rows, width="stretch", hide_index=True, height=180)
+            st.caption("These interaction themes are report-only validation context, not production scoring columns.")
 
     st.caption("Structural land thesis")
     st.write(wave3_note["summary"])
@@ -4676,40 +5045,64 @@ CUSTOMER_TIER_COLORS = {
 
 
 CUSTOMER_PRESET_CATALOG = {
-    "General Opportunity": {
-        "base_preset": "Long-term appreciation",
+    "Quiet Pre-Boom": {
+        "base_preset": "Quiet shortlist (classifier order)",
         "risk_posture": "Balanced",
-        "description": "Matches the default Product Mode long-term appreciation strategy.",
+        "description": "The classifier's quiet shortlist inside the investable universe, in its own order, with value facts shown beside each county.",
+    },
+    "Quiet Pre-Boom (timing-led blend)": {
+        "base_preset": "Quiet pre-boom (timing-led)",
+        "risk_posture": "Balanced",
+        "description": "Timing-led with a light value and risk tiebreaker.",
+    },
+    "Timing x Value": {
+        "base_preset": "Timing x value (balanced)",
+        "risk_posture": "Balanced",
+        "description": "The sweet spot: quiet pre-boom resemblance and observed cheapness/yield weighted together.",
+    },
+    "Income & Yield": {
+        "base_preset": "Income first (rent yield)",
+        "risk_posture": "Balanced",
+        "description": "Leads with observed gross rent yield and cheapness; timing as the secondary read.",
+    },
+    "Vacation Land": {
+        "base_preset": "Vacation land (tourism)",
+        "risk_posture": "Balanced",
+        "description": "Tourism intensity (park visits, hospitality jobs, seasonal homes, STR-host growth) plus quiet pre-boom timing.",
+    },
+    "Farmland & Acreage": {
+        "base_preset": "Farmland & acreage",
+        "risk_posture": "Balanced",
+        "description": "Cheap farm land with an income floor (cash rents, cap-rate proxy, prime-farmland share) plus timing.",
     },
     "Low-Risk Growth": {
         "base_preset": "Low-risk compounder",
         "risk_posture": "Lower risk",
-        "description": "Favors durable upside, cleaner risk, and medium-or-better confidence.",
-    },
-    "Vacation Land": {
-        "base_preset": "Recreation amenity",
-        "risk_posture": "Balanced",
-        "description": "Highlights recreation/amenity access and long-horizon land demand.",
-    },
-    "Hidden Upside": {
-        "base_preset": "Distressed rebound",
-        "risk_posture": "More aggressive",
-        "description": "Looks for higher-upside counties where the thesis needs more diligence.",
+        "description": "Timing and value with a heavier risk-control weight and a medium-or-better confidence gate.",
     },
     "Buildable Scarcity": {
         "base_preset": "Buildable scarcity",
         "risk_posture": "Balanced",
-        "description": "Emphasizes developability, scarcity, and structural land fit.",
+        "description": "Emphasizes developability, scarcity, and structural land fit alongside timing.",
     },
     "Climate-Resilient Growth": {
         "base_preset": "Climate-resilient growth",
         "risk_posture": "Lower risk",
-        "description": "Rewards lower fragility and cleaner structural risk.",
+        "description": "Rewards lower fragility and cleaner structural risk alongside timing.",
     },
-    "Land Optionality": {
-        "base_preset": "Land optionality",
-        "risk_posture": "Balanced",
-        "description": "Looks for counties with multiple plausible land-use paths.",
+}
+
+
+CUSTOMER_VISUAL_THEME_CATALOG = {
+    "Investor": {
+        "label": "Investor",
+        "description": "Clean command-center view for normal diligence work.",
+        "query_value": "investor",
+    },
+    "Vaporwave": {
+        "label": "Vaporwave",
+        "description": "Neon terminal skin with high-contrast market surfaces.",
+        "query_value": "vaporwave",
     },
 }
 
@@ -4725,17 +5118,27 @@ CUSTOMER_WORKSPACE_LABELS = {
 
 
 CUSTOMER_TERM_DEFINITIONS = {
+    "Universe B": "Investable universe: population density percentile at or below 0.95 and population under 1M. The adopted scope rule (2026-09-09) — where land can be bought at scale. Not a model.",
+    "Timing": "Boom-onset classifier, ensemble-class within-year rank (0–100): how much a quiet county resembles the years before documented booms. Halved outside the quiet band; never a forecast of returns.",
+    "Value": "Observed cheapness and income (0–100): gross rent yield within the county's RUCC band, home-value and farm-land cheapness, farm cap-rate proxy. Facts, vintage-stamped.",
+    "Gross Rent Yield": "HUD Fair Market Rent for a 2-bedroom unit × 12 ÷ ZHVI. Validated against market rents (Spearman 0.80 vs ZORI yield).",
+    "Tourism Intensity": "Descriptive index (0–1): tourism GDP share, hospitality jobs, seasonal homes, park visits within 50 km, STR-host proxy, natural amenity. Not a validated predictor.",
+    "Farm Land $/ac": "USDA Census of Agriculture value of farm real estate including buildings (2022). Shown as a range in spirit — a different asset from residential land.",
+    "Business activity (CBP)": "County Business Patterns establishment counts per 1,000 residents by sector (retail 44-45, real estate 53, arts/recreation 71, manufacturing 31-33, health care 62) with three-year log growth. Commercial is shown as activity, not price: no free county-level commercial price series exists and none is claimed.",
+    "STR demand pressure (AirROI)": "Three-year RevPAR growth minus three-year growth in active listings for the county's mapped STR localities (AirROI, 60-month market history). Positive = demand outran supply; negative = supply outran demand (post-boom saturation). Descriptive, pre-registered for a forward test (H-STR-FWD-1); not a forecast.",
+    "STR RevPAR (AirROI)": "Short-term-rental revenue per available night for the county's principal STR localities (AirROI markets, trailing 12 months, listing-weighted). A locality snapshot, not a county total and not a forecast; shown for mapped counties only.",
     "Strategy Score": "The active Product Mode strategy score for the selected thesis, risk posture, and state universe.",
     "Customer Signal": "A presentation-only blend that makes the current opportunity easier to read. It does not rewrite production rank.",
     "Prime / Strong": "Customer-facing signal tiers based on strategy score, risk, and confidence.",
     "Composite Risk": "A 0-100 risk read where lower is cleaner for diligence.",
     "Confidence": "Model confidence bucket from the current scored artifact. Higher confidence means the model has cleaner support, not a guarantee.",
-    "5yr Upside": "The current long-horizon predicted appreciation signal used by the strategy simulation.",
+    "1yr Signal": "The 1-year-ahead relative appreciation signal from the scored artifact. Validated as an ordering read against other counties only — not a top-list picker and not a forecast.",
+    "5yr Signal": "Legacy long-horizon model output, retired from every ranking and card (no validated forward skill). It survives only in the raw scored artifact.",
     "Strategy Rank": "Rank after applying the active Customer/Product thesis weights. Lower rank number is better.",
     "Parcel Readiness": "A customer workflow cue for how much parcel-level diligence is likely needed next.",
     "Active Filter": "The county matches the current Customer preset, risk posture, confidence gate, and state filters.",
     "Outside Filter": "The county exists in the scored universe, but does not match the active Customer filter.",
-    "Watchlist Health": "A workflow read combining rank, stability, upside, and risk to suggest whether to keep, watch, or review a county.",
+    "Watchlist Health": "A workflow read combining rank, stability, model growth signal, and risk to suggest whether to keep, watch, or review a county.",
 }
 
 
@@ -4743,6 +5146,83 @@ def _customer_escape(value) -> str:
     if value is None or (isinstance(value, float) and pd.isna(value)):
         return ""
     return html.escape(str(value), quote=True)
+
+
+def _customer_visual_theme_sentinel(theme: str) -> str:
+    class_name = "customer-theme-vaporwave" if theme == "Vaporwave" else "customer-theme-investor"
+    return f'<div class="customer-theme-sentinel {class_name}" aria-hidden="true"></div>'
+
+
+def _customer_plot_theme_tokens(theme: str) -> dict[str, object]:
+    if theme == "Vaporwave":
+        return {
+            "font": "#f8f7ff",
+            "muted": "#e9d5ff",
+            "paper": "rgba(16,0,43,0)",
+            "plot": "rgba(26,6,56,0.94)",
+            "polar": "rgba(26,6,56,0.94)",
+            "grid": "rgba(103,232,249,0.28)",
+            "zero": "rgba(244,114,182,0.35)",
+            "hover_bg": "#10002b",
+            "hover_border": "#67e8f9",
+            "geo_land": "#1a0638",
+            "geo_lake": "#0b1230",
+            "map_scale": [
+                [0.0, "#21124b"],
+                [0.28, "#7c3aed"],
+                [0.55, "#ff4fd8"],
+                [0.78, "#f9a8d4"],
+                [1.0, "#67e8f9"],
+            ],
+            "risk_scale": [
+                [0.0, "#67e8f9"],
+                [0.35, "#a78bfa"],
+                [0.68, "#ff4fd8"],
+                [1.0, "#f97316"],
+            ],
+            "sequence": ["#67e8f9", "#f472b6", "#c084fc", "#facc15", "#22d3ee", "#fb7185"],
+        }
+    return {
+        "font": "#0f172a",
+        "muted": "#475569",
+        "paper": "rgba(255,255,255,0)",
+        "plot": "rgba(248,250,252,0.92)",
+        "polar": "rgba(248,250,252,0.95)",
+        "grid": "rgba(148,163,184,0.35)",
+        "zero": "rgba(148,163,184,0.40)",
+        "hover_bg": "#0f172a",
+        "hover_border": "#14b8a6",
+        "geo_land": "#f8fafc",
+        "geo_lake": "#e0f2fe",
+        "map_scale": "Viridis",
+        "risk_scale": "RdYlGn_r",
+        "sequence": px.colors.qualitative.Set2,
+    }
+
+
+def _apply_customer_plot_theme(fig: go.Figure, theme: str) -> go.Figure:
+    tokens = _customer_plot_theme_tokens(theme)
+    fig.update_layout(
+        paper_bgcolor=tokens["paper"],
+        plot_bgcolor=tokens["plot"],
+        font=dict(color=tokens["font"], family="Inter, system-ui, sans-serif"),
+        hoverlabel=dict(
+            bgcolor=tokens["hover_bg"],
+            font_color=tokens["font"],
+            bordercolor=tokens["hover_border"],
+        ),
+    )
+    fig.update_xaxes(gridcolor=tokens["grid"], zerolinecolor=tokens["zero"], linecolor=tokens["grid"], tickfont=dict(color=tokens["font"]))
+    fig.update_yaxes(gridcolor=tokens["grid"], zerolinecolor=tokens["zero"], linecolor=tokens["grid"], tickfont=dict(color=tokens["font"]))
+    if "polar" in fig.layout:
+        fig.update_layout(
+            polar=dict(
+                bgcolor=tokens["polar"],
+                radialaxis=dict(gridcolor=tokens["grid"], tickfont=dict(color=tokens["font"])),
+                angularaxis=dict(gridcolor=tokens["grid"], tickfont=dict(color=tokens["font"])),
+            )
+        )
+    return fig
 
 
 LANDINVEST_LOGO_SVG = """
@@ -4794,11 +5274,10 @@ def _brand_header_html(
         ("Data", data_ts),
         ("Top-25 Churn", churn_text),
     ]
-    if health_text:
-        meta.append(("3yr Health", health_text))
+    meta.append(("Timing engine", _timing_chip_text((globals().get("recal_reads") or {}).get("honest"))))  # replaces the retired 3yr-health chip
     meta_html = "".join(_brand_chip_html(label, value) for label, value in meta)
     return f"""
-<div class="landinvest-brand-header">
+<div class="landinvest-brand-header" role="banner" aria-label="LandInvest application summary">
   <div class="landinvest-brand-main">
     <div class="landinvest-logo-wrap">{_landinvest_logo_svg()}</div>
     <div class="landinvest-brand-copy">
@@ -4814,7 +5293,7 @@ def _brand_header_html(
 
 def _sidebar_brand_html() -> str:
     return f"""
-<div class="landinvest-sidebar-brand">
+<div class="landinvest-sidebar-brand" aria-label="LandInvest sidebar brand">
   <div class="landinvest-sidebar-logo">{_landinvest_logo_svg()}</div>
   <div>
     <b>LandInvest</b>
@@ -4850,12 +5329,17 @@ def _customer_share_url(
     workspace: str,
     selected_states: list[str],
     selected_fips: str | None,
+    visual_theme: str,
 ) -> str:
     params = {
         "experience": "customer",
         "customer_preset": customer_preset,
         "risk_posture": risk_posture,
         "workspace": workspace,
+        "customer_theme": CUSTOMER_VISUAL_THEME_CATALOG.get(
+            visual_theme,
+            CUSTOMER_VISUAL_THEME_CATALOG["Investor"],
+        )["query_value"],
     }
     if selected_states:
         params["states"] = ",".join(selected_states)
@@ -4871,6 +5355,26 @@ def _set_customer_story_selection(fips: str) -> None:
 
 def _customer_workspace_label(workspace: str) -> str:
     return CUSTOMER_WORKSPACE_LABELS.get(workspace, workspace)
+
+
+def _normalize_customer_visual_theme(value: str | None) -> str:
+    normalized = str(value or "").strip().lower().replace("-", " ").replace("_", " ")
+    aliases = {
+        "": "Investor",
+        "investor": "Investor",
+        "default": "Investor",
+        "classic": "Investor",
+        "clean": "Investor",
+        "vaporwave": "Vaporwave",
+        "vapor": "Vaporwave",
+        "synthwave": "Vaporwave",
+        "neon": "Vaporwave",
+    }
+    return aliases.get(normalized, "Investor")
+
+
+def _customer_visual_theme_label(theme: str) -> str:
+    return CUSTOMER_VISUAL_THEME_CATALOG.get(theme, CUSTOMER_VISUAL_THEME_CATALOG["Investor"])["label"]
 
 
 def _render_customer_term_guide(label: str = "Term Guide") -> None:
@@ -4914,6 +5418,69 @@ def _render_customer_workspace_help(workspace: str) -> None:
             st.markdown(f"- {item}")
 
 
+# Pro-tier score and policy terms; shown alongside CUSTOMER_TERM_DEFINITIONS
+# in the Pro term guide so every score visible in Product Mode is defined.
+PRO_TERM_DEFINITIONS = {
+    "Model Disagreement": "Gap between the XGBoost and LightGBM predictions for the same county. A larger gap means a less trustworthy point estimate.",
+    "Horizon Spread": "How much the 1yr/3yr/5yr predictions disagree after scaling. Big spreads signal timing uncertainty.",
+    "Prediction Interval": "Conformal range around the point prediction. Wider intervals mean less certainty.",
+    "Fallback": "The 3yr model policy substituted a guarded baseline because the specialist signal failed its checks for this county.",
+    "Top-25 Churn": "Share of the national top-25 that changed since the previous run. High churn means an unstable regime or a data shift worth investigating.",
+    "Guarded Blend": "The default pre-boom ranking: momentum-safe signals with brakes applied.",
+    "Residual Upside": "Model upside left after removing what momentum already explains. Display-guarded and report-only; never a rank.",
+    "Quiet County": "Prior-momentum rank at or below the 67th percentile — a county that is not yet moving.",
+    "Promotion Gate": "The evidence ladder a research signal must clear before it can affect any default surface.",
+    "Evidence Panel": "Opt-in, report-only context cards from gated sources (events, anchors). Context for diligence, never part of rank.",
+}
+
+# What / How / Next guides for every Product Mode tab. Keep each line short:
+# the popover is a 10-second orientation, not documentation.
+PRO_TAB_GUIDES = {
+    "start": ("Your home base: current run status, headline signals, and suggested next steps.", "Scan the run chips and cards for anything unusual.", "Head to Discover -> Search to find counties."),
+    "search": ("Plain-English county search.", "Type a goal like 'low-risk Mountain West with a strong growth signal'; it maps to transparent filters.", "Open promising counties in County Memo."),
+    "explore": ("The ranked table of the full scored universe under current filters.", "Sort by strategy rank or any score; narrow with the sidebar filters.", "Send candidates to County Memo or the Watchlist."),
+    "preboom": ("The headline discovery surface (report-only): the boom-onset classifier's quiet shortlist ranked inside investable universe B, with value facts and archetype lens beside each county.", "Read timing and value together; badges flag the known false-positive modes; the legacy two-score lane sits in an expander for reference.", "Treat hits as diligence leads, never as a buy list."),
+    "strategy": ("Strategy simulator: re-weight the thesis and watch ranks move.", "Adjust the weights; the resulting rank is a simulation, not a saved artifact.", "Save a shortlist you like to the Watchlist."),
+    "screening": ("Hard-threshold screening across scores and brakes.", "Set floors and caps to cut the universe down to survivors.", "Export survivors or push them to the Watchlist."),
+    "region": ("State and regional rollups.", "Compare regions before drilling into counties.", "Drill into a region's counties via Explore."),
+    "map": ("Choropleth of the active signal across all counties.", "Switch signal layers; click a county for details.", "Open clicked counties in County Memo."),
+    "memo": ("A one-county diligence memo: scores, drivers, history, and caveats.", "Pick a county and read top to bottom.", "Add it to the Watchlist or export via Reports."),
+    "watchlist": ("Your saved counties with health and stage tracking.", "Use stages, notes, and alerts as your workflow; they never change production rank.", "Promote conviction names into the Funnel."),
+    "funnel": ("Pipeline view of watchlist stages.", "Move counties through research -> diligence -> decision.", "Export decisions via Reports."),
+    "reports": ("Bundle exports: shortlists, packets, and CSVs.", "Pick the artifacts you need and export for handoff.", "Share or archive the packet."),
+    "thesis": ("Long-form investment memo builder.", "Compose the thesis from current evidence; edit before export.", "Export as the final memo."),
+    "evidence_center": ("Governance view of x-factor evidence panels and source gates.", "Read panel status and provenance; nothing here is a rank.", "Consult the promotion-gates doc before promoting anything."),
+    "run_review": ("Run-over-run rank movement review.", "Compare this run against the previous one; investigate big movers.", "Check Model Health if churn looks abnormal."),
+    "autopsy": ("Post-mortems of past misses and hits.", "Read the case studies for recurring failure patterns.", "Feed the lessons into your strategy settings."),
+    "promotion_gate": ("Promotion-gate scoreboard for research candidates.", "Check which gates a candidate currently passes.", "Promotion requires the full gate contract, not this view alone."),
+    "model_health": ("Model health diagnostics: calibration, drift, and coverage.", "Scan the statuses; investigate anything flagged.", "Slow down decisions while health is degraded."),
+    "stress": ("Scenario stress tests on the current strategy.", "Apply shocks and see which picks are fragile.", "Prefer counties that hold up across scenarios."),
+    "peers": ("Peer-set construction for county comparables.", "Inspect how peers are chosen for a county.", "Use peer sets inside County Memo comparisons."),
+    "disagreement": ("Counties where XGBoost and LightGBM disagree most.", "High disagreement means lower trust in the point estimate.", "Treat high-disagreement counties as leads needing extra diligence."),
+    "validation": ("Model validation: walk-forward CV, known-boom backtests, conformal coverage.", "Read MAE and relative ranking, not raw R²; check that known booms rank in top percentiles.", "Slow decisions if coverage or backtests degrade."),
+    "system_status": ("Operational health: source freshness, completeness, drift, Wave 2/3 posture.", "Scan source health and missingness; investigate anything flagged.", "Rerun the pipeline or refresh sources if health is degraded."),
+    "tokenization": ("Internal, report-only SOURCING-readiness screen — A/B/C tiers over the quiet shortlist with best land-type strategy and income fit.", "Read tier + best land-type strategy as a parcel-diligence priority, never as investability; all six investability gates stay blocked.", "Pursue Tier A income-fit counties for parcel diligence; offerings need parcel data + securities counsel first."),
+}
+
+
+def _render_pro_tab_guide(tab_key: str) -> None:
+    guide = PRO_TAB_GUIDES.get(tab_key)
+    if not guide:
+        return
+    what, how, nxt = guide
+    with st.popover("How this tab works", help="What this tab is, how to use it, and what to do next."):
+        st.markdown(f"**What it is.** {what}")
+        st.markdown(f"**How to use it.** {how}")
+        st.markdown(f"**What to do next.** {nxt}")
+
+
+def _render_pro_term_guide(label: str = "Term Guide") -> None:
+    with st.popover(label, help="Definitions for every score and policy label shown in Pro."):
+        for term, body in {**CUSTOMER_TERM_DEFINITIONS, **PRO_TERM_DEFINITIONS}.items():
+            st.markdown(f"**{term}**")
+            st.caption(body)
+
+
 def _saved_customer_views() -> dict:
     profiles = st.session_state.get("saved_strategy_profiles", {}) or {}
     return {
@@ -4942,13 +5509,14 @@ def _customer_view_session_state(profile: dict) -> dict:
     cfg = profile.get("cfg") if isinstance(profile.get("cfg"), dict) else {}
     selected_fips = _normalize_fips_value(profile.get("selected_fips"))
     updates = {
-        "customer_experience_preset": profile.get("customer_preset_name", "General Opportunity"),
-        "customer_preset": profile.get("base_preset") or cfg.get("preset_name") or "Long-term appreciation",
+        "customer_experience_preset": profile.get("customer_preset_name", "Quiet Pre-Boom"),
+        "customer_preset": profile.get("base_preset") or cfg.get("preset_name") or "Quiet shortlist (classifier order)",
         "customer_risk_posture": profile.get("risk_posture", "Balanced"),
         "customer_states": profile.get("states", []),
         "customer_card_limit": int(profile.get("card_limit", 12)),
         "customer_workspace": profile.get("workspace", "Radar"),
         "customer_radar_layer": profile.get("radar_layer", "sim_score"),
+        "customer_visual_theme": _normalize_customer_visual_theme(profile.get("visual_theme")),
     }
     if selected_fips:
         updates["customer_selected_fips"] = selected_fips
@@ -4965,6 +5533,7 @@ def _customer_view_payload(
     workspace: str,
     selected_fips: str | None,
     radar_layer: str,
+    visual_theme: str,
     cfg: dict,
 ) -> dict:
     return {
@@ -4977,6 +5546,7 @@ def _customer_view_payload(
         "workspace": workspace,
         "selected_fips": _normalize_fips_value(selected_fips),
         "radar_layer": radar_layer,
+        "visual_theme": _normalize_customer_visual_theme(visual_theme),
         "cfg": cfg.copy(),
         "saved_at": datetime.now().isoformat(),
     }
@@ -5034,7 +5604,7 @@ def _customer_watchlist_command_rows(
                 "Alerts": int(alert_counts.get(fips, 0)),
                 "Strategy Rank": _rank_text(row.get("sim_rank")),
                 "Customer Signal": _fmt_score(row.get("customer_signal_score")),
-                "5yr": _fmt_pct(row.get("pred_avg_5yr")),
+                "1yr Signal": _fmt_pct(row.get("pred_avg_1yr")),
                 "Risk": _fmt_score(row.get("composite_risk")),
                 "Next Action": _customer_next_step(row),
                 "_strategy_rank": _product_numeric(row, "sim_rank", 99999.0),
@@ -5068,6 +5638,7 @@ def _customer_header_html(
     top_row: pd.Series,
     customer_preset_name: str,
     risk_posture: str,
+    visual_theme: str,
     run_id: str,
     universe_count: int,
     full_count: int,
@@ -5077,11 +5648,17 @@ def _customer_header_html(
 ) -> str:
     churn_text = f"{100 * churn:.1f}%" if churn is not None else "n/a"
     health_text = _humanize_status_label(health) if health else "n/a"
+    if visual_theme == "Vaporwave":
+        kicker = "LandInvest Customer Mode | Vaporwave"
+        title = "Neon Market Terminal"
+    else:
+        kicker = "LandInvest Customer Mode"
+        title = "Investment Command Center"
     return f"""
-<div class="customer-command-header">
+<div class="customer-command-header" role="region" aria-label="Customer Mode investment command summary">
   <div class="customer-command-copy">
-    <div class="customer-kicker">LandInvest Customer Mode</div>
-    <h1>Investment Command Center</h1>
+    <div class="customer-kicker">{_customer_escape(kicker)}</div>
+    <h1>{_customer_escape(title)}</h1>
     <p>{_customer_escape(_customer_county_display(top_row))} leads the active thesis. {_customer_escape(_customer_thesis_read(top_row))}</p>
   </div>
   <div class="customer-command-grid">
@@ -5090,7 +5667,7 @@ def _customer_header_html(
     <span><b>{universe_count:,} / {full_count:,}</b><small>Active universe</small></span>
     <span><b>{prime_count}</b><small>Prime signals</small></span>
     <span><b>{_customer_escape(churn_text)}</b><small>Top-25 churn</small></span>
-    <span><b>{_customer_escape(health_text)}</b><small>3yr health</small></span>
+    <span><b>{_customer_escape(_timing_chip_text((globals().get("recal_reads") or {}).get("honest")))}</b><small>Timing engine</small></span>
     <span><b>{_customer_escape(run_id)}</b><small>Run</small></span>
   </div>
 </div>
@@ -5112,9 +5689,39 @@ def _customer_section_header(title: str, subtitle: str | None = None) -> None:
     )
 
 
+def _customer_empty_state_html(
+    title: str,
+    body: str,
+    actions: list[str] | None = None,
+    *,
+    tone: str = "neutral",
+) -> str:
+    action_html = ""
+    if actions:
+        action_html = "<ul>" + "".join(f"<li>{_customer_escape(action)}</li>" for action in actions) + "</ul>"
+    return f"""
+<div class="customer-empty-state customer-empty-{_customer_escape(tone)}" role="status" aria-live="polite">
+  <span class="customer-kicker">{_customer_escape(tone.title())}</span>
+  <h3>{_customer_escape(title)}</h3>
+  <p>{_customer_escape(body)}</p>
+  {action_html}
+</div>
+"""
+
+
+def _render_customer_empty_state(
+    title: str,
+    body: str,
+    actions: list[str] | None = None,
+    *,
+    tone: str = "neutral",
+) -> None:
+    st.markdown(_customer_empty_state_html(title, body, actions, tone=tone), unsafe_allow_html=True)
+
+
 def _customer_map_selection_html(row: pd.Series) -> str:
     return f"""
-<div class="customer-map-callout">
+<div class="customer-map-callout" role="region" aria-label="Selected county map summary">
   <div>
     <span class="customer-kicker">Selected County | Map Highlight Active</span>
     <h3>{_customer_escape(_customer_county_display(row))}</h3>
@@ -5158,7 +5765,7 @@ def _customer_tier_label(row: pd.Series) -> str:
         return "Prime"
     if score >= 68 and risk <= 58 and confidence != "LOW":
         return "Strong"
-    if score >= 58 or _product_numeric(row, "pred_avg_5yr", 0.0) >= 0.12:
+    if score >= 58 or _product_numeric(row, "sim_timing_score", 0.0) >= 85:
         return "Speculative"
     return "Watch"
 
@@ -5202,9 +5809,9 @@ def _customer_thesis_read(row: pd.Series) -> str:
     thesis = str(decision.get("thesis", "")).strip()
     if thesis and thesis != "Current model and structural context are not complete enough for a confident thesis.":
         return f"{archetype}: {thesis}"
-    pred5 = row.get("pred_avg_5yr")
     risk = row.get("composite_risk")
-    return f"{archetype}: {_fmt_pct(pred5)} 5yr signal with {_fmt_score(risk)} risk."
+    return (f"{archetype}: timing {_fmt_score(row.get('sim_timing_score'))}, value {_fmt_score(row.get('sim_value_score'))}, "
+            f"gross rent yield {_fmt_pct(row.get('fmr_gross_yield'))}, risk {_fmt_score(risk)}.")
 
 
 def _customer_next_step(row: pd.Series) -> str:
@@ -5233,18 +5840,20 @@ def _customer_card_html(row: pd.Series, *, compact: bool = False) -> str:
     rank = _rank_text(row.get("sim_rank"))
     prod_rank = _rank_text(row.get("overall_rank"))
     signal = _customer_signal_value(row, "customer_signal_score")
-    growth = _customer_signal_value(row, "sim_growth_score")
+    timing = _customer_signal_value(row, "sim_timing_score")
+    value = _customer_signal_value(row, "sim_value_score")
     risk_fit = _customer_signal_value(row, "sim_risk_fit")
     land_fit = _customer_signal_value(row, "sim_structure_score")
     confidence = _customer_signal_value(row, "sim_confidence_score")
     bars = "".join(
         [
             _customer_signal_bar_html("Signal", signal, color),
-            _customer_signal_bar_html("Upside", growth, "#38bdf8"),
+            _customer_signal_bar_html("Timing", timing, "#38bdf8"),
+            _customer_signal_bar_html("Value", value, "#14b8a6"),
             _customer_signal_bar_html("Risk Control", risk_fit, "#22c55e"),
             _customer_signal_bar_html("Land Fit", land_fit, "#a78bfa"),
             _customer_signal_bar_html("Confidence", confidence, "#f59e0b"),
-        ][:3 if compact else 5]
+        ][:3 if compact else 6]
     )
     compact_class = " customer-card-compact" if compact else ""
     return f"""
@@ -5289,7 +5898,9 @@ def _customer_brief_table(df: pd.DataFrame, limit: int = 20) -> pd.DataFrame:
                 "Strategy Rank": _rank_text(row.get("sim_rank")),
                 "Production Rank": _rank_text(row.get("overall_rank")),
                 "Customer Signal": _fmt_score(row.get("customer_signal_score")),
-                "5yr": _fmt_pct(row.get("pred_avg_5yr")),
+                "Timing": _fmt_score(row.get("sim_timing_score")),
+                "Value": _fmt_score(row.get("sim_value_score")),
+                "Gross Rent Yield": _fmt_pct(row.get("fmr_gross_yield")),
                 "Risk Band": row.get("customer_risk_band", _customer_risk_band(row)),
                 "Confidence": row.get("confidence", "n/a"),
                 "Thesis": _customer_thesis_read(row),
@@ -5302,7 +5913,8 @@ def _customer_brief_table(df: pd.DataFrame, limit: int = 20) -> pd.DataFrame:
 def _customer_signal_rows(row: pd.Series) -> pd.DataFrame:
     return pd.DataFrame(
         [
-            {"Signal": "Upside", "Score": _customer_signal_value(row, "sim_growth_score"), "Read": _fmt_pct(row.get("pred_avg_5yr"))},
+            {"Signal": "Timing", "Score": _customer_signal_value(row, "sim_timing_score"), "Read": f"class rank {_fmt_score(row.get('sim_timing_score'))}"},
+            {"Signal": "Value", "Score": _customer_signal_value(row, "sim_value_score"), "Read": f"gross yield {_fmt_pct(row.get('fmr_gross_yield'))}"},
             {"Signal": "Risk Control", "Score": _customer_signal_value(row, "sim_risk_fit"), "Read": _fmt_score(row.get("composite_risk"))},
             {"Signal": "Land Fit", "Score": _customer_signal_value(row, "sim_structure_score"), "Read": row.get("opportunity_archetype", "n/a")},
             {"Signal": "Confidence", "Score": _customer_signal_value(row, "sim_confidence_score"), "Read": row.get("confidence", "n/a")},
@@ -5748,6 +6360,73 @@ def _customer_history_row(
     return match.iloc[0]
 
 
+_ARCHETYPE_READS = {
+    "anchor": "an employer/institution-led setup (jobs, anchors, campuses)",
+    "amenity": "an amenity/migration-led setup (inflows from costly metros, second-home demand)",
+    "adoption": "an early-adoption setup (new business formation, broadband take-up)",
+}
+
+
+def _customer_archetype_read(fips: str, lens_df: pd.DataFrame | None) -> tuple[str, str] | None:
+    """Return (headline, detail) describing which boom archetype a county most
+    resembles, from the report-only archetype-lens artifact, or None."""
+    if lens_df is None or lens_df.empty or "fips" not in lens_df.columns:
+        return None
+    work = lens_df.copy()
+    work["fips"] = work["fips"].astype(str).str.replace(r"\.0$", "", regex=True).str.zfill(5)
+    match = work[work["fips"].eq(str(fips).zfill(5))]
+    if match.empty:
+        return None
+    rec = match.iloc[0]
+    ranks = {
+        key: rec.get(f"{key}_lens_rank")
+        for key in _ARCHETYPE_READS
+        if pd.notna(rec.get(f"{key}_lens_rank"))
+    }
+    if not ranks:
+        return None
+    best_key = min(ranks, key=ranks.get)
+    best_rank = int(ranks[best_key])
+    # only call it out when the lens is genuinely enthusiastic about the county
+    if best_rank > 300:
+        return ("No single boom archetype stands out yet for this county.", "")
+    return (
+        f"Most resembles {_ARCHETYPE_READS[best_key]}.",
+        f"The {best_key} research lens ranks this county {best_rank} of ~3,100 nationally. "
+        "Report-only context; it does not change rank.",
+    )
+
+
+# Per-county structural land reads surfaced from the archetype-lens artifact
+# (report-only national percentiles). dynamism_pct + farmland_cash_rent_pct are
+# the free-data lanes added in the 2026 sweep (backlog UX1).
+_STRUCTURAL_READS = {
+    "dynamism_pct": "Economic dynamism (GDP + firm growth)",
+    "farmland_cash_rent_pct": "Farmland cash-rent level",
+    "natural_amenity_pct": "Natural amenity",
+    "supply_constraint_pct": "Supply constraint (zoning)",
+}
+
+
+def _customer_structural_reads(fips: str, lens_df: pd.DataFrame | None) -> list[tuple[str, int]]:
+    """Available per-county structural percentiles (label, percentile) from the
+    archetype-lens artifact, or an empty list."""
+    if lens_df is None or lens_df.empty or "fips" not in lens_df.columns:
+        return []
+    work = lens_df.copy()
+    work["fips"] = work["fips"].astype(str).str.replace(r"\.0$", "", regex=True).str.zfill(5)
+    match = work[work["fips"].eq(str(fips).zfill(5))]
+    if match.empty:
+        return []
+    rec = match.iloc[0]
+    reads: list[tuple[str, int]] = []
+    for col, label in _STRUCTURAL_READS.items():
+        val = rec.get(col)
+        if pd.notna(val):
+            reads.append((label, int(val)))
+    return reads
+
+
 def _render_customer_story(
     row: pd.Series,
     history_row: pd.Series | None,
@@ -5758,72 +6437,54 @@ def _render_customer_story(
     preboom_surfaces: dict[str, pd.DataFrame | None] | None,
     known_analog_suite: dict | None,
     xfactor_scoreboard: dict | None,
+    visual_theme: str = "Investor",
 ) -> None:
     fips = str(row.get("fips", "")).zfill(5)
     tier = str(row.get("customer_tier") or _customer_tier_label(row))
     color = CUSTOMER_TIER_COLORS.get(tier, "#64748b")
     st.markdown(
-        f"""
-<div class="customer-hero">
-  <div class="customer-kicker">Customer Mode County Story</div>
-  <h1>{_customer_escape(_customer_county_display(row))}</h1>
-  <p>{_customer_escape(_customer_thesis_read(row))}</p>
-  <div class="customer-hero-strip">
-    <span style="border-color:{color}; color:{color};">{_customer_escape(tier)} signal</span>
-    <span>Strategy {_rank_text(row.get('sim_rank'))}</span>
-    <span>Production {_rank_text(row.get('overall_rank'))}</span>
-    <span>Risk {_fmt_score(row.get('composite_risk'))}</span>
-  </div>
-</div>
-""",
+        customer_story_hero_html(
+            county_display=_customer_county_display(row),
+            thesis_read=_customer_thesis_read(row),
+            tier=tier,
+            tier_color=color,
+            strategy_rank=_rank_text(row.get("sim_rank")),
+            production_rank=_rank_text(row.get("overall_rank")),
+            risk_score=_fmt_score(row.get("composite_risk")),
+        ),
         unsafe_allow_html=True,
     )
 
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("Customer Signal", _fmt_score(row.get("customer_signal_score")))
-    c2.metric("5yr Upside", _fmt_pct(row.get("pred_avg_5yr")))
+    c2.metric("1yr Signal", _fmt_pct(row.get("pred_avg_1yr")))
     c3.metric("Risk Band", row.get("customer_risk_band", _customer_risk_band(row)))
     c4.metric("Confidence", row.get("confidence", "n/a"))
     c5.metric("Parcel Read", _parcel_readiness(row)[0])
 
-    signal_rows = _customer_signal_rows(row)
-    radar_labels = signal_rows["Signal"].tolist()
-    radar_values = signal_rows["Score"].astype(float).tolist()
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatterpolar(
-            r=radar_values + [radar_values[0]],
-            theta=radar_labels + [radar_labels[0]],
-            fill="toself",
-            line=dict(color=color, width=3),
-            fillcolor="rgba(20, 184, 166, 0.22)",
-            name="Signal stack",
+    archetype_read = _customer_archetype_read(fips, boom_onset_archetype_lens_df)
+    if archetype_read is not None:
+        headline, detail = archetype_read
+        st.info(f"**Boom archetype:** {headline}" + (f" {detail}" if detail else ""))
+
+    structural_reads = _customer_structural_reads(fips, boom_onset_archetype_lens_df)
+    if structural_reads:
+        chips = " · ".join(f"{label} {pct}th pct" for label, pct in structural_reads)
+        st.caption(
+            f"Structural land reads (report-only national percentiles): {chips}"
         )
-    )
-    fig.update_layout(
-        height=380,
-        template="plotly_white",
-        polar=dict(
-            radialaxis=dict(range=[0, 100], showticklabels=False, gridcolor="rgba(148,163,184,0.35)"),
-            angularaxis=dict(gridcolor="rgba(148,163,184,0.28)"),
-            bgcolor="rgba(248,250,252,0.95)",
-        ),
-        margin=dict(l=35, r=35, t=25, b=25),
-        showlegend=False,
-        paper_bgcolor="rgba(255,255,255,0)",
-        font=dict(color="#0f172a", family="Inter, system-ui, sans-serif"),
-        hoverlabel=dict(bgcolor="#0f172a", font_color="#f8fafc", bordercolor="#14b8a6"),
-    )
+
+    signal_rows = _customer_signal_rows(row)
+    fig = customer_signal_radar_figure(signal_rows, color=color)
+    _apply_customer_plot_theme(fig, visual_theme)
 
     left, right = st.columns([1.05, 1])
     with left:
         with st.container(border=True):
             st.plotly_chart(fig, width="stretch")
     with right:
-        signal_view = signal_rows.copy()
-        signal_view["Score"] = signal_view["Score"].map(lambda x: f"{float(x):.0f}")
         st.caption("Signal stack")
-        st.dataframe(signal_view, width="stretch", hide_index=True, height=310)
+        st.dataframe(customer_signal_table(signal_rows), width="stretch", hide_index=True, height=310)
 
     change_rows = _customer_change_table(row, latest_compare_rank_df)
     source_rows = _customer_signal_provenance_table(row, wave3_status)
@@ -5858,19 +6519,18 @@ def _render_customer_story(
 
     preboom_rows = _preboom_signal_rows_for_county(row, preboom_surfaces)
     analog_rows = _analog_rows_for_county(row, known_analog_suite)
-    e1, e2 = st.columns(2)
-    with e1:
-        st.subheader("Pre-Boom Context")
-        if preboom_rows.empty:
-            st.caption("No loaded pre-boom review surface currently includes this county.")
-        else:
-            st.dataframe(preboom_rows, width="stretch", hide_index=True, height=220)
-    with e2:
-        st.subheader("Analog Context")
-        if analog_rows.empty:
-            st.caption("No analog-library context is currently available for this county.")
-        else:
-            st.dataframe(analog_rows, width="stretch", hide_index=True, height=220)
+    render_county_evidence_panel(
+        row,
+        preboom_rows=preboom_rows,
+        analog_rows=analog_rows,
+        command_loop_df=xfactor_command_loop_df,
+        source_confidence_df=source_confidence_weighting_df,
+        announcement_df=announcement_anchor_event_latest_df,
+        boundary_df=fiveyr_boundary_review_df,
+        archetype_df=boom_onset_archetype_lens_df,
+        expanded=False,
+        key_prefix=f"customer_evidence_{fips}",
+    )
 
     st.subheader("Similar Counties")
     if similar_rows.empty:
@@ -5932,15 +6592,40 @@ def _render_customer_mode(
     xfactor_promotion_gate: dict | None = None,
     demo_readiness_report: dict | None = None,
 ) -> None:
+    if not st.session_state.get("customer_tour_dismissed", False):
+        with st.container(border=True):
+            st.markdown("**Welcome — three steps to your first shortlist**")
+            tour_cols = st.columns([1, 1, 1, 0.35])
+            tour_cols[0].markdown(
+                "**1. Pick a preset.** Choose an investment thesis in the sidebar "
+                "(Quiet Pre-Boom is a good start)."
+            )
+            tour_cols[1].markdown(
+                "**2. Open a county story.** Click a county on the Radar map, then "
+                "open its Story for the plain-English read."
+            )
+            tour_cols[2].markdown(
+                "**3. Save it.** Add promising counties to your Watchlist and export "
+                "a Packet when you are ready."
+            )
+            if tour_cols[3].button(
+                "Got it",
+                key="customer_tour_dismiss",
+                help="Hide this intro. It stays hidden for this profile.",
+            ):
+                st.session_state.customer_tour_dismissed = True
+                _save_current_user_state()
+                st.rerun()
     presets = _product_thesis_presets()
     customer_preset_names = list(CUSTOMER_PRESET_CATALOG)
-    requested_customer_preset = _query_param_first("customer_preset", "General Opportunity")
+    requested_customer_preset = _query_param_first("customer_preset", "Quiet Pre-Boom")
     if requested_customer_preset not in CUSTOMER_PRESET_CATALOG:
-        requested_customer_preset = "General Opportunity"
+        requested_customer_preset = "Quiet Pre-Boom"
     requested_workspace = _query_param_first("workspace", "Radar")
     workspace_options = ["Radar", "Opportunities", "County Story", "Compare", "Watchlist", "Packet"]
     if requested_workspace not in workspace_options:
         requested_workspace = "Radar"
+    requested_visual_theme = _normalize_customer_visual_theme(_query_param_first("customer_theme", "Investor"))
     requested_fips = _normalize_fips_value(_query_param_first("fips"))
     if requested_fips and "customer_selected_fips" not in st.session_state:
         st.session_state.customer_selected_fips = requested_fips
@@ -5950,7 +6635,7 @@ def _render_customer_mode(
             st.session_state[key] = value
     has_explicit_customer_view = any(
         _query_param_first(param)
-        for param in ["customer_preset", "risk_posture", "workspace", "states", "fips"]
+        for param in ["customer_preset", "risk_posture", "workspace", "states", "fips", "customer_theme"]
     )
     if (
         not has_explicit_customer_view
@@ -5989,6 +6674,24 @@ def _render_customer_mode(
                 help="Controls the risk ceiling, risk weight, and confidence gate used by the active Customer view.",
                 **risk_kwargs,
             )
+        with st.expander("Experience Style", expanded=True):
+            visual_theme_kwargs = {}
+            if "customer_visual_theme" not in st.session_state:
+                visual_theme_kwargs["default"] = requested_visual_theme
+            customer_visual_theme = st.segmented_control(
+                "Visual skin",
+                list(CUSTOMER_VISUAL_THEME_CATALOG),
+                selection_mode="single",
+                required=True,
+                format_func=_customer_visual_theme_label,
+                key="customer_visual_theme",
+                help="Switch the Customer Mode presentation skin without changing scoring, ranks, filters, or saved artifacts.",
+                width="stretch",
+                **visual_theme_kwargs,
+            )
+            if customer_visual_theme is None:
+                customer_visual_theme = requested_visual_theme
+            st.caption(CUSTOMER_VISUAL_THEME_CATALOG[customer_visual_theme]["description"])
         with st.expander("Universe And Display", expanded=True):
             state_lookup = {str(state).upper(): state for state in states}
             query_states = [state_lookup[s.upper()] for s in _query_param_list("states") if s.upper() in state_lookup]
@@ -6028,6 +6731,7 @@ def _render_customer_mode(
             )
             st.caption("Advanced tuning changes the simulated strategy lens only. It does not retrain or rewrite production artifacts.")
         _render_customer_term_guide("Term Guide")
+    st.markdown(_customer_visual_theme_sentinel(customer_visual_theme), unsafe_allow_html=True)
 
     cfg = presets[preset_name].copy()
     if risk_posture == "Lower risk":
@@ -6054,11 +6758,21 @@ def _render_customer_mode(
         sim_df["fips"] = sim_df["fips"].astype(str).str.zfill(5)
         sim_df = sim_df.merge(run_history_summary_df[hist_cols], on="fips", how="left")
     sim_df = _customer_augment(sim_df)
-    filtered = _apply_product_filter(sim_df, selected_states, float(cfg.get("max_risk", 70)), str(cfg.get("min_confidence", "Any"))).sort_values("sim_rank")
+    filtered = _apply_product_filter(sim_df, selected_states, float(cfg.get("max_risk", 70)), str(cfg.get("min_confidence", "Any")),
+                                     universe_only=bool(cfg.get("universe_only", True)), quiet_only=bool(cfg.get("quiet_only", True))).sort_values("sim_rank")
 
     if filtered.empty:
         _render_trust_banner(latest_run, df, xfactor_promotion_gate)
-        st.warning("No counties match the current Customer Mode setup.")
+        _render_customer_empty_state(
+            "No counties match this Customer setup",
+            "The active preset, risk posture, confidence gate, and state filters produced an empty review universe.",
+            [
+                "Clear the state filter or widen the selected state set.",
+                "Switch Risk posture to Balanced or More aggressive.",
+                "Try the General Opportunity preset before saving this view.",
+            ],
+            tone="review",
+        )
         _render_demo_footer(latest_run, status_bundle, demo_readiness_report)
         return
 
@@ -6077,6 +6791,7 @@ def _render_customer_mode(
             top_row=top_row,
             customer_preset_name=customer_preset_name,
             risk_posture=risk_posture,
+            visual_theme=customer_visual_theme,
             run_id=run_id,
             universe_count=len(filtered),
             full_count=len(sim_df),
@@ -6148,7 +6863,8 @@ def _render_customer_mode(
                 st.caption(
                     f"{default_badge}: {view_meta.get('customer_preset_name', 'Customer view')} / "
                     f"{view_meta.get('risk_posture', 'Balanced')} / "
-                    f"{view_meta.get('workspace', 'Radar')}"
+                    f"{view_meta.get('workspace', 'Radar')} / "
+                    f"{_normalize_customer_visual_theme(view_meta.get('visual_theme'))}"
                 )
                 load_col, default_col = st.columns(2)
                 if load_col.button("Load View", key="customer_load_saved_view", type="primary"):
@@ -6254,6 +6970,7 @@ def _render_customer_mode(
                         workspace=workspace,
                         selected_fips=st.session_state.get("customer_selected_fips"),
                         radar_layer=st.session_state.get("customer_radar_layer", "sim_score"),
+                        visual_theme=customer_visual_theme,
                         cfg=cfg,
                     )
                     _save_current_user_state()
@@ -6266,6 +6983,7 @@ def _render_customer_mode(
         workspace=workspace,
         selected_states=selected_states,
         selected_fips=st.session_state.get("customer_selected_fips"),
+        visual_theme=customer_visual_theme,
     )
     with st.expander("Share And Profile", expanded=False):
         s1, s2 = st.columns([2, 1])
@@ -6289,7 +7007,7 @@ def _render_customer_mode(
   <span><b>{prime_count}</b><small>Prime signals</small></span>
   <span><b>{int(filtered['customer_tier'].eq('Strong').sum())}</b><small>Strong signals</small></span>
   <span><b>{100 * filtered['confidence'].astype(str).str.upper().eq('HIGH').mean():.0f}%</b><small>High confidence</small></span>
-  <span><b>{_fmt_pct(filtered['pred_avg_5yr'].mean())}</b><small>Avg 5yr upside</small></span>
+  <span><b>{_fmt_pct(filtered['fmr_gross_yield'].median()) if 'fmr_gross_yield' in filtered.columns else '—'}</b><small>Median gross rent yield</small></span>
 </div>
 """,
             unsafe_allow_html=True,
@@ -6298,7 +7016,12 @@ def _render_customer_mode(
         map_layer_labels = {
             "customer_signal_score": "Customer Signal",
             "sim_score": "Strategy Score",
-            "pred_avg_5yr": "5yr Upside",
+            "sim_timing_score": "Timing (boom-onset)",
+            "sim_value_score": "Value (yield & cheapness)",
+            "fmr_gross_yield": "Gross Rent Yield",
+            "tourism_intensity_index": "Tourism Intensity",
+            "nass_land_value_per_acre": "Farm Land $/ac",
+            "pred_avg_1yr": "1yr Signal (context)",
             "composite_risk": "Risk",
             "lens_parcel_readiness": "Parcel Readiness",
             "sim_structure_score": "Land Fit",
@@ -6308,7 +7031,7 @@ def _render_customer_mode(
             map_layer_kwargs["index"] = 0
         map_layer = st.selectbox(
             "Map signal layer",
-            ["sim_score", "customer_signal_score", "pred_avg_5yr", "composite_risk", "lens_parcel_readiness", "sim_structure_score"],
+            ["sim_score", "customer_signal_score", "pred_avg_1yr", "composite_risk", "lens_parcel_readiness", "sim_structure_score"],
             format_func=lambda x: map_layer_labels.get(x, x.replace("_", " ").title()),
             key="customer_radar_layer",
             help="Choose the score used to color the county map. Click a county to load it into the selected-county action panel.",
@@ -6332,6 +7055,8 @@ def _render_customer_mode(
                 else "Click a county to select"
             )
             st.caption(selected_map_title)
+            plot_tokens = _customer_plot_theme_tokens(customer_visual_theme)
+            map_color_scale = plot_tokens["risk_scale"] if map_layer == "composite_risk" else plot_tokens["map_scale"]
             fig_map = px.choropleth(
                 map_df,
                 geojson=county_geojson,
@@ -6339,14 +7064,14 @@ def _render_customer_mode(
                 color=map_layer,
                 hover_name="county_name",
                 hover_data={"state": True, "customer_tier": True, "customer_universe": True, "sim_rank": True, "fips_str": False},
-                color_continuous_scale="RdYlGn_r" if map_layer == "composite_risk" else "Viridis",
+                color_continuous_scale=map_color_scale,
                 scope="usa",
                 title=f"{map_layer_labels.get(map_layer, map_layer.replace('_', ' ').title())} Radar | {selected_map_title}",
                 custom_data=["fips_str", "state", "customer_tier", "customer_universe", "sim_rank"],
             )
             fig_map.update_traces(
                 marker_line_width=0.25,
-                marker_line_color="rgba(15, 23, 42, 0.28)",
+                marker_line_color="rgba(103, 232, 249, 0.34)" if customer_visual_theme == "Vaporwave" else "rgba(15, 23, 42, 0.28)",
                 hovertemplate=(
                     "<b>%{hovertext}</b><br>"
                     "State: %{customdata[1]}<br>"
@@ -6361,9 +7086,9 @@ def _render_customer_mode(
                         geojson=county_geojson,
                         locations=[selected_map_fips],
                         z=[1],
-                        colorscale=[[0, "rgba(251,191,36,0.22)"], [1, "rgba(251,191,36,0.22)"]],
+                        colorscale=[[0, "rgba(250,204,21,0.24)"], [1, "rgba(250,204,21,0.24)"]],
                         showscale=False,
-                        marker_line_color="#f59e0b",
+                        marker_line_color="#facc15" if customer_visual_theme == "Vaporwave" else "#f59e0b",
                         marker_line_width=4.0,
                         hoverinfo="skip",
                         name="Selected county",
@@ -6373,12 +7098,18 @@ def _render_customer_mode(
                 height=650,
                 margin=dict(l=0, r=0, t=52, b=0),
                 clickmode="event+select",
-                paper_bgcolor="rgba(255,255,255,0)",
-                plot_bgcolor="rgba(255,255,255,0)",
-                font=dict(color="#0f172a", family="Inter, system-ui, sans-serif"),
+                paper_bgcolor=plot_tokens["paper"],
+                plot_bgcolor=plot_tokens["paper"],
+                font=dict(color=plot_tokens["font"], family="Inter, system-ui, sans-serif"),
                 title=dict(font=dict(size=18), x=0.01, xanchor="left"),
-                hoverlabel=dict(bgcolor="#0f172a", font_color="#f8fafc", bordercolor="#14b8a6"),
-                geo=dict(bgcolor="rgba(0,0,0,0)", lakecolor="#e0f2fe", landcolor="#f8fafc"),
+                hoverlabel=dict(bgcolor=plot_tokens["hover_bg"], font_color=plot_tokens["font"], bordercolor=plot_tokens["hover_border"]),
+                geo=dict(
+                    bgcolor="rgba(0,0,0,0)",
+                    lakecolor=plot_tokens["geo_lake"],
+                    landcolor=plot_tokens["geo_land"],
+                    subunitcolor=plot_tokens["grid"],
+                    coastlinecolor=plot_tokens["grid"],
+                ),
             )
             with st.container(border=True):
                 selection = st.plotly_chart(
@@ -6439,7 +7170,7 @@ def _render_customer_mode(
     elif workspace == "Opportunities":
         sort_choice = st.selectbox(
             "Opportunity sorting lens",
-            ["Strategy rank", "Customer signal", "Lowest risk", "Highest 5yr upside", "Best land fit"],
+            ["Strategy rank", "Best timing", "Highest rent yield", "Cheapest farm land", "Tourism intensity", "Customer signal", "Lowest risk", "Best land fit"],
             index=0,
             key="customer_sort",
             help="Controls how the Opportunity Deck is ordered inside the active Customer filter.",
@@ -6460,19 +7191,34 @@ def _render_customer_mode(
             card_df = card_df[mask]
         sort_map = {
             "Strategy rank": ("sim_rank", True),
+            "Best timing": ("sim_timing_score", False),
+            "Highest rent yield": ("fmr_gross_yield", False),
+            "Cheapest farm land": ("nass_land_value_per_acre", True),
+            "Tourism intensity": ("tourism_intensity_index", False),
             "Customer signal": ("customer_signal_score", False),
             "Lowest risk": ("composite_risk", True),
-            "Highest 5yr upside": ("pred_avg_5yr", False),
             "Best land fit": ("sim_structure_score", False),
         }
         sort_col, ascending = sort_map[sort_choice]
         card_df = card_df.sort_values([sort_col, "sim_rank"], ascending=[ascending, True]).head(int(card_limit))
-        cols = st.columns(3)
-        for idx, (_, row) in enumerate(card_df.iterrows()):
-            if idx > 0 and idx % 3 == 0:
-                cols = st.columns(3)
-            with cols[idx % 3]:
-                _render_customer_card(row, f"customer_opportunity_{idx}")
+        if card_df.empty:
+            _render_customer_empty_state(
+                "No opportunity cards match this search",
+                "The active opportunity universe is still available, but the current search phrase removed every card.",
+                [
+                    "Clear the search field to restore the active shortlist.",
+                    "Search by state abbreviation, county name, archetype, risk band, or signal tier.",
+                    "Use County Story when you want to search every scored county.",
+                ],
+                tone="search",
+            )
+        else:
+            cols = st.columns(3)
+            for idx, (_, row) in enumerate(card_df.iterrows()):
+                if idx > 0 and idx % 3 == 0:
+                    cols = st.columns(3)
+                with cols[idx % 3]:
+                    _render_customer_card(row, f"customer_opportunity_{idx}")
         with st.expander("Data View", expanded=False):
             st.dataframe(_customer_brief_table(card_df, limit=int(card_limit)), width="stretch", hide_index=True, height=420)
 
@@ -6499,7 +7245,16 @@ def _render_customer_mode(
                     mask = mask | labels_df[col].astype(str).str.lower().str.contains(q, regex=False, na=False)
             labels_df = labels_df[mask]
         if labels_df.empty:
-            st.info("No counties match that Story search. Try a county name, state abbreviation, or FIPS code.")
+            _render_customer_empty_state(
+                "No County Story match",
+                "The search did not match a county, state, FIPS code, archetype, tier, or risk band in the scored universe.",
+                [
+                    "Try a shorter county name or two-letter state abbreviation.",
+                    "Use a five-digit FIPS code when you have one.",
+                    "Clear the search to return to the full scored county list.",
+                ],
+                tone="search",
+            )
             _render_demo_footer(latest_run, status_bundle, demo_readiness_report)
             return
         labels = labels_df.apply(
@@ -6533,6 +7288,7 @@ def _render_customer_mode(
                 preboom_surfaces,
                 known_analog_suite,
                 xfactor_scoreboard,
+                visual_theme=customer_visual_theme,
             )
 
     elif workspace == "Compare":
@@ -6552,21 +7308,30 @@ def _render_customer_mode(
         selected_fips = [label_to_fips[label] for label in selected if label in label_to_fips]
         compare_df = compare_source[compare_source["fips"].astype(str).str.zfill(5).isin(selected_fips)].copy()
         if compare_df.empty:
-            st.info("Choose at least one county to compare.")
+            _render_customer_empty_state(
+                "Choose counties to compare",
+                "The comparison chart needs at least one selected county before it can draw the signal stack.",
+                [
+                    "Select one to five counties from the compare control.",
+                    "Start with the default top-ranked counties when you want a quick benchmark.",
+                ],
+                tone="action",
+            )
         else:
             winner = compare_df.sort_values("sim_rank").iloc[0]
             st.success(
                 f"Best fit under this Customer Mode thesis: {_customer_county_display(winner)} "
                 f"at strategy {_rank_text(winner.get('sim_rank'))}."
             )
-            score_cols = ["customer_signal_score", "sim_growth_score", "sim_risk_fit", "sim_structure_score", "sim_confidence_score"]
+            score_cols = ["customer_signal_score", "sim_timing_score", "sim_value_score", "sim_risk_fit", "sim_structure_score", "sim_confidence_score"]
             chart_df = compare_df[["county_name", "state"] + [c for c in score_cols if c in compare_df.columns]].copy()
             chart_df["County"] = compare_df.apply(_customer_county_display, axis=1).values
             long_chart = chart_df.melt(id_vars=["County"], value_vars=[c for c in score_cols if c in chart_df.columns], var_name="Signal", value_name="Score")
             long_chart["Signal"] = long_chart["Signal"].map(
                 {
                     "customer_signal_score": "Customer Signal",
-                    "sim_growth_score": "Upside",
+                    "sim_timing_score": "Timing",
+                    "sim_value_score": "Value",
                     "sim_risk_fit": "Risk Control",
                     "sim_structure_score": "Land Fit",
                     "sim_confidence_score": "Confidence",
@@ -6580,15 +7345,10 @@ def _render_customer_mode(
                 barmode="group",
                 range_y=[0, 100],
                 title="Signal Stack Comparison",
-                color_discrete_sequence=px.colors.qualitative.Set2,
+                color_discrete_sequence=_customer_plot_theme_tokens(customer_visual_theme)["sequence"],
             )
             fig_compare.update_layout(height=420, margin=dict(t=45, b=20))
-            fig_compare.update_layout(
-                paper_bgcolor="rgba(255,255,255,0)",
-                plot_bgcolor="rgba(248,250,252,0.92)",
-                font=dict(color="#0f172a", family="Inter, system-ui, sans-serif"),
-                hoverlabel=dict(bgcolor="#0f172a", font_color="#f8fafc", bordercolor="#14b8a6"),
-            )
+            _apply_customer_plot_theme(fig_compare, customer_visual_theme)
             with st.container(border=True):
                 st.plotly_chart(fig_compare, width="stretch")
             st.dataframe(_customer_brief_table(compare_df, limit=len(compare_df)), width="stretch", hide_index=True, height=320)
@@ -6598,7 +7358,16 @@ def _render_customer_mode(
         watch_df = sim_df[sim_df["fips"].astype(str).str.zfill(5).isin(watch_fips)].copy().sort_values("sim_rank")
         summary = _watchlist_portfolio_summary(watch_df)
         if watch_df.empty:
-            st.info("No customer watchlist yet. Add counties from Radar, Opportunities, or County Story.")
+            _render_customer_empty_state(
+                "Your Customer watchlist is empty",
+                "Save counties from Radar, Opportunity Deck, or County Story to build a diligence queue.",
+                [
+                    "Open a county story from the map or cards and choose Add To Watchlist.",
+                    "Use Starter Candidates below as a first-pass shortlist.",
+                    "Watchlist data is local demo storage for the current user profile.",
+                ],
+                tone="action",
+            )
             with st.container(border=True):
                 st.subheader("Starter Candidates", help="Top active-filter counties to consider adding first.")
                 st.dataframe(_customer_brief_table(filtered.head(8), limit=8), width="stretch", hide_index=True, height=320)
@@ -6731,18 +7500,15 @@ def _render_customer_mode(
                     hover_name="County",
                     hover_data={"sim_rank": True, "pred_avg_5yr": True, "confidence": True, "plot_upside_size": False},
                     title="Watchlist Signal vs Risk",
-                    color_discrete_sequence=px.colors.qualitative.Set2,
+                    color_discrete_sequence=_customer_plot_theme_tokens(customer_visual_theme)["sequence"],
                 )
                 fig_watch.update_layout(
                     height=420,
                     margin=dict(t=50, b=30),
-                    paper_bgcolor="rgba(255,255,255,0)",
-                    plot_bgcolor="rgba(248,250,252,0.92)",
-                    font=dict(color="#0f172a", family="Inter, system-ui, sans-serif"),
-                    hoverlabel=dict(bgcolor="#0f172a", font_color="#f8fafc", bordercolor="#14b8a6"),
                     xaxis_title="Composite Risk (lower is cleaner)",
                     yaxis_title="Customer Signal",
                 )
+                _apply_customer_plot_theme(fig_watch, customer_visual_theme)
                 with st.container(border=True):
                     st.plotly_chart(fig_watch, width="stretch")
                 replacement_df = _recommend_watchlist_replacements(filtered, watch_df)
@@ -6850,6 +7616,16 @@ def _render_customer_mode(
             alert_df=packet_alert_df,
         )
         packet_html = _customer_packet_html(packet)
+        if watch_df.empty:
+            _render_customer_empty_state(
+                "Packet has no watchlist counties yet",
+                "The export is still available and will use the active Radar shortlist, but the Watchlist Command Center section is stronger after you save counties.",
+                [
+                    "Add counties from Radar, Opportunity Deck, or County Story.",
+                    "Use the active shortlist export for a quick first handoff.",
+                ],
+                tone="action",
+            )
         st.markdown(
             f"""
 <div class="customer-stat-strip">
@@ -6905,3727 +7681,75 @@ def _render_customer_mode(
     _render_demo_footer(latest_run, status_bundle, demo_readiness_report)
 
 
-def _render_product_mode(
-    df: pd.DataFrame,
-    states: list[str],
-    latest_run: dict | None,
-    latest_deltas: dict | None,
-    status_bundle: dict | None,
-    run_history_summary_df: pd.DataFrame | None,
-    run_history_detail_df: pd.DataFrame | None,
-    latest_compare_rank_df: pd.DataFrame | None,
-    latest_compare_boundary_df: pd.DataFrame | None,
-    wave3_status: dict | None,
-    preboom_surfaces: dict[str, pd.DataFrame | None] | None = None,
-    preboom_blend_report: dict | None = None,
-    preboom_analog_report: dict | None = None,
-    preboom_promotion_gate: dict | None = None,
-    known_analog_suite: dict | None = None,
-    xfactor_scoreboard: dict | None = None,
-    xfactor_ablation_queue: dict | None = None,
-    xfactor_promotion_gate: dict | None = None,
-    demo_readiness_report: dict | None = None,
-    p0_repeatable_residual_guardrail: dict | None = None,
-    p0_repeatable_residual_candidates: pd.DataFrame | None = None,
-) -> None:
-    presets = _product_thesis_presets()
-
-    pending_profile = st.session_state.pop("pending_product_strategy_profile", None)
-    if isinstance(pending_profile, dict):
-        for key, value in pending_profile.items():
-            st.session_state[key] = value
-
-    with st.sidebar:
-        st.subheader("Strategy")
-        saved_profiles = st.session_state.get("saved_strategy_profiles", {})
-        if saved_profiles:
-            profile_name = st.selectbox("Saved strategy profile", ["None"] + sorted(saved_profiles), key="product_saved_profile")
-            if profile_name != "None" and st.button("Apply saved profile"):
-                profile = saved_profiles.get(profile_name, {})
-                st.session_state.pending_product_strategy_profile = {
-                    "product_h1": int(profile.get("h1", 0)),
-                    "product_h3": int(profile.get("h3", 10)),
-                    "product_h5": int(profile.get("h5", 90)),
-                    "product_growth": int(profile.get("growth", 75)),
-                    "product_risk": int(profile.get("risk", 15)),
-                    "product_structure": int(profile.get("structure", 5)),
-                    "product_confidence": int(profile.get("confidence", 5)),
-                    "product_uncertainty": int(profile.get("uncertainty", 5)),
-                    "product_structural_focus": profile.get("structural_focus", "Overall land thesis"),
-                    "product_max_risk": float(profile.get("max_risk", 70)),
-                    "product_min_confidence": profile.get("min_confidence", "Any"),
-                    "product_states": profile.get("states", []),
-                }
-                st.rerun()
-        preset_name = st.selectbox("Thesis preset", list(presets.keys()), index=0, key="product_preset")
-        preset = presets[preset_name]
-        selected_states = st.multiselect("States", states, default=[], placeholder="All states", key="product_states")
-        min_confidence = st.selectbox(
-            "Minimum confidence",
-            ["Any", "MEDIUM+", "HIGH"],
-            index=["Any", "MEDIUM+", "HIGH"].index(preset["min_confidence"]),
-            key="product_min_confidence",
-        )
-        max_risk = st.slider("Maximum risk", 20.0, 80.0, float(preset["max_risk"]), step=1.0, key="product_max_risk")
-        st.divider()
-        st.caption("Horizon mix")
-        h1 = st.slider("1yr", 0, 100, int(preset["h1"]), step=5, key="product_h1")
-        h3 = st.slider("3yr", 0, 100, int(preset["h3"]), step=5, key="product_h3")
-        h5 = st.slider("5yr", 0, 100, int(preset["h5"]), step=5, key="product_h5")
-        st.caption("Score mix")
-        growth = st.slider("Growth", 0, 100, int(preset["growth"]), step=5, key="product_growth")
-        risk = st.slider("Risk control", 0, 100, int(preset["risk"]), step=5, key="product_risk")
-        structure = st.slider("Land thesis", 0, 100, int(preset["structure"]), step=5, key="product_structure")
-        confidence = st.slider("Confidence", 0, 100, int(preset["confidence"]), step=5, key="product_confidence")
-        uncertainty = st.slider("Uncertainty penalty", 0, 25, int(preset["uncertainty"]), step=1, key="product_uncertainty")
-        structural_focus = st.selectbox(
-            "Land thesis focus",
-            ["Overall land thesis", "Optionality", "Low fragility", "Recreation access", "Buildable scarcity"],
-            index=["Overall land thesis", "Optionality", "Low fragility", "Recreation access", "Buildable scarcity"].index(preset["structural_focus"]),
-            key="product_structural_focus",
-        )
-        profile_save_name = st.text_input("Save strategy as", value="", placeholder="e.g. Mountain West low-risk")
-
-    cfg = {
-        "h1": h1,
-        "h3": h3,
-        "h5": h5,
-        "growth": growth,
-        "risk": risk,
-        "structure": structure,
-        "confidence": confidence,
-        "uncertainty": uncertainty,
-        "structural_focus": structural_focus,
-        "max_risk": max_risk,
-        "min_confidence": min_confidence,
-        "states": selected_states,
-        "preset_name": preset_name,
-    }
-    if profile_save_name.strip():
-        with st.sidebar:
-            if st.button("Save strategy profile", type="secondary"):
-                st.session_state.saved_strategy_profiles[profile_save_name.strip()] = cfg.copy()
-                _save_current_user_state()
-                st.success(f"Saved strategy profile: {profile_save_name.strip()}")
-    st.sidebar.caption(_strategy_profile_description(cfg))
-    sim_df = _simulate_strategy_rankings(df, cfg)
-    sim_df = _add_product_lenses(sim_df)
-    if run_history_summary_df is not None and not run_history_summary_df.empty:
-        hist_cols = [
-            c for c in ["fips", "avg_rank", "std_rank", "top25_presence_share", "rank_range"]
-            if c in run_history_summary_df.columns
-        ]
-        sim_df["fips"] = sim_df["fips"].astype(str).str.zfill(5)
-        sim_df = sim_df.merge(run_history_summary_df[hist_cols], on="fips", how="left")
-    filtered = _apply_product_filter(sim_df, selected_states, max_risk, min_confidence).sort_values("sim_rank")
-
-    if "product_selected_fips" not in st.session_state and not filtered.empty:
-        st.session_state.product_selected_fips = str(filtered.iloc[0]["fips"]).zfill(5)
-
-    run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
-    churn = latest_deltas.get("top25_churn") if latest_deltas and latest_deltas.get("has_previous") else None
-    health = ((status_bundle or {}).get("model_health_3yr") or {}).get("assessment", {}).get("health_status")
-    chips = [
-        f"Run: {run_id}",
-        f"Counties: {len(filtered):,} / {len(df):,}",
-        f"Preset: {preset_name}",
-        f"Top-25 churn: {100 * churn:.1f}%" if churn is not None else "Top-25 churn: n/a",
-    ]
-    if health:
-        chips.append(f"3yr health: {_humanize_status_label(health)}")
-    st.markdown(" ".join(f'<span class="run-chip">{chip}</span>' for chip in chips), unsafe_allow_html=True)
-    _render_trust_banner(latest_run, df, xfactor_promotion_gate)
-
-    (
-        top_start,
-        top_discover,
-        top_map,
-        top_memo,
-        top_watch,
-        top_reports,
-        top_advanced,
-    ) = st.tabs(
-        [
-            "Start",
-            "Discover",
-            "Map",
-            "County Memo",
-            "Watchlist",
-            "Reports",
-            "Advanced",
-        ]
-    )
-    st.caption("Main workflow: Start -> Discover -> Map -> County Memo -> Watchlist -> Reports. Advanced keeps diagnostics and promotion gates out of the default path.")
-
-    tab_start = top_start
-    tab_map = top_map
-    tab_memo = top_memo
-
-    with top_discover:
-        (
-            tab_search,
-            tab_explore,
-            tab_preboom,
-            tab_play,
-            tab_screen,
-            tab_stress,
-            tab_peers,
-            tab_disagree,
-            tab_region,
-        ) = st.tabs(
-            [
-                "Search",
-                "Explore",
-                "Pre-Boom",
-                "Strategy",
-                "Screening",
-                "Stress Tests",
-                "Peer Sets",
-                "Disagreement",
-                "Region",
-            ]
-        )
-
-    with top_watch:
-        tab_watch, tab_workflow = st.tabs(
-            [
-                "Watchlist",
-                "Funnel",
-            ]
-        )
-
-    with top_reports:
-        tab_reports, tab_thesis = st.tabs(
-            [
-                "Reports",
-                "Investment Memo",
-            ]
-        )
-
-    with top_advanced:
-        tab_run, tab_autopsy, tab_promo, tab_health = st.tabs(
-            [
-                "Run Review",
-                "Autopsy",
-                "Promotion Gate",
-                "Model Health",
-            ]
-        )
-
-    with tab_start:
-        _render_start_here_tab(filtered, cfg, latest_run, xfactor_scoreboard, xfactor_promotion_gate, demo_readiness_report)
-
-    with tab_search:
-        st.header("Natural-Language Search")
-        if "product_nl_query" not in st.session_state:
-            st.session_state.product_nl_query = ""
-        st.caption("Use transparent keyword search for quick county-set discovery, then tune the sidebar strategy for precise policy changes.")
-        examples = [
-            ("Low-risk Mountain West", "low-risk counties with strong 5yr upside in the Mountain West"),
-            ("High-confidence recreation", "high confidence recreation"),
-            ("Model disagreement", "model disagreement"),
-        ]
-        ecols = st.columns(len(examples))
-        for col, (label, example_query) in zip(ecols, examples):
-            if col.button(label, key=f"product_nl_example_{label.lower().replace(' ', '_').replace('-', '_')}"):
-                st.session_state.product_nl_query = example_query
-                st.rerun()
-        with st.form("product_nl_search_form", clear_on_submit=False):
-            query = st.text_input(
-                "Ask for a county set",
-                placeholder="e.g. low-risk counties with strong 5yr upside in the Mountain West",
-                key="product_nl_query",
-            )
-            st.form_submit_button("Apply search", type="primary")
-        if st.button("Clear search", key="product_nl_clear_search"):
-            st.session_state.product_nl_query = ""
-            st.rerun()
-        query = st.session_state.get("product_nl_query", query)
-        result_df, query_notes = _apply_natural_language_query(filtered, query)
-        for note in query_notes:
-            st.caption(note)
-        st.dataframe(_product_table(result_df, limit=40), width="stretch", hide_index=True, height=520)
-        if not result_df.empty:
-            st.caption("Natural-language search uses a transparent keyword parser; use Strategy controls for precise policy changes.")
-
-    with tab_explore:
-        st.header("Explore")
-        m1, m2, m3, m4 = st.columns(4)
-        m1.metric("Best Strategy Score", _fmt_score(filtered["sim_score"].max()) if not filtered.empty else "—")
-        m2.metric("Median Risk", _fmt_score(filtered["composite_risk"].median()) if not filtered.empty else "—")
-        high_conf = filtered["confidence"].astype(str).str.upper().eq("HIGH").mean() if not filtered.empty else np.nan
-        m3.metric("High Confidence", f"{100 * high_conf:.0f}%" if pd.notna(high_conf) else "—")
-        fallback = filtered.get("use_stable_3yr_fallback", pd.Series(dtype=bool)).mean() if not filtered.empty else np.nan
-        m4.metric("3yr Fallback", f"{100 * fallback:.0f}%" if pd.notna(fallback) else "—")
-
-        for title, caption, slice_df in _insight_slices(filtered):
-            st.subheader(title)
-            st.caption(caption)
-            st.dataframe(_product_table(slice_df, limit=8), width="stretch", hide_index=True, height=320)
-
-        if "opportunity_archetype" in filtered.columns and not filtered.empty:
-            st.subheader("Opportunity Archetypes")
-            arch_counts = filtered["opportunity_archetype"].value_counts().reset_index()
-            arch_counts.columns = ["Archetype", "Count"]
-            a1, a2 = st.columns([1, 2])
-            with a1:
-                st.dataframe(arch_counts, width="stretch", hide_index=True, height=260)
-            with a2:
-                fig_arch = px.bar(
-                    arch_counts.sort_values("Count", ascending=True),
-                    x="Count",
-                    y="Archetype",
-                    orientation="h",
-                    title="Active Strategy Archetype Mix",
-                    color="Count",
-                    color_continuous_scale="Teal",
-                )
-                fig_arch.update_layout(height=320, margin=dict(t=45, b=20))
-                st.plotly_chart(fig_arch, width="stretch")
-
-    with tab_reports:
-        st.header("Review Package")
-        st.caption("Exports are shareable screening artifacts for discussion. They preserve the current Product Mode strategy settings.")
-        st.info(
-            "Use this after County Memo and Watchlist review: export a Top 25/Top 100 package, "
-            "then attach a compare set for the counties you want to discuss."
-        )
-        if filtered.empty:
-            st.warning("No counties match the active strategy filters.")
-        else:
-            report_df = filtered.sort_values("sim_rank").copy()
-            c1, c2, c3, c4 = st.columns(4)
-            with c1:
-                top25_md = _top_report_markdown(
-                    report_df,
-                    cfg,
-                    latest_run,
-                    limit=25,
-                    title="LandInvest Top 25 Opportunity Report",
-                )
-                st.download_button(
-                    "Top 25 Markdown",
-                    data=top25_md.encode("utf-8"),
-                    file_name="landinvest_top25_opportunity_report.md",
-                    mime="text/markdown",
-                    key="product_report_top25_md",
-                )
-            with c2:
-                top100_md = _top_report_markdown(
-                    report_df,
-                    cfg,
-                    latest_run,
-                    limit=100,
-                    title="LandInvest Top 100 Opportunity Report",
-                )
-                st.download_button(
-                    "Top 100 Markdown",
-                    data=top100_md.encode("utf-8"),
-                    file_name="landinvest_top100_opportunity_report.md",
-                    mime="text/markdown",
-                    key="product_report_top100_md",
-                )
-            with c3:
-                shortlist = _format_export_frame(report_df, 100)
-                st.download_button(
-                    "Shortlist CSV",
-                    data=shortlist.to_csv(index=False).encode("utf-8"),
-                    file_name="landinvest_active_shortlist_top100.csv",
-                    mime="text/csv",
-                    key="product_report_shortlist_csv",
-                )
-            with c4:
-                review_packet = (
-                    _top_report_markdown(
-                        report_df,
-                        cfg,
-                        latest_run,
-                        limit=25,
-                        title="LandInvest Investor Review Packet",
-                    )
-                    + "\n---\n\n"
-                    + _compare_set_markdown(report_df.head(5), cfg, latest_run)
-                )
-                st.download_button(
-                    "Review Packet",
-                    data=review_packet.encode("utf-8"),
-                    file_name="landinvest_investor_review_packet.md",
-                    mime="text/markdown",
-                    key="product_report_review_packet_md",
-                )
-
-            st.subheader("Shortlist Preview")
-            st.dataframe(_product_table(report_df, limit=25), width="stretch", hide_index=True, height=420)
-
-            st.subheader("Compare-Set Export")
-            compare_source = report_df.head(500).copy()
-            compare_labels = compare_source.apply(
-                lambda r: f"{r['county_name']}, {r['state']} (strategy #{int(r['sim_rank'])}, production #{int(r['overall_rank'])})",
-                axis=1,
-            ).tolist()
-            default_labels = compare_labels[: min(3, len(compare_labels))]
-            selected_labels = st.multiselect(
-                "Counties to compare",
-                compare_labels,
-                default=default_labels,
-                key="product_report_compare_set",
-            )
-            label_to_fips = dict(zip(compare_labels, compare_source["fips"].astype(str).str.zfill(5)))
-            selected_fips = {label_to_fips[label] for label in selected_labels if label in label_to_fips}
-            compare_df = report_df[report_df["fips"].astype(str).str.zfill(5).isin(selected_fips)].copy()
-            if compare_df.empty:
-                st.info("Choose at least one county to build a compare-set export.")
-            else:
-                compare_export = _compare_export_frame(compare_df)
-                st.dataframe(compare_export, width="stretch", hide_index=True, height=260)
-                e1, e2 = st.columns(2)
-                with e1:
-                    compare_md = _compare_set_markdown(compare_df, cfg, latest_run)
-                    st.download_button(
-                        "Compare Summary Markdown",
-                        data=compare_md.encode("utf-8"),
-                        file_name="landinvest_compare_set_summary.md",
-                        mime="text/markdown",
-                        key="product_report_compare_md",
-                    )
-                with e2:
-                    compare_payload = {
-                        "generated_at": datetime.now().isoformat(),
-                        "strategy": cfg,
-                        "ranking_run": latest_run or {},
-                        "counties": json.loads(compare_export.to_json(orient="records")),
-                    }
-                    st.download_button(
-                        "Compare Set JSON",
-                        data=json.dumps(compare_payload, indent=2).encode("utf-8"),
-                        file_name="landinvest_compare_set.json",
-                        mime="application/json",
-                        key="product_report_compare_json",
-                    )
-
-    with tab_preboom:
-        _render_preboom_review_tab(
-            surfaces=preboom_surfaces or {},
-            blend_report=preboom_blend_report,
-            analog_report=preboom_analog_report,
-            promotion_gate=preboom_promotion_gate,
-            p0_repeatable_residual_guardrail=p0_repeatable_residual_guardrail,
-            p0_repeatable_residual_candidates=p0_repeatable_residual_candidates,
-        )
-
-    with tab_play:
-        st.header("Strategy Playground")
-        st.caption("This is a simulation layer only. Production ranks and scores are unchanged.")
-        strategy_table = _filter_product_table_rows(filtered, "product_strategy_table")
-        st.caption(f"Showing {len(strategy_table):,} of {len(filtered):,} strategy rows.")
-        st.dataframe(_product_table(strategy_table.sort_values("sim_rank"), limit=500), width="stretch", hide_index=True, height=520)
-        clean_view = filtered.sort_values("lens_confidence_rank").head(30).copy()
-        with st.expander("High-Conviction Lens", expanded=False):
-            st.caption("This optional lens pushes wide-uncertainty and lower-confidence counties down without changing production rank.")
-            clean_cols = [
-                "lens_confidence_rank", "sim_rank", "overall_rank", "county_name", "state",
-                "lens_confidence_weighted", "sim_score", "confidence", "quantile_interval_width_mean",
-            ]
-            clean = clean_view[[c for c in clean_cols if c in clean_view.columns]].copy()
-            clean = clean.rename(
-                columns={
-                    "lens_confidence_rank": "High-Conviction Rank",
-                    "sim_rank": "Strategy Rank",
-                    "overall_rank": "Production Rank",
-                    "county_name": "County",
-                    "state": "State",
-                    "lens_confidence_weighted": "High-Conviction Score",
-                    "sim_score": "Strategy Score",
-                    "confidence": "Confidence",
-                    "quantile_interval_width_mean": "Uncertainty Width",
-                }
-            )
-            for col in ["High-Conviction Rank", "Strategy Rank", "Production Rank"]:
-                if col in clean.columns:
-                    clean[col] = clean[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
-            for col in ["High-Conviction Score", "Strategy Score", "Uncertainty Width"]:
-                if col in clean.columns:
-                    clean[col] = clean[col].map(lambda x: f"{float(x):.3f}" if col == "Uncertainty Width" else _fmt_score(x))
-            st.dataframe(clean, width="stretch", hide_index=True, height=320)
-
-        p1, p2 = st.columns(2)
-        with p1:
-            if not filtered.empty:
-                fig = px.scatter(
-                    filtered.head(500),
-                    x="overall_rank",
-                    y="sim_rank",
-                    color="sim_score",
-                    hover_name="county_name",
-                    hover_data=["state", "composite_risk", "pred_avg_5yr", "pred_policy_3yr"],
-                    title="Production Rank vs Strategy Rank",
-                    labels={"overall_rank": "Production rank", "sim_rank": "Strategy rank"},
-                    color_continuous_scale="Viridis",
-                )
-                fig.add_shape(type="line", x0=1, y0=1, x1=500, y1=500, line=dict(color="gray", dash="dash"))
-                fig.update_yaxes(autorange="reversed")
-                fig.update_xaxes(autorange="reversed")
-                fig.update_layout(height=430, margin=dict(t=45, b=20))
-                st.plotly_chart(fig, width="stretch")
-        with p2:
-            risers = filtered.sort_values("sim_rank_delta").head(15).copy()
-            fig = px.bar(
-                risers,
-                x="sim_rank_delta",
-                y="county_name",
-                orientation="h",
-                color="sim_score",
-                title="Largest Strategy Risers",
-                labels={"sim_rank_delta": "Strategy rank minus production rank", "county_name": "County"},
-                color_continuous_scale="Teal",
-            )
-            fig.update_layout(height=430, margin=dict(t=45, b=20))
-            st.plotly_chart(fig, width="stretch")
-
-    with tab_screen:
-        st.header("Negative Screening")
-        st.caption("This view helps find counties to avoid, monitor only, or require a special thesis.")
-        if filtered.empty:
-            st.info("No counties match the active strategy filters.")
-        else:
-            screen_df = _negative_screen(filtered)
-            avoid_cols = [
-                "screen_read", "avoid_score", "county_name", "state", "sim_rank", "overall_rank",
-                "composite_risk", "confidence", "sim_uncertainty_score", "sim_structure_score",
-            ]
-            avoid = screen_df[[c for c in avoid_cols if c in screen_df.columns]].head(50).copy()
-            avoid = avoid.rename(
-                columns={
-                    "screen_read": "Screen Read",
-                    "avoid_score": "Avoid Score",
-                    "county_name": "County",
-                    "state": "State",
-                    "sim_rank": "Strategy Rank",
-                    "overall_rank": "Production Rank",
-                    "composite_risk": "Risk",
-                    "confidence": "Confidence",
-                    "sim_uncertainty_score": "Uncertainty",
-                    "sim_structure_score": "Thesis Fit",
-                }
-            )
-            for col in ["Avoid Score", "Risk", "Uncertainty", "Thesis Fit"]:
-                if col in avoid.columns:
-                    avoid[col] = avoid[col].map(_fmt_score)
-            for col in ["Strategy Rank", "Production Rank"]:
-                if col in avoid.columns:
-                    avoid[col] = avoid[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
-            st.dataframe(avoid, width="stretch", hide_index=True, height=520)
-
-    stress_df = None
-    with tab_stress:
-        st.header("Scenario Stress Tests")
-        st.caption("Stress tests are strategy overlays. They do not alter production ranks or saved artifacts.")
-        catalog = _scenario_catalog()
-        scenarios = st.multiselect(
-            "Stress scenarios",
-            list(catalog.keys()),
-            default=["Higher rates", "Climate-risk haircut"],
-            key="product_scenarios",
-        )
-        severity = st.slider("Stress severity", 0.25, 2.00, 1.00, step=0.25, key="product_stress_severity")
-        if scenarios and not filtered.empty:
-            stress_df = _apply_scenario_stress(filtered, scenarios, severity)
-            base_top = set(filtered.sort_values("sim_rank").head(25)["fips"].astype(str).str.zfill(5))
-            stress_top = set(stress_df.sort_values("stress_rank").head(25)["fips"].astype(str).str.zfill(5))
-            overlap = len(base_top & stress_top)
-            s1, s2, s3, s4 = st.columns(4)
-            s1.metric("Top-25 Survivors", f"{overlap}/25")
-            s2.metric("Top-25 Churn", f"{100 * (1 - overlap / 25):.0f}%")
-            s3.metric("Median Stress Score", _fmt_score(stress_df["stress_score"].median()))
-            s4.metric("Median Rank Move", f"{stress_df['stress_rank_delta'].abs().median():.0f}")
-
-            st.dataframe(_stress_table(stress_df, limit=40), width="stretch", hide_index=True, height=480)
-            c1, c2 = st.columns(2)
-            with c1:
-                fallers = stress_df.sort_values("stress_rank_delta", ascending=False).head(15)
-                fig_fall = px.bar(
-                    fallers,
-                    x="stress_rank_delta",
-                    y="county_name",
-                    orientation="h",
-                    title="Most Stress-Sensitive Counties",
-                    labels={"stress_rank_delta": "Stress rank move", "county_name": "County"},
-                    color="stress_rank_delta",
-                    color_continuous_scale="Reds",
-                )
-                fig_fall.update_layout(height=420, margin=dict(t=45, b=20))
-                st.plotly_chart(fig_fall, width="stretch")
-            with c2:
-                survivors = stress_df[stress_df["fips"].astype(str).str.zfill(5).isin(base_top & stress_top)]
-                fig_survive = px.scatter(
-                    survivors,
-                    x="composite_risk",
-                    y="stress_score",
-                    color="opportunity_archetype" if "opportunity_archetype" in survivors.columns else "state",
-                    hover_name="county_name",
-                    title="Top-25 Survivors",
-                    labels={"composite_risk": "Composite risk", "stress_score": "Stress score"},
-                )
-                fig_survive.update_layout(height=420, margin=dict(t=45, b=20))
-                st.plotly_chart(fig_survive, width="stretch")
-            for name in scenarios:
-                st.caption(f"{name}: {catalog[name]['description']}")
-        else:
-            st.info("Choose at least one scenario to stress the active strategy.")
-
-    with tab_map:
-        st.header("Map")
-        metric = st.selectbox(
-            "Map layer",
-            [
-                "sim_score",
-                "lens_confidence_weighted",
-                "lens_upside_minus_risk",
-                "lens_structure_minus_fragility",
-                "lens_parcel_readiness",
-                "sim_rank_delta",
-                "opportunity_score",
-                "composite_risk",
-                "sim_structure_score",
-                "pred_avg_5yr",
-                "pred_policy_3yr",
-            ],
-            format_func=lambda x: x.replace("_", " ").title(),
-            key="product_map_metric",
-        )
-        map_df = filtered.dropna(subset=["fips", metric]).copy()
-        map_df["fips_str"] = map_df["fips"].astype(str).str.zfill(5)
-        color_scale = "RdYlGn_r" if "risk" in metric or metric == "sim_rank_delta" else "Viridis"
-        fig_map = px.choropleth(
-            map_df,
-            geojson=load_county_geojson(_mtime=_file_mtime(COUNTY_GEOJSON_PATH)),
-            locations="fips_str",
-            color=metric,
-            hover_name="county_name",
-            hover_data={"state": True, "sim_rank": True, "overall_rank": True, "fips_str": False},
-            color_continuous_scale=color_scale,
-            scope="usa",
-            title=f"{metric.replace('_', ' ').title()} by County",
-            custom_data=["fips_str"],
-        )
-        fig_map.update_layout(height=650, margin=dict(l=0, r=0, t=45, b=0), geo=dict(bgcolor="rgba(0,0,0,0)"))
-        selection = st.plotly_chart(fig_map, width="stretch", on_select="rerun", selection_mode=["points", "box", "lasso"], key="product_map")
-        selected_points = getattr(selection, "selection", {}).get("points", []) if selection is not None else []
-        if selected_points:
-            point = selected_points[0]
-            customdata = point.get("customdata") or []
-            if customdata:
-                st.session_state.product_selected_fips = str(customdata[0]).zfill(5)
-        st.caption("Select a county or region on the map, then open County Memo to inspect the current selection.")
-
-    with tab_memo:
-        st.header("County Memo")
-        if filtered.empty:
-            st.warning("No counties match the active strategy filters.")
-        else:
-            labels = filtered.sort_values("sim_rank").head(1000).apply(
-                lambda r: f"{r['county_name']}, {r['state']} (strategy #{int(r['sim_rank'])}, production #{int(r['overall_rank'])})",
-                axis=1,
-            ).tolist()
-            label_to_fips = dict(zip(labels, filtered.sort_values("sim_rank").head(1000)["fips"].astype(str).str.zfill(5)))
-            current_fips = st.session_state.get("product_selected_fips")
-            current_label = next((label for label, fips in label_to_fips.items() if fips == current_fips), labels[0])
-            chosen = st.selectbox("County", labels, index=labels.index(current_label) if current_label in labels else 0)
-            st.session_state.product_selected_fips = label_to_fips[chosen]
-            row = _selected_county_row(filtered, st.session_state.product_selected_fips)
-            history_row = None
-            if row is not None and run_history_summary_df is not None and not run_history_summary_df.empty:
-                match = run_history_summary_df[run_history_summary_df["fips"].astype(str).str.zfill(5) == str(row["fips"]).zfill(5)]
-                if not match.empty:
-                    history_row = match.iloc[0]
-            if row is not None:
-                _render_product_county_memo(
-                    row,
-                    history_row,
-                    wave3_status,
-                    cfg,
-                    preboom_surfaces=preboom_surfaces,
-                    analog_suite=known_analog_suite,
-                    xfactor_scoreboard=xfactor_scoreboard,
-                )
-
-    with tab_peers:
-        st.header("Peer Sets")
-        if filtered.empty:
-            st.warning("No counties match the active strategy filters.")
-        else:
-            row = _selected_county_row(filtered, st.session_state.get("product_selected_fips"))
-            if row is None:
-                row = filtered.sort_values("sim_rank").iloc[0]
-                st.session_state.product_selected_fips = str(row["fips"]).zfill(5)
-            st.caption(
-                f"Peer context for {row.get('county_name')}, {row.get('state')} "
-                f"(strategy #{int(row.get('sim_rank'))}, production #{int(row.get('overall_rank'))})."
-            )
-            peer_sets = _find_peer_sets(row, filtered)
-            if not peer_sets:
-                st.info("No peer sets available under the active filters.")
-            for label, peer_df in peer_sets.items():
-                st.subheader(label)
-                st.dataframe(_peer_table(peer_df), width="stretch", hide_index=True, height=300)
-            st.subheader("County Matchmaker")
-            match_goal = st.radio(
-                "Find alternatives with",
-                ["More upside", "Lower risk", "Same region", "Different region", "Stronger structural support", "Less rank volatility"],
-                horizontal=True,
-                key="product_match_goal",
-            )
-            base = filtered[filtered["fips"].astype(str).str.zfill(5) != str(row.get("fips")).zfill(5)].copy()
-            if match_goal == "More upside":
-                base = base[base["pred_avg_5yr"] >= _product_numeric(row, "pred_avg_5yr", 0.0)].sort_values(["pred_avg_5yr", "sim_rank"], ascending=[False, True])
-            elif match_goal == "Lower risk":
-                base = base[base["composite_risk"] <= _product_numeric(row, "composite_risk", 50.0)].sort_values(["composite_risk", "sim_rank"])
-            elif match_goal == "Same region":
-                base = base[base["state"] == row.get("state")].sort_values("sim_rank")
-            elif match_goal == "Different region":
-                base = base[base["state"] != row.get("state")].sort_values("sim_rank")
-            elif match_goal == "Stronger structural support":
-                base = base[base["sim_structure_score"] >= _product_numeric(row, "sim_structure_score", 50.0)].sort_values(["sim_structure_score", "sim_rank"], ascending=[False, True])
-            else:
-                base = base[base["rank_stability_spread"] <= _product_numeric(row, "rank_stability_spread", 0.25)].sort_values(["rank_stability_spread", "sim_rank"])
-            st.dataframe(_peer_table(base.head(12)), width="stretch", hide_index=True, height=320)
-            st.caption("Peer sets are heuristic comparisons for exploration, not replacement model outputs.")
-
-    with tab_disagree:
-        st.header("Model Disagreement Explorer")
-        st.caption("Counties here are thesis-dependent or less settled across models/horizons.")
-        if filtered.empty:
-            st.info("No counties match the active strategy filters.")
-        else:
-            disagree_df = _model_disagreement_surface(filtered)
-            cols = [
-                "county_name", "state", "sim_rank", "overall_rank", "model_disagreement_lens",
-                "model_disagreement", "horizon_disagreement", "sim_uncertainty_score",
-                "pred_avg_1yr", "pred_policy_3yr", "pred_avg_5yr", "confidence",
-            ]
-            view = disagree_df[[c for c in cols if c in disagree_df.columns]].head(50).copy()
-            view = view.rename(
-                columns={
-                    "county_name": "County",
-                    "state": "State",
-                    "sim_rank": "Strategy Rank",
-                    "overall_rank": "Production Rank",
-                    "model_disagreement_lens": "Disagreement Lens",
-                    "model_disagreement": "Model Disagreement",
-                    "horizon_disagreement": "Horizon Disagreement",
-                    "sim_uncertainty_score": "Uncertainty",
-                    "pred_avg_1yr": "1yr",
-                    "pred_policy_3yr": "3yr",
-                    "pred_avg_5yr": "5yr",
-                    "confidence": "Confidence",
-                }
-            )
-            for col in ["Strategy Rank", "Production Rank"]:
-                if col in view.columns:
-                    view[col] = view[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
-            for col in ["Disagreement Lens", "Model Disagreement", "Horizon Disagreement", "Uncertainty"]:
-                if col in view.columns:
-                    view[col] = view[col].map(lambda x: f"{float(x):.3f}" if pd.notna(x) else "—")
-            for col in ["1yr", "3yr", "5yr"]:
-                if col in view.columns:
-                    view[col] = view[col].map(_fmt_pct)
-            st.dataframe(view, width="stretch", hide_index=True, height=520)
-
-    with tab_region:
-        st.header("Regional Strategy Builder")
-        region_states = st.multiselect("Region states", states, default=selected_states, key="product_region_states")
-        region_df = filtered[filtered["state"].isin(region_states)].copy() if region_states else filtered.copy()
-        state_roll, arch = _regional_summary(region_df)
-        if region_df.empty:
-            st.info("No counties match the regional selection.")
-        else:
-            r1, r2, r3, r4 = st.columns(4)
-            r1.metric("Counties", f"{len(region_df):,}")
-            r2.metric("Avg Strategy Score", _fmt_score(region_df["sim_score"].mean()))
-            r3.metric("Avg Risk", _fmt_score(region_df["composite_risk"].mean()))
-            r4.metric("Top Archetype", region_df["opportunity_archetype"].mode().iloc[0] if "opportunity_archetype" in region_df.columns else "n/a")
-            st.subheader("State Rollup")
-            roll = state_roll.copy()
-            for col in ["avg_strategy_score", "avg_risk"]:
-                if col in roll.columns:
-                    roll[col] = roll[col].map(_fmt_score)
-            if "avg_5yr" in roll.columns:
-                roll["avg_5yr"] = roll["avg_5yr"].map(_fmt_pct)
-            if "high_conf_share" in roll.columns:
-                roll["high_conf_share"] = roll["high_conf_share"].map(lambda x: f"{100 * float(x):.0f}%")
-            st.dataframe(roll, width="stretch", hide_index=True, height=300)
-            st.subheader("Regional Leaders")
-            regional_leaders = _filter_product_table_rows(region_df.sort_values("sim_rank"), "product_regional_leaders")
-            st.caption(f"Showing {len(regional_leaders):,} of {len(region_df):,} regional rows.")
-            st.dataframe(_product_table(regional_leaders.sort_values("sim_rank"), limit=500), width="stretch", hide_index=True, height=420)
-            if not arch.empty:
-                fig_region = px.bar(
-                    arch.head(40),
-                    x="count",
-                    y="state",
-                    color="opportunity_archetype",
-                    orientation="h",
-                    title="Regional Archetype Mix",
-                )
-                fig_region.update_layout(height=420, margin=dict(t=45, b=20))
-                st.plotly_chart(fig_region, width="stretch")
-
-    with tab_thesis:
-        st.header("Thesis Builder")
-        watch_fips = {str(f).zfill(5) for f in st.session_state.watchlist_fips}
-        watch_df = filtered[filtered["fips"].astype(str).str.zfill(5).isin(watch_fips)].copy()
-        if watch_df.empty:
-            st.info("Add counties from County Memo to build a thesis memo.")
-        else:
-            t1, t2, t3, t4 = st.columns(4)
-            t1.metric("Shortlist Counties", len(watch_df))
-            t2.metric("Avg Strategy Score", _fmt_score(watch_df["sim_score"].mean()))
-            t3.metric("Avg Risk", _fmt_score(watch_df["composite_risk"].mean()))
-            t4.metric("Archetypes", watch_df["opportunity_archetype"].nunique() if "opportunity_archetype" in watch_df.columns else "n/a")
-
-            st.subheader("Shortlist Diligence Readiness")
-            readiness_rows = []
-            for _, rec in watch_df.sort_values("sim_rank").iterrows():
-                readiness, actions = _parcel_readiness(rec)
-                readiness_rows.append(
-                    {
-                        "County": rec.get("county_name"),
-                        "State": rec.get("state"),
-                        "Strategy Rank": f"#{int(rec.get('sim_rank'))}",
-                        "Archetype": rec.get("opportunity_archetype"),
-                        "Readiness": readiness,
-                        "Next Check": actions[0] if actions else "—",
-                    }
-                )
-            st.dataframe(pd.DataFrame(readiness_rows), width="stretch", hide_index=True, height=320)
-
-            memo = _build_deal_thesis_memo(watch_df, cfg, preset_name, stress_df=stress_df)
-            st.subheader("Generated Investment Memo")
-            st.text_area("Memo", value=memo, height=420)
-            st.download_button(
-                "Export thesis memo (Markdown)",
-                data=memo.encode("utf-8"),
-                file_name="landinvest_thesis_memo.md",
-                mime="text/markdown",
-            )
-            ic_packet = _ic_packet_markdown(watch_df, cfg, preset_name, stress_df)
-            with st.expander("Investment Committee Mode", expanded=False):
-                st.text_area("IC packet", value=ic_packet, height=420)
-                st.download_button(
-                    "Export IC packet (Markdown)",
-                    data=ic_packet.encode("utf-8"),
-                    file_name="landinvest_ic_packet.md",
-                    mime="text/markdown",
-                )
-
-    with tab_workflow:
-        st.header("Opportunity Funnel")
-        funnel_rows = []
-        for fips, rec in st.session_state.county_funnel.items():
-            feedback = st.session_state.county_feedback.get(fips, {})
-            evidence = st.session_state.diligence_evidence.get(fips, {})
-            funnel_rows.append(
-                {
-                    "FIPS": fips,
-                    "County": rec.get("county_name"),
-                    "State": rec.get("state"),
-                    "Stage": rec.get("stage"),
-                    "Feedback": feedback.get("feedback", "Unreviewed"),
-                    "Evidence": "yes" if (evidence.get("evidence") or "").strip() else "no",
-                    "Updated": rec.get("updated_at"),
-                }
-            )
-        if funnel_rows:
-            funnel_df = pd.DataFrame(funnel_rows).sort_values(["Stage", "State", "County"])
-            st.dataframe(funnel_df, width="stretch", hide_index=True, height=420)
-            stage_counts = funnel_df["Stage"].value_counts().reset_index()
-            stage_counts.columns = ["Stage", "Count"]
-            fig_funnel = px.bar(stage_counts, x="Stage", y="Count", title="Funnel Stage Counts", color="Stage")
-            fig_funnel.update_layout(height=320, margin=dict(t=45, b=20))
-            st.plotly_chart(fig_funnel, width="stretch")
-        else:
-            st.info("Set a funnel stage in County Memo to start tracking opportunities.")
-
-        feedback_rows = []
-        for fips, rec in st.session_state.county_feedback.items():
-            feedback_rows.append({"FIPS": fips, **rec})
-        if feedback_rows:
-            st.subheader("Human Feedback Loop")
-            st.dataframe(pd.DataFrame(feedback_rows), width="stretch", hide_index=True, height=280)
-
-    with tab_watch:
-        st.header("Watchlist")
-        st.caption("Use Watchlist as the active review queue before generating Reports or an Investment Memo.")
-        watch_fips = {str(f).zfill(5) for f in st.session_state.watchlist_fips}
-        watch_df = filtered[filtered["fips"].astype(str).str.zfill(5).isin(watch_fips)].copy()
-        summary = _watchlist_portfolio_summary(watch_df)
-        w1, w2, w3, w4, w5 = st.columns(5)
-        w1.metric("Counties", summary["count"])
-        w2.metric("Avg Strategy Score", summary["avg_score"])
-        w3.metric("Avg Risk", summary["avg_risk"])
-        w4.metric("High Confidence", summary["high_conf_share"])
-        w5.metric("Top States", summary["top_states"])
-        if watch_df.empty:
-            st.info("Add counties from County Memo to build a strategy watchlist.")
-        else:
-            st.dataframe(_product_table(watch_df.sort_values("sim_rank"), limit=100), width="stretch", hide_index=True, height=420)
-            flags = _watchlist_review_flags(watch_df)
-            recs = _recommend_watchlist_replacements(filtered, watch_df)
-            drift_alerts = _watchlist_drift_alerts(watch_df, latest_compare_rank_df)
-            r1, r2, r3 = st.columns(3)
-            with r1:
-                st.subheader("Review Candidates")
-                if flags.empty:
-                    st.caption("No watchlist counties are currently triggering review flags under this strategy.")
-                else:
-                    st.dataframe(flags, width="stretch", hide_index=True, height=260)
-            with r2:
-                st.subheader("Suggested Additions")
-                if recs.empty:
-                    st.caption("No replacement suggestions available under the active filters.")
-                else:
-                    st.dataframe(_product_table(recs, limit=8), width="stretch", hide_index=True, height=260)
-            with r3:
-                st.subheader("Drift Alerts")
-                if drift_alerts.empty:
-                    st.caption("No watchlist drift alerts are currently firing.")
-                else:
-                    st.dataframe(drift_alerts, width="stretch", hide_index=True, height=260)
-            if run_history_summary_df is not None and not run_history_summary_df.empty:
-                enriched = watch_df.merge(
-                    run_history_summary_df[[
-                        c for c in ["fips", "std_rank", "top25_presence_share", "rank_range"]
-                        if c in run_history_summary_df.columns
-                    ]],
-                    on="fips",
-                    how="left",
-                    suffixes=("", "_hist"),
-                )
-                fig = px.scatter(
-                    enriched,
-                    x="composite_risk",
-                    y="sim_score",
-                    size="top25_presence_share" if "top25_presence_share" in enriched.columns else None,
-                    color="state",
-                    hover_name="county_name",
-                    title="Watchlist Risk, Score, and Durability",
-                    labels={"composite_risk": "Composite risk", "sim_score": "Strategy score"},
-                )
-                fig.update_layout(height=420, margin=dict(t=45, b=20))
-                st.plotly_chart(fig, width="stretch")
-
-    with tab_run:
-        st.header("Run Review")
-        review = _run_review_summary(filtered, latest_compare_rank_df, latest_compare_boundary_df)
-        if not review:
-            st.info("No latest run-comparison artifact is available for this Product Mode summary.")
-        else:
-            if latest_compare_rank_df is not None and not latest_compare_rank_df.empty:
-                comp = latest_compare_rank_df.copy()
-                c1, c2, c3, c4 = st.columns(4)
-                c1.metric("Compared Counties", f"{len(comp):,}")
-                c2.metric("Mean |Rank Move|", f"{pd.to_numeric(comp.get('abs_rank_shift'), errors='coerce').mean():.1f}")
-                entrants = review.get("Top-25 entrants", pd.DataFrame())
-                exits = review.get("Top-25 exits", pd.DataFrame())
-                c3.metric("Top-25 Entrants", len(entrants))
-                c4.metric("Top-25 Exits", len(exits))
-                st.subheader("Narrative Brief")
-                for bullet in _run_review_narrative(latest_compare_rank_df):
-                    st.markdown(f"- {bullet}")
-            for label, frame in review.items():
-                st.subheader(label)
-                if frame.empty:
-                    st.caption("None in the latest comparison.")
-                else:
-                    st.dataframe(_run_review_table(frame), width="stretch", hide_index=True, height=300)
-
-    with tab_autopsy:
-        st.header("County Autopsy")
-        st.caption("A lightweight review queue for counties where the system may have been too optimistic or where the latest run changed the read.")
-        autopsy = _autopsy_candidates(filtered, latest_compare_rank_df)
-        if autopsy.empty:
-            st.info("No autopsy candidates found under the active strategy.")
-        else:
-            rows = []
-            for _, rec in autopsy.iterrows():
-                rows.append(
-                    {
-                        "County": rec.get("county_name"),
-                        "State": rec.get("state"),
-                        "Current Rank": f"#{int(rec.get('overall_rank'))}" if pd.notna(rec.get("overall_rank")) else "—",
-                        "Reason": rec.get("autopsy_reason"),
-                        "Risk": _fmt_score(rec.get("composite_risk")),
-                        "Confidence": rec.get("confidence"),
-                        "3yr Fallback": bool(rec.get("use_stable_3yr_fallback", False)),
-                        "What to review": "; ".join(_why_not_bullets(rec)[:2]),
-                    }
-                )
-            st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True, height=520)
-
-    with tab_promo:
-        st.header("Promotion-Readiness Console")
-        st.caption("This is a compact product gate for deciding whether candidate model/policy changes deserve promotion work.")
-        st.dataframe(_promotion_readiness_rows(status_bundle), width="stretch", hide_index=True, height=260)
-        gate = xfactor_promotion_gate or {}
-        if gate:
-            st.subheader("X-Factor Interaction Promotion Gate")
-            g1, g2, g3, g4 = st.columns(4)
-            g1.metric("Status", gate.get("production_promotion_status", "n/a"))
-            g2.metric("Ablation Ready", gate.get("ablation_ready_count", "n/a"))
-            g3.metric("Default Promotion", gate.get("default_promotion_count", "n/a"))
-            g4.metric("Report-Only", gate.get("report_only_count", "n/a"))
-            gate_rows = pd.DataFrame(gate.get("gates") or [])
-            if not gate_rows.empty:
-                view_cols = [
-                    "interaction",
-                    "label",
-                    "scoreboard_decision",
-                    "ablation_decision",
-                    "quiet_lift_gate",
-                    "already_hot_gate",
-                    "analog_gate",
-                    "ablation_gate",
-                    "final_decision",
-                ]
-                st.dataframe(gate_rows[[c for c in view_cols if c in gate_rows.columns]], width="stretch", hide_index=True, height=300)
-            notes = gate.get("notes") or []
-            for note in notes[:4]:
-                st.markdown(f"- {note}")
-        queue = xfactor_ablation_queue or {}
-        queue_rows = pd.DataFrame(queue.get("queue") or [])
-        if not queue_rows.empty:
-            st.subheader("Controlled Ablation Queue")
-            queue_cols = [
-                "interaction",
-                "label",
-                "status",
-                "scoreboard_decision",
-                "ablation_decision",
-                "recommended_action",
-            ]
-            st.dataframe(queue_rows[[c for c in queue_cols if c in queue_rows.columns]], width="stretch", hide_index=True, height=300)
-            st.download_button(
-                "Export Ablation Queue JSON",
-                data=json.dumps(queue, indent=2).encode("utf-8"),
-                file_name="xfactor_interaction_ablation_queue.json",
-                mime="application/json",
-                key="product_ablation_queue_json",
-            )
-        st.markdown(
-            "- Treat green-looking product lenses as exploration aids until they pass historical quality, churn, source-health, and model-health gates.\n"
-            "- Current Product Mode simulations are UI overlays only; `scoring_pipeline.py` production rankings remain unchanged.\n"
-            "- Use Legacy Mode for the full validation and run-comparison evidence before changing model artifacts."
-        )
-
-    with tab_health:
-        st.header("Model Health")
-        model_health = (status_bundle or {}).get("model_health_3yr") or {}
-        wave3_closeout = (status_bundle or {}).get("wave3_closeout") or {}
-        h1c, h2c, h3c, h4c = st.columns(4)
-        assessment = model_health.get("assessment", {}) or {}
-        raw_health_status = assessment.get("health_status", "n/a")
-        h1c.metric("3yr Status", _humanize_status_label(raw_health_status))
-        fallback_share = (((model_health.get("live_rankings") or {}).get("fallback") or {}).get("fallback_share"))
-        h2c.metric("3yr Fallback", f"{100 * fallback_share:.1f}%" if fallback_share is not None else "n/a")
-        drift = model_health.get("target_drift_3yr", {}) or {}
-        drift_psi = drift.get("psi")
-        try:
-            drift_read = f"{float(drift_psi):.3f}" if drift_psi is not None else "n/a"
-        except (TypeError, ValueError):
-            drift_read = str(drift_psi)
-        h3c.metric("3yr Drift PSI", drift_read)
-        closeout_summary = wave3_closeout.get("summary", {}) or {}
-        wave3_status_label = wave3_closeout.get("status", closeout_summary.get("status", "n/a"))
-        h4c.metric("Wave 3 Posture", _humanize_status_label(wave3_status_label))
-        st.caption(f"Full 3yr status: `{raw_health_status}`")
-        warnings = assessment.get("blocking_reasons") or assessment.get("warnings") or assessment.get("notes") or []
-        if warnings:
-            st.caption("Current model-health read")
-            for item in warnings[:6]:
-                st.markdown(f"- {item}")
-        st.info("Use Legacy Mode for full validation, source-health, drift, calibration, and run-comparison diagnostics.")
-
-    _render_demo_footer(latest_run, status_bundle, demo_readiness_report)
-
-
-# ---------------------------------------------------------------------------
-# Page config
-# ---------------------------------------------------------------------------
-
-st.set_page_config(
-    page_title="LandInvest — County Growth Dashboard",
-    page_icon="🏔️",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
-st.markdown(
-    """
-<style>
-    .landinvest-brand-header {
-        display: grid;
-        grid-template-columns: minmax(280px, 0.82fr) minmax(320px, 1.18fr);
-        align-items: center;
-        gap: 0.82rem;
-        border: 1px solid rgba(15, 118, 110, 0.22);
-        background: linear-gradient(135deg, #f8fafc 0%, #f0fdfa 58%, #fffbeb 100%);
-        color: #0f172a;
-        border-radius: 8px;
-        padding: 0.78rem 0.86rem;
-        margin: 0 0 0.85rem 0;
-        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
-    }
-    .landinvest-brand-main {
-        display: flex;
-        align-items: center;
-        gap: 0.68rem;
-        min-width: 0;
-    }
-    .landinvest-logo-wrap {
-        width: 2.85rem;
-        height: 2.85rem;
-        flex: 0 0 2.85rem;
-    }
-    .landinvest-logo-wrap svg,
-    .landinvest-sidebar-logo svg {
-        width: 100%;
-        height: 100%;
-        display: block;
-    }
-    .landinvest-brand-kicker {
-        color: #0f766e;
-        font-size: 0.68rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0;
-        margin-bottom: 0.1rem;
-    }
-    .landinvest-brand-copy h1 {
-        color: #0f172a;
-        font-size: 1.42rem;
-        line-height: 1.06;
-        margin: 0;
-        letter-spacing: 0;
-    }
-    .landinvest-brand-copy p {
-        color: #475569;
-        font-size: 0.83rem;
-        line-height: 1.35;
-        margin: 0.22rem 0 0 0;
-        max-width: 44rem;
-    }
-    .landinvest-brand-meta {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        gap: 0.45rem;
-        max-width: none;
-    }
-    .landinvest-brand-chip {
-        min-width: 5.95rem;
-        border: 1px solid rgba(15, 118, 110, 0.20);
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.76);
-        padding: 0.35rem 0.5rem;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
-    }
-    .landinvest-brand-chip b {
-        display: block;
-        color: #0f766e;
-        font-size: 0.62rem;
-        line-height: 1.1;
-        text-transform: uppercase;
-        letter-spacing: 0;
-        margin-bottom: 0.12rem;
-    }
-    .landinvest-brand-chip span {
-        display: block;
-        color: #0f172a;
-        font-size: 0.76rem;
-        line-height: 1.15;
-        font-weight: 700;
-    }
-    .landinvest-sidebar-brand {
-        display: flex;
-        align-items: center;
-        gap: 0.58rem;
-        margin: 0.15rem 0 0.85rem 0;
-        padding: 0.45rem 0.1rem;
-    }
-    .landinvest-sidebar-logo {
-        width: 2.25rem;
-        height: 2.25rem;
-        flex: 0 0 2.25rem;
-    }
-    .landinvest-sidebar-brand b {
-        display: block;
-        color: #0f172a;
-        font-size: 1rem;
-        line-height: 1.05;
-    }
-    .landinvest-sidebar-brand span {
-        display: block;
-        color: #64748b;
-        font-size: 0.76rem;
-        margin-top: 0.12rem;
-    }
-    .run-chip {
-        display: inline-block;
-        padding: 0.25rem 0.55rem;
-        border-radius: 999px;
-        background: #eef2f7;
-        border: 1px solid #cbd5e1;
-        color: #0f172a;
-        font-size: 0.8rem;
-        margin-right: 0.35rem;
-        margin-bottom: 0.35rem;
-    }
-    .onboard {
-        border: 1px solid #bfdbfe;
-        background: linear-gradient(90deg, #e0ecff 0%, #eef4ff 100%);
-        border-radius: 10px;
-        padding: 0.75rem 0.9rem;
-        margin-bottom: 0.8rem;
-        color: #0f172a;
-    }
-    .onboard b {
-        color: #0b3a7e;
-    }
-    .customer-sidebar-title {
-        font-size: 0.78rem;
-        font-weight: 800;
-        color: #0f766e;
-        text-transform: uppercase;
-        letter-spacing: 0;
-        margin: 0.2rem 0 0.65rem 0;
-    }
-    .customer-command-header {
-        border: 1px solid rgba(20, 184, 166, 0.35);
-        background:
-            linear-gradient(135deg, rgba(204, 251, 241, 0.96) 0%, rgba(248, 250, 252, 0.98) 44%, rgba(254, 243, 199, 0.74) 100%);
-        color: #0f172a;
-        border-radius: 8px;
-        padding: 1.15rem 1.25rem;
-        margin: 0 0 0.85rem 0;
-        box-shadow: 0 18px 46px rgba(15, 23, 42, 0.10);
-        display: grid;
-        grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
-        gap: 1rem;
-        align-items: end;
-    }
-    .customer-command-header h1 {
-        color: #0f172a;
-        font-size: 2.1rem;
-        line-height: 1.08;
-        margin: 0 0 0.45rem 0;
-        letter-spacing: 0;
-    }
-    .customer-command-header p {
-        color: #334155;
-        margin: 0;
-        max-width: 76rem;
-    }
-    .customer-command-grid,
-    .customer-stat-strip,
-    .customer-map-stats {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.48rem;
-    }
-    .customer-command-grid span,
-    .customer-stat-strip span,
-    .customer-map-stats span {
-        border: 1px solid rgba(15, 118, 110, 0.24);
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.72);
-        padding: 0.52rem 0.64rem;
-        min-width: 7.2rem;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.80);
-    }
-    .customer-command-grid b,
-    .customer-stat-strip b,
-    .customer-map-stats b {
-        display: block;
-        color: #0f172a;
-        font-size: 0.95rem;
-        line-height: 1.15;
-    }
-    .customer-command-grid small,
-    .customer-stat-strip small,
-    .customer-map-stats small {
-        display: block;
-        color: #64748b;
-        font-size: 0.72rem;
-        margin-top: 0.18rem;
-    }
-    .customer-section-header {
-        margin: 0.65rem 0 0.75rem 0;
-        padding: 0.72rem 0.85rem;
-        border-left: 4px solid #14b8a6;
-        border-radius: 8px;
-        background: linear-gradient(90deg, rgba(240, 253, 250, 0.95), rgba(255, 251, 235, 0.55));
-    }
-    .customer-section-header p {
-        margin: 0.12rem 0 0 0;
-        color: #475569;
-    }
-    .customer-stat-strip {
-        margin: 0.3rem 0 0.85rem 0;
-    }
-    .customer-stat-strip span {
-        min-width: 10rem;
-    }
-    .customer-map-callout {
-        margin: 0.8rem 0 0.25rem 0;
-        border: 1px solid rgba(20, 184, 166, 0.34);
-        border-radius: 8px;
-        background: #f8fafc;
-        padding: 0.82rem 0.92rem;
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 0.85rem;
-        align-items: center;
-    }
-    .customer-map-callout h3 {
-        margin: 0.08rem 0 0.22rem 0;
-        font-size: 1.05rem;
-        letter-spacing: 0;
-        color: #0f172a;
-    }
-    .customer-map-callout p {
-        margin: 0;
-        color: #475569;
-        font-size: 0.84rem;
-    }
-    button[data-testid^="stBaseButton-segmented_control"] {
-        border-radius: 7px;
-        font-weight: 700;
-        border: 1px solid rgba(20, 184, 166, 0.22);
-        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-        color: #0f172a;
-    }
-    button[data-testid="stBaseButton-segmented_controlActive"] {
-        border-color: rgba(15, 118, 110, 0.55);
-        background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(251, 191, 36, 0.14));
-        color: #0f172a !important;
-    }
-    button[data-testid^="stBaseButton-segmented_control"] *,
-    button[kind^="segmented_control"] * {
-        color: inherit !important;
-    }
-    button[kind="primary"],
-    button[data-testid="stBaseButton-primary"] {
-        background: #0f766e !important;
-        border-color: #0f766e !important;
-        color: #ffffff !important;
-    }
-    button[kind="primary"] *,
-    button[data-testid="stBaseButton-primary"] * {
-        color: #ffffff !important;
-    }
-    div[role="slider"] [data-testid="stSliderThumbValue"],
-    div[data-testid="stSliderThumbValue"],
-    div[data-testid="stSliderThumbValue"] * {
-        color: #ffffff !important;
-    }
-    div[data-testid="stPlotlyChart"] {
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    .customer-hero {
-        border: 1px solid rgba(20, 184, 166, 0.38);
-        background: linear-gradient(135deg, #0b1115 0%, #10231f 58%, #312914 100%);
-        color: #f8fafc;
-        border-radius: 8px;
-        padding: 1.1rem 1.25rem;
-        margin: 0.75rem 0 1rem 0;
-        box-shadow: 0 18px 45px rgba(2, 6, 23, 0.22);
-    }
-    .customer-kicker {
-        color: #0f766e;
-        font-size: 0.82rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: 0.35rem;
-    }
-    .customer-hero h1 {
-        color: #f8fafc;
-        font-size: 2.1rem;
-        line-height: 1.15;
-        margin: 0 0 0.45rem 0;
-        letter-spacing: 0;
-    }
-    .customer-hero p {
-        color: #cbd5e1;
-        margin: 0;
-        max-width: 78rem;
-    }
-    .customer-hero-strip {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.55rem;
-        margin-top: 0.95rem;
-    }
-    .customer-hero-strip span {
-        border: 1px solid rgba(148, 163, 184, 0.45);
-        border-radius: 999px;
-        padding: 0.22rem 0.55rem;
-        color: #e2e8f0 !important;
-        font-size: 0.8rem;
-        background: rgba(15, 23, 42, 0.60);
-    }
-    .customer-card {
-        min-height: 332px;
-        border: 1px solid #cbd5e1;
-        background: #ffffff;
-        color: #0f172a;
-        border-radius: 8px;
-        padding: 0.9rem;
-        margin: 0.35rem 0 0.6rem 0;
-        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-        transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
-    }
-    .customer-card:hover {
-        transform: translateY(-1px);
-        border-color: #14b8a6;
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
-    }
-    .customer-card-compact {
-        min-height: 238px;
-    }
-    .customer-card-top {
-        display: flex;
-        justify-content: space-between;
-        gap: 0.5rem;
-        align-items: center;
-        color: #64748b;
-        font-size: 0.78rem;
-        margin-bottom: 0.55rem;
-    }
-    .customer-tier {
-        display: inline-flex;
-        align-items: center;
-        border: 1px solid;
-        border-radius: 999px;
-        padding: 0.15rem 0.45rem;
-        font-weight: 700;
-        background: #f8fafc;
-    }
-    .customer-card h3 {
-        font-size: 1.03rem;
-        line-height: 1.25;
-        margin: 0 0 0.45rem 0;
-        letter-spacing: 0;
-    }
-    .customer-thesis {
-        min-height: 3.4rem;
-        color: #334155;
-        font-size: 0.87rem;
-        margin: 0 0 0.65rem 0;
-    }
-    .customer-next {
-        color: #475569;
-        font-size: 0.78rem;
-        margin: 0.75rem 0 0 0;
-    }
-    .customer-signal-row {
-        margin-top: 0.42rem;
-    }
-    .customer-signal-row div:first-child {
-        display: flex;
-        justify-content: space-between;
-        gap: 0.5rem;
-        color: #475569;
-        font-size: 0.75rem;
-        margin-bottom: 0.12rem;
-    }
-    .customer-meter {
-        width: 100%;
-        height: 7px;
-        background: #e2e8f0;
-        border-radius: 999px;
-        overflow: hidden;
-    }
-    .customer-meter span {
-        display: block;
-        height: 100%;
-        border-radius: 999px;
-    }
-    @media (max-width: 720px) {
-        .landinvest-brand-header {
-            grid-template-columns: 1fr;
-            padding: 0.8rem;
-        }
-        .landinvest-brand-meta {
-            justify-content: flex-start;
-        }
-        .landinvest-brand-chip {
-            min-width: 7.3rem;
-        }
-        .landinvest-brand-copy h1 {
-            font-size: 1.35rem;
-        }
-        .landinvest-brand-copy p {
-            font-size: 0.84rem;
-        }
-        .customer-command-header,
-        .customer-map-callout {
-            grid-template-columns: 1fr;
-        }
-        .customer-command-header h1 {
-            font-size: 1.55rem;
-        }
-        .customer-hero {
-            padding: 0.9rem;
-        }
-        .customer-hero h1 {
-            font-size: 1.45rem;
-        }
-        .customer-card,
-        .customer-card-compact {
-            min-height: auto;
-        }
-        .customer-thesis {
-            min-height: auto;
-        }
-    }
-    @media (prefers-color-scheme: dark) {
-        .landinvest-brand-header {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(6, 78, 59, 0.60));
-            border-color: rgba(45, 212, 191, 0.40);
-            color: #f8fafc;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
-        }
-        .landinvest-brand-kicker,
-        .landinvest-brand-chip b {
-            color: #5eead4;
-        }
-        .landinvest-brand-copy h1,
-        .landinvest-brand-chip span,
-        .landinvest-sidebar-brand b {
-            color: #f8fafc;
-        }
-        .landinvest-brand-copy p,
-        .landinvest-sidebar-brand span {
-            color: #cbd5e1;
-        }
-        .landinvest-brand-chip {
-            background: rgba(15, 23, 42, 0.66);
-            border-color: rgba(148, 163, 184, 0.34);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        }
-        .run-chip {
-            background: rgba(100, 116, 139, 0.25);
-            border: 1px solid rgba(148, 163, 184, 0.45);
-            color: #e5e7eb;
-        }
-        .onboard {
-            border: 1px solid rgba(96, 165, 250, 0.45);
-            background: linear-gradient(90deg, rgba(30, 58, 138, 0.40) 0%, rgba(15, 23, 42, 0.30) 100%);
-            color: #e5e7eb;
-        }
-        .onboard b {
-            color: #bfdbfe;
-        }
-        .customer-sidebar-title {
-            color: #5eead4;
-        }
-        .customer-kicker {
-            color: #5eead4;
-        }
-        .customer-command-header {
-            background: linear-gradient(135deg, rgba(6, 78, 59, 0.62), rgba(15, 23, 42, 0.92));
-            color: #f8fafc;
-            border-color: rgba(45, 212, 191, 0.45);
-        }
-        .customer-command-header h1,
-        .customer-command-grid b,
-        .customer-stat-strip b,
-        .customer-map-stats b,
-        .customer-map-callout h3 {
-            color: #f8fafc;
-        }
-        .customer-command-header p,
-        .customer-section-header p,
-        .customer-map-callout p {
-            color: #cbd5e1;
-        }
-        .customer-command-grid span,
-        .customer-stat-strip span,
-        .customer-map-stats span,
-        .customer-map-callout,
-        .customer-section-header {
-            background: rgba(15, 23, 42, 0.66);
-            border-color: rgba(148, 163, 184, 0.36);
-        }
-        button[data-testid^="stBaseButton-segmented_control"] {
-            border-color: rgba(148, 163, 184, 0.35);
-            color: #e5e7eb !important;
-        }
-        button[data-testid="stBaseButton-segmented_controlActive"] {
-            border-color: rgba(45, 212, 191, 0.55);
-            background: #0f766e !important;
-            color: #ffffff !important;
-        }
-        button[data-testid="stTab"] {
-            color: #e5e7eb !important;
-        }
-        button[data-testid="stTab"][aria-selected="true"] {
-            color: #5eead4 !important;
-        }
-        button[data-testid="stTab"] * {
-            color: inherit !important;
-        }
-        .customer-tier,
-        .customer-hero-strip span {
-            color: #f8fafc !important;
-            border-color: rgba(203, 213, 225, 0.70) !important;
-        }
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .bg {
-            fill: rgba(15, 23, 42, 0.94) !important;
-        }
-        div[data-testid="stPlotlyChart"] .js-plotly-plot svg text,
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .legendtext,
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .gtitle,
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .xtitle,
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .ytitle {
-            fill: #e5e7eb !important;
-            color: #e5e7eb !important;
-        }
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .gridlayer path,
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .xgrid,
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .ygrid,
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .zerolinelayer path,
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .xlines-above,
-        div[data-testid="stPlotlyChart"] .js-plotly-plot .ylines-above {
-            stroke: rgba(148, 163, 184, 0.38) !important;
-        }
-        .customer-command-grid small,
-        .customer-stat-strip small,
-        .customer-map-stats small {
-            color: #94a3b8;
-        }
-        .customer-card {
-            background: #0b1115;
-            border-color: rgba(148, 163, 184, 0.35);
-            color: #f8fafc;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
-        }
-        .customer-tier {
-            background: rgba(15, 23, 42, 0.68);
-        }
-        .customer-card-top,
-        .customer-thesis,
-        .customer-next,
-        .customer-signal-row div:first-child {
-            color: #cbd5e1;
-        }
-        .customer-meter {
-            background: rgba(100, 116, 139, 0.35);
-        }
-    }
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-df = load_data(_mtime=_file_mtime(DATA_PATH))
-if df.empty:
-    _render_missing_artifact_help()
-    st.stop()
-wave3_overlay_df = load_wave3_structural_overlay_df(_mtime=_file_mtime(WAVE3_STRUCTURAL_OVERLAY_CSV_PATH))
-wave3_overlay_summary = load_wave3_structural_overlay_summary(_mtime=_file_mtime(WAVE3_STRUCTURAL_OVERLAY_JSON_PATH))
-if wave3_overlay_df is not None and not wave3_overlay_df.empty:
-    overlay_cols = [
-        c for c in [
-            "fips",
-            "wave3_overlay_rank",
-            "wave3_overlay_score",
-            "wave3_overlay_adjustment",
-            "wave3_net_support",
-            "wave3_support_score",
-            "wave3_brake_score",
-            "wave3_supports",
-            "wave3_brakes",
-            "wave3_structural_summary",
-        ] if c in wave3_overlay_df.columns
-    ]
-    if len(overlay_cols) > 1:
-        df["fips"] = df["fips"].astype(str).str.zfill(5)
-        overlay_merge = wave3_overlay_df[overlay_cols].copy()
-        overlay_merge["fips"] = overlay_merge["fips"].astype(str).str.zfill(5)
-        df = df.drop(columns=[c for c in overlay_cols if c != "fips" and c in df.columns], errors="ignore")
-        df = df.merge(overlay_merge, on="fips", how="left")
-states = get_states(df)
-calibration_diag = compute_calibration_diagnostics(df)
-latest_run, latest_deltas = load_latest_run_snapshot(
-    _mtime=max(_file_mtime(DATA_PATH), _file_mtime(EVAL_PATH), _file_mtime(RUNS_PATH))
-)
-conformal_diag = load_conformal_diagnostics(_mtime=_file_mtime(CONFORMAL_DIAG_PATH))
-status_bundle = load_status_bundle(
-    _mtime=max(
-        _file_mtime(STATUS_BUNDLE_PATH),
-        _file_mtime(SOURCE_HEALTH_PATH),
-        _file_mtime(MISSINGNESS_PATH),
-        _file_mtime(GAP_TRIAGE_PATH),
-        _file_mtime(DRIFT_TRIAGE_PATH),
-        _file_mtime(WAVE2_REASSESSMENT_PATH),
-        _file_mtime(WAVE3_STRUCTURAL_OVERLAY_JSON_PATH),
-        _file_mtime(RUNS_PATH),
-    )
-)
-run_compare_files = list_run_compare_artifacts(_mtime=_file_mtime(OUTPUT_PATH))
-run_history_summary = load_run_history_summary(_mtime=_file_mtime(RUN_HISTORY_SUMMARY_JSON_PATH))
-run_history_summary_df = load_run_history_summary_df(_mtime=_file_mtime(RUN_HISTORY_SUMMARY_CSV_PATH))
-run_history_detail_df = load_run_history_detail_df(_mtime=_file_mtime(RUN_HISTORY_DETAIL_CSV_PATH))
-wave2_training_policy = load_wave2_training_policy(_mtime=_file_mtime(WAVE2_TRAINING_POLICY_PATH))
-fiveyr_policy_status = load_fiveyr_policy_status(_mtime=_file_mtime(FIVEYR_POLICY_STATUS_PATH))
-preboom_surfaces = {
-    "raw": load_preboom_surface_df(str(PREBOOM_RAW_EXPORT_PATH), _mtime=_file_mtime(PREBOOM_RAW_EXPORT_PATH)),
-    "balanced": load_preboom_surface_df(str(PREBOOM_BALANCED_EXPORT_PATH), _mtime=_file_mtime(PREBOOM_BALANCED_EXPORT_PATH)),
-    "unguarded_blend": load_preboom_surface_df(str(PREBOOM_BLEND_EXPORT_PATH), _mtime=_file_mtime(PREBOOM_BLEND_EXPORT_PATH)),
-    "guarded_blend": load_preboom_surface_df(str(PREBOOM_GUARDED_BLEND_EXPORT_PATH), _mtime=_file_mtime(PREBOOM_GUARDED_BLEND_EXPORT_PATH)),
-    "residual_guardrail": load_preboom_surface_df(
-        str(PREBOOM_RESIDUAL_DISPLAY_GUARDED_PATH),
-        _mtime=_file_mtime(PREBOOM_RESIDUAL_DISPLAY_GUARDED_PATH),
-    ),
-    "residual_audit": load_preboom_surface_df(
-        str(PREBOOM_RESIDUAL_AUDIT_PATH),
-        _mtime=_file_mtime(PREBOOM_RESIDUAL_AUDIT_PATH),
-    ),
-}
-preboom_blend_report = _safe_json_load(PREBOOM_BLEND_REPORT_PATH)
-preboom_analog_report = _safe_json_load(PREBOOM_ANALOG_REPORT_PATH)
-preboom_promotion_gate = _safe_json_load(PREBOOM_PROMOTION_GATE_PATH)
-p0_repeatable_residual_guardrail = _safe_json_load(P0_REPEATABLE_RESIDUAL_GUARDRAIL_PATH)
-p0_repeatable_residual_candidates = load_preboom_surface_df(
-    str(P0_REPEATABLE_RESIDUAL_GUARDRAIL_TOP_CANDIDATES_PATH),
-    _mtime=_file_mtime(P0_REPEATABLE_RESIDUAL_GUARDRAIL_TOP_CANDIDATES_PATH),
-)
-known_analog_suite = load_known_analog_suite(_mtime=_file_mtime(KNOWN_ANALOG_SUITE_PATH))
-xfactor_scoreboard = load_xfactor_interaction_scoreboard(_mtime=_file_mtime(XFACTOR_INTERACTION_SCOREBOARD_PATH))
-xfactor_ablation_queue = load_xfactor_interaction_ablation_queue(_mtime=_file_mtime(XFACTOR_INTERACTION_ABLATION_QUEUE_PATH))
-xfactor_promotion_gate = load_xfactor_interaction_promotion_gate(_mtime=_file_mtime(XFACTOR_INTERACTION_PROMOTION_GATE_PATH))
-demo_readiness_report = load_demo_readiness_report(_mtime=_file_mtime(DEMO_READINESS_REPORT_PATH))
-latest_compare_json_path = ((status_bundle or {}).get("latest_run") or {}).get("run_compare_path")
-latest_compare_rank_df = None
-latest_compare_boundary_df = None
-if latest_compare_json_path:
-    latest_compare_rank_path = str(Path(latest_compare_json_path).with_name(Path(latest_compare_json_path).stem + "_rank_shifts.csv"))
-    latest_compare_boundary_path = str(Path(latest_compare_json_path).with_name(Path(latest_compare_json_path).stem + "_top25_boundary.csv"))
-    latest_compare_rank_df = load_compare_csv(latest_compare_rank_path, _mtime=_file_mtime(Path(latest_compare_rank_path)))
-    latest_compare_boundary_df = load_compare_csv(latest_compare_boundary_path, _mtime=_file_mtime(Path(latest_compare_boundary_path)))
-
-wave3_status = (status_bundle or {}).get("wave3_status") or {}
-
-with st.sidebar:
-    st.markdown(_sidebar_brand_html(), unsafe_allow_html=True)
-
-if "dashboard_user_id" not in st.session_state:
-    st.session_state.dashboard_user_id = "demo"
-with st.sidebar:
-    user_id_input = st.text_input(
-        "Demo user",
-        value=st.session_state.dashboard_user_id,
-        key="dashboard_user_id_input",
-        help="Separates saved watchlists, notes, and compare sets in a local SQLite store. This is not authentication.",
-    )
-resolved_user_id = _normalize_user_id(user_id_input)
-if resolved_user_id != st.session_state.dashboard_user_id:
-    st.session_state.dashboard_user_id = resolved_user_id
-    st.session_state.user_data_loaded = False
-with st.sidebar:
-    st.caption(_user_storage_status())
-
-if "watchlist_fips" not in st.session_state:
-    st.session_state.watchlist_fips = []
-if not st.session_state.get("user_data_loaded", False):
-    user_data = _load_user_data()
-    st.session_state.saved_watchlists = user_data.get("saved_watchlists", {})
-    st.session_state.county_notes = user_data.get("county_notes", {})
-    st.session_state.saved_compare_sets = user_data.get("saved_compare_sets", {})
-    st.session_state.saved_strategy_profiles = user_data.get("saved_strategy_profiles", {})
-    st.session_state.county_funnel = user_data.get("county_funnel", {})
-    st.session_state.county_feedback = user_data.get("county_feedback", {})
-    st.session_state.preboom_feedback = user_data.get("preboom_feedback", {})
-    st.session_state.diligence_evidence = user_data.get("diligence_evidence", {})
-    st.session_state.parcel_checklists = user_data.get("parcel_checklists", {})
-    st.session_state.watchlist_alert_state = user_data.get("watchlist_alert_state", {})
-    st.session_state.watchlist_settings = user_data.get("watchlist_settings", _default_user_data()["watchlist_settings"])
-    st.session_state.user_data_loaded = True
-if "saved_watchlists" not in st.session_state:
-    st.session_state.saved_watchlists = {}
-if "county_notes" not in st.session_state:
-    st.session_state.county_notes = {}
-if "saved_compare_sets" not in st.session_state:
-    st.session_state.saved_compare_sets = {}
-if "saved_strategy_profiles" not in st.session_state:
-    st.session_state.saved_strategy_profiles = {}
-if "county_funnel" not in st.session_state:
-    st.session_state.county_funnel = {}
-if "county_feedback" not in st.session_state:
-    st.session_state.county_feedback = {}
-if "preboom_feedback" not in st.session_state:
-    st.session_state.preboom_feedback = {}
-if "diligence_evidence" not in st.session_state:
-    st.session_state.diligence_evidence = {}
-if "parcel_checklists" not in st.session_state:
-    st.session_state.parcel_checklists = {}
-if "watchlist_alert_state" not in st.session_state:
-    st.session_state.watchlist_alert_state = _load_user_data().get("watchlist_alert_state", {})
-if "watchlist_settings" not in st.session_state:
-    st.session_state.watchlist_settings = _load_user_data().get("watchlist_settings", _default_user_data()["watchlist_settings"])
-
-experience_options = ["Product Mode", "Customer Mode", "Legacy Mode"]
-requested_experience = (_query_param_first("experience", "") or "").strip().lower()
-experience_default_index = 1 if requested_experience in {"customer", "customer mode"} else 0
-experience_mode = st.sidebar.radio(
-    "Experience",
-    experience_options,
-    index=experience_default_index,
-    horizontal=False,
-    help="Customer Mode is the visual investor workflow. Product Mode keeps power-user controls. Legacy Mode keeps the full analyst console.",
-)
-
-header_data_ts = datetime.fromtimestamp(_file_mtime(DATA_PATH)).strftime("%Y-%m-%d %H:%M")
-header_run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
-header_run_year = latest_run.get("year", "n/a") if latest_run else "n/a"
-header_churn = latest_deltas.get("top25_churn") if latest_deltas and latest_deltas.get("has_previous") else None
-header_churn_text = f"{100 * header_churn:.1f}%" if header_churn is not None else "n/a"
-header_health = ((status_bundle or {}).get("model_health_3yr") or {}).get("assessment", {}).get("health_status")
-header_health_text = _humanize_status_label(header_health) if header_health else None
-st.markdown(
-    _brand_header_html(
-        experience_mode=experience_mode,
-        run_id=header_run_id,
-        run_year=header_run_year,
-        data_ts=header_data_ts,
-        churn_text=header_churn_text,
-        health_text=header_health_text,
-    ),
-    unsafe_allow_html=True,
-)
-
-if experience_mode == "Customer Mode":
-    _render_customer_mode(
-        df=df,
-        states=states,
-        latest_run=latest_run,
-        latest_deltas=latest_deltas,
-        status_bundle=status_bundle,
-        run_history_summary_df=run_history_summary_df,
-        latest_compare_rank_df=latest_compare_rank_df,
-        wave3_status=wave3_status,
-        preboom_surfaces=preboom_surfaces,
-        known_analog_suite=known_analog_suite,
-        xfactor_scoreboard=xfactor_scoreboard,
-        xfactor_promotion_gate=xfactor_promotion_gate,
-        demo_readiness_report=demo_readiness_report,
-    )
-    st.stop()
-
-if experience_mode == "Product Mode":
-    _render_product_mode(
-        df=df,
-        states=states,
-        latest_run=latest_run,
-        latest_deltas=latest_deltas,
-        status_bundle=status_bundle,
-        run_history_summary_df=run_history_summary_df,
-        run_history_detail_df=run_history_detail_df,
-        latest_compare_rank_df=latest_compare_rank_df,
-        latest_compare_boundary_df=latest_compare_boundary_df,
-        wave3_status=wave3_status,
-        preboom_surfaces=preboom_surfaces,
-        preboom_blend_report=preboom_blend_report,
-        preboom_analog_report=preboom_analog_report,
-        preboom_promotion_gate=preboom_promotion_gate,
-        known_analog_suite=known_analog_suite,
-        xfactor_scoreboard=xfactor_scoreboard,
-        xfactor_ablation_queue=xfactor_ablation_queue,
-        xfactor_promotion_gate=xfactor_promotion_gate,
-        demo_readiness_report=demo_readiness_report,
-        p0_repeatable_residual_guardrail=p0_repeatable_residual_guardrail,
-        p0_repeatable_residual_candidates=p0_repeatable_residual_candidates,
-    )
-    st.stop()
-
-# ---------------------------------------------------------------------------
-# Header + mode
-# ---------------------------------------------------------------------------
-
-st.markdown(
-    '<div class="onboard"><b>Workflow:</b> 1) Apply filters 2) Inspect map 3) Deep-dive counties 4) Compare counties 5) Export shortlist</div>',
-    unsafe_allow_html=True,
-)
-
-view_mode = st.radio(
-    "View Mode",
-    ["Quick View", "Advanced View"],
-    horizontal=True,
-    help="Advanced View exposes QA/testing controls while keeping the same core workflow.",
-)
-advanced_mode = view_mode == "Advanced View"
-
-data_ts = datetime.fromtimestamp(_file_mtime(DATA_PATH)).strftime("%Y-%m-%d %H:%M")
-run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
-run_year = latest_run.get("year", "n/a") if latest_run else "n/a"
-winner = latest_run.get("champion_challenger", {}).get("overall_winner", "n/a") if latest_run else "n/a"
-churn_txt = "n/a"
-if latest_deltas and latest_deltas.get("has_previous"):
-    churn_txt = f"{100 * latest_deltas.get('top25_churn', 0):.2f}%"
-st.markdown(
-    (
-        f'<span class="run-chip">Run: <b>{run_id}</b></span>'
-        f'<span class="run-chip">Year: <b>{run_year}</b></span>'
-        f'<span class="run-chip">Champion: <b>{winner}</b></span>'
-        f'<span class="run-chip">Top-25 Churn: <b>{churn_txt}</b></span>'
-        f'<span class="run-chip">Data Freshness: <b>{data_ts}</b></span>'
-    ),
-    unsafe_allow_html=True,
-)
-
-# ---------------------------------------------------------------------------
-# Sidebar filters
-# ---------------------------------------------------------------------------
-
-st.sidebar.divider()
-st.sidebar.caption(f"Mode: `{view_mode}`")
-
-if "flt_states" not in st.session_state:
-    st.session_state.flt_states = []
-if "flt_horizon" not in st.session_state:
-    st.session_state.flt_horizon = 5
-if "flt_opp" not in st.session_state:
-    st.session_state.flt_opp = (0.0, 100.0)
-if "flt_top_n" not in st.session_state:
-    st.session_state.flt_top_n = 100 if advanced_mode else 50
-if "flt_show_all" not in st.session_state:
-    st.session_state.flt_show_all = False
-if "watchlist_fips" not in st.session_state:
-    st.session_state.watchlist_fips = []
-if not st.session_state.get("user_data_loaded", False):
-    user_data = _load_user_data()
-    st.session_state.saved_watchlists = user_data.get("saved_watchlists", {})
-    st.session_state.county_notes = user_data.get("county_notes", {})
-    st.session_state.saved_compare_sets = user_data.get("saved_compare_sets", {})
-    st.session_state.saved_strategy_profiles = user_data.get("saved_strategy_profiles", {})
-    st.session_state.county_funnel = user_data.get("county_funnel", {})
-    st.session_state.county_feedback = user_data.get("county_feedback", {})
-    st.session_state.preboom_feedback = user_data.get("preboom_feedback", {})
-    st.session_state.diligence_evidence = user_data.get("diligence_evidence", {})
-    st.session_state.parcel_checklists = user_data.get("parcel_checklists", {})
-    st.session_state.user_data_loaded = True
-if "saved_watchlists" not in st.session_state:
-    st.session_state.saved_watchlists = {}
-if "county_notes" not in st.session_state:
-    st.session_state.county_notes = {}
-if "saved_compare_sets" not in st.session_state:
-    st.session_state.saved_compare_sets = {}
-if "saved_strategy_profiles" not in st.session_state:
-    st.session_state.saved_strategy_profiles = {}
-if "county_funnel" not in st.session_state:
-    st.session_state.county_funnel = {}
-if "county_feedback" not in st.session_state:
-    st.session_state.county_feedback = {}
-if "preboom_feedback" not in st.session_state:
-    st.session_state.preboom_feedback = {}
-if "diligence_evidence" not in st.session_state:
-    st.session_state.diligence_evidence = {}
-if "parcel_checklists" not in st.session_state:
-    st.session_state.parcel_checklists = {}
-if "watchlist_alert_state" not in st.session_state:
-    st.session_state.watchlist_alert_state = _load_user_data().get("watchlist_alert_state", {})
-if "session_watchlist_meta" not in st.session_state:
-    st.session_state.session_watchlist_meta = {"owner": "", "tags": [], "thesis": ""}
-if "watchlist_settings" not in st.session_state:
-    st.session_state.watchlist_settings = _load_user_data().get("watchlist_settings", _default_user_data()["watchlist_settings"])
-
-preset = st.sidebar.selectbox("Filter preset", ["Custom", "Balanced", "Conservative", "Aggressive"], index=0)
-if preset != "Custom":
-    if preset == "Balanced":
-        st.session_state.flt_opp = (55.0, 100.0)
-    elif preset == "Conservative":
-        st.session_state.flt_opp = (45.0, 100.0)
-    elif preset == "Aggressive":
-        st.session_state.flt_opp = (70.0, 100.0)
-
-with st.sidebar.form("filter_form", clear_on_submit=False):
-    selected_states = st.multiselect(
-        "Filter by state", states, default=st.session_state.flt_states, placeholder="All states"
-    )
-    horizon = st.radio(
-        "Forecast horizon", HORIZONS, format_func=lambda h: f"{h}-year", index=HORIZONS.index(st.session_state.flt_horizon)
-    )
-    min_opp, max_opp = st.slider(
-        "Opportunity score range", 0.0, 100.0, st.session_state.flt_opp, step=1.0
-    )
-    top_n_max = 500 if advanced_mode else 200
-    top_n_default = min(st.session_state.flt_top_n, top_n_max)
-    top_n = st.slider("Top N counties to show", 10, top_n_max, top_n_default, step=10)
-    show_all_counties = False
-    if advanced_mode:
-        st.divider()
-        st.caption("Advanced Controls")
-        show_all_counties = st.checkbox(
-            "Include all counties (ignore filters)",
-            value=st.session_state.flt_show_all,
-            help="Testing-only mode to inspect full national output regardless of filters.",
-        )
-    apply_btn = st.form_submit_button("Apply filters", type="primary")
-    reset_btn = st.form_submit_button("Reset")
-
-if apply_btn:
-    st.session_state.flt_states = selected_states
-    st.session_state.flt_horizon = horizon
-    st.session_state.flt_opp = (min_opp, max_opp)
-    st.session_state.flt_top_n = top_n
-    st.session_state.flt_show_all = show_all_counties
-if reset_btn:
-    st.session_state.flt_states = []
-    st.session_state.flt_horizon = 5
-    st.session_state.flt_opp = (0.0, 100.0)
-    st.session_state.flt_top_n = 100 if advanced_mode else 50
-    st.session_state.flt_show_all = False
-
-selected_states = st.session_state.flt_states
-horizon = st.session_state.flt_horizon
-min_opp, max_opp = st.session_state.flt_opp
-top_n = st.session_state.flt_top_n
-show_all_counties = st.session_state.flt_show_all if advanced_mode else False
-
-# Apply filters
-mask = pd.Series(True, index=df.index)
-if show_all_counties:
-    filtered = df.copy()
-else:
-    if selected_states:
-        mask &= df["state"].isin(selected_states)
-    mask &= df["opportunity_score"].between(min_opp, max_opp)
-    filtered = df[mask].copy()
-
-st.sidebar.metric("Counties shown", f"{len(filtered):,}")
-st.sidebar.metric("Total counties", f"{len(df):,}")
-if advanced_mode:
-    st.sidebar.metric("Filtered out", f"{len(df) - len(filtered):,}")
-
-if latest_run:
-    with st.sidebar.expander("Latest Run Summary", expanded=False):
-        st.write(f"Run: `{latest_run.get('run_id', 'unknown')}`")
-        st.write(f"Year: `{latest_run.get('year', 'n/a')}`")
-        champs = latest_run.get("champion_challenger", {})
-        if champs:
-            st.write(f"Champion: `{champs.get('overall_winner', 'n/a')}`")
-        policy = latest_run.get("policy_settings", {})
-        if policy:
-            st.write(
-                "3yr policy: "
-                f"`dq={policy.get('threeyr_disagree_q', 'n/a')}`, "
-                f"`gq={policy.get('threeyr_gap_q', 'n/a')}`"
-            )
-        if latest_deltas and latest_deltas.get("has_previous"):
-            st.write(f"Top-25 churn: `{100 * latest_deltas.get('top25_churn', 0):.2f}%`")
-
-# ---------------------------------------------------------------------------
-# Tab layout
-# ---------------------------------------------------------------------------
-
-tab_rank, tab_map, tab_detail, tab_watch, tab_compare, tab_valid, tab_status = st.tabs([
-    "Rankings", "Map", "County Detail", "Watchlist", "Model Comparison", "Validation", "System Status"
-])
-
-# ========================= TAB 1: RANKINGS =================================
-
-with tab_rank:
-    st.header("County Rankings")
-
-    pred_col = f"pred_avg_{horizon}yr"
-    rank_col = f"rank_avg_{horizon}yr"
-
-    # Fallback if avg not available
-    if pred_col not in filtered.columns:
-        pred_col = f"pred_xgboost_{horizon}yr"
-        rank_col = f"rank_xgboost_{horizon}yr"
-
-    display_cols = ["overall_rank", "county_name", "state"]
-    for overlay_col in ["wave3_overlay_rank", "wave3_net_support", "wave3_support_score", "wave3_brake_score"]:
-        if overlay_col in filtered.columns and overlay_col not in display_cols:
-            display_cols.append(overlay_col)
-    if pred_col in filtered.columns:
-        display_cols.append(pred_col)
-    for h in HORIZONS:
-        for mt in ["xgboost", "lightgbm"]:
-            raw_col = f"pred_{mt}_{h}yr"
-            cal_col = f"{raw_col}_cal"
-            if raw_col in filtered.columns and raw_col not in display_cols:
-                display_cols.append(raw_col)
-            if cal_col in filtered.columns and cal_col not in display_cols:
-                display_cols.append(cal_col)
-        eff_col = "pred_policy_3yr" if h == 3 else f"pred_avg_{h}yr"
-        if eff_col in filtered.columns and eff_col not in display_cols:
-            display_cols.append(eff_col)
-    display_cols += ["opportunity_score", "composite_risk", "confidence"]
-    display_cols = [c for c in display_cols if c in filtered.columns]
-
-    top = filtered.sort_values("overall_rank").head(top_n)[display_cols].copy()
-    selected_cols = st.multiselect(
-        "Columns to display",
-        options=top.columns.tolist(),
-        default=top.columns.tolist(),
-        key="rank_cols",
-    )
-    if selected_cols:
-        top = top[selected_cols]
-
-    # Format prediction columns as percentages
-    for col in top.columns:
-        if col.startswith("pred_"):
-            top[col] = top[col].map(_fmt_pct)
-    if "opportunity_score" in top.columns:
-        top["opportunity_score"] = top["opportunity_score"].map(_fmt_score)
-    if "composite_risk" in top.columns:
-        top["composite_risk"] = top["composite_risk"].map(_fmt_score)
-    for col in ["wave3_net_support", "wave3_support_score", "wave3_brake_score"]:
-        if col in top.columns:
-            top[col] = top[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "—")
-
-    st.dataframe(
-        top,
-        width="stretch",
-        hide_index=True,
-        height=min(35 * len(top) + 38, 800),
-    )
-    st.download_button(
-        "Export current rankings view (CSV)",
-        data=filtered.sort_values("overall_rank").head(top_n).to_csv(index=False).encode("utf-8"),
-        file_name=f"rankings_view_{horizon}yr.csv",
-        mime="text/csv",
-    )
+def _render_honest_coordinates() -> None:
+    """Current honest claim coordinates, generated (never hardcoded) by
+    scripts/build_honest_coordinates.py from the measurement artifacts."""
+    path = OUTPUT_PATH / "honest_coordinates.json"
+    if not path.exists():
+        st.caption("Honest-coordinates artifact missing — regenerate with "
+                   "`scripts/build_honest_coordinates.py`.")
+        return
+    hc = json.loads(path.read_text())
+    c, o, fv = hc["classifier"], hc["operator_review"], hc["forward_validation"]
+    r1 = hc["regression"]["horizons"]["1yr"]
+    st.subheader("Current Honest Coordinates")
+    st.caption(f"Generated {hc['generated_at'][:10]} from the measurement artifacts — "
+               "these are the ONLY model-skill numbers this product claims.")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Shortlist capture (honest)", f"{c['honest_held_out_capture_at_100']:.3f}",
+              f"{c['vs_random_multiple']}× random", delta_color="off")
+    m2.metric("Operator precision (proxy)", f"{o['operator_precision']:.2f}",
+              f"{o['accepted']}✓ / {o['rejected']}✗ / {o['held']} hold", delta_color="off")
+    m3.metric("1yr rank signal (ordinal)", f"{r1['embargoed_median_spearman']:+.2f}",
+              "top-K unproven", delta_color="off")
+    m4.metric("Realized outcomes graded", "0 so far",
+              f"clock running {max(s['days_elapsed'] for s in fv['snapshots'])}d", delta_color="off")
     st.caption(
-        "Prediction columns: raw model outputs (`pred_*`), calibrated outputs (`pred_*_cal`), "
-        "and effective scoring signals (`pred_avg_*`, `pred_policy_3yr`)."
+        f"Shortlist figure: {c['claim']} Measured on {c['measured_on']} "
+        f"(naive argmax {c['naive_argmax']:.3f}; {c['vs_best_baseline_ratio']}× best baseline). "
+        "3yr/5yr appreciation forecasts are falsified and never presented. "
+        "Operator precision is judged, not realized; the forward-validation clock is the "
+        "realized read and is sparse by design early."
+    )
+    _render_recal_reads_block()
+
+
+def _render_recal_reads_block() -> None:
+    """RECAL-1 reads (universe, value-lens validation, embargoed precision, quick-AI) from output/recal/reads.json."""
+    reads = recal_reads if "recal_reads" in globals() else None
+    if not reads:
+        return
+    st.subheader("Recalibration reads (2026-09-08/09)")
+    uc = (reads.get("universe_capture") or {}).get("universes", {}).get("B", {})
+    vl = ((reads.get("value_lens") or {}).get("validation") or {}).get("VAL-1 fmr_yield_vs_zori_yield", {})
+    pr = ((reads.get("precision") or {}).get("summary") or {}).get("pre_covid_folds", {})
+    qa = reads.get("quick_ai") or {}
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Universe B capture (inside / unrestricted)", f"{uc.get('ratio_vs_unrestricted', float('nan')):.2f}×" if uc else "—",
+              f"class {uc.get('class_median', float('nan')):.3f}" if uc else "", delta_color="off")
+    m2.metric("Rent yield validation (VAL-1)", f"ρ {vl.get('spearman', float('nan')):.2f}" if vl else "—", "FMR vs ZORI yield", delta_color="off")
+    m3.metric("Embargoed statistical precision", f"{pr.get('median_lift_p100', float('nan')):.2f}× random" if pr else "—",
+              f"{pr.get('median_ratio_vs_best_naive', float('nan')):.2f}× best naive rule" if pr else "", delta_color="off")
+    cmp = (qa.get("comparison_ai_vs_landinvest_vs_universeB") or {}).get("ai_picks", {})
+    m4.metric("Quick-AI picks that are documented past booms", f"{100 * cmp.get('share_in_documented_boom_family_library', float('nan')):.0f}%" if cmp else "—",
+              f"run-to-run overlap {qa.get('H_b_mean_pairwise_jaccard', float('nan')):.2f}" if qa else "", delta_color="off")
+    st.caption(
+        "Statistical precision (FHFA 1975–2025, fully embargoed) beats random about 3× but does not beat the best simple contrarian rule "
+        "on the median fold — quote both together. The universe read is a scope rule, not new skill. Full reads: `output/recalibration_20260908/OVERNIGHT_READ.md`."
     )
 
-    if advanced_mode:
-        st.subheader("Advanced QA")
-        st.caption("Missingness checks and raw feature preview for QA/testing.")
-        miss_cols = [c for c in ["opportunity_score", "composite_risk", "confidence"] if c in filtered.columns]
-        miss_cols += [c for c in filtered.columns if c.startswith("pred_")][:8]
-        if miss_cols:
-            miss = (
-                filtered[miss_cols].isna().mean().sort_values(ascending=False) * 100
-            ).round(2).rename("missing_pct").reset_index().rename(columns={"index": "column"})
-            st.dataframe(miss, width="stretch", hide_index=True, height=220)
 
-        preview_default = [c for c in ["fips", "county_name", "state", "overall_rank", "opportunity_score"] if c in filtered.columns]
-        preview_choices = [c for c in filtered.columns if c.startswith("pred_") or c.startswith("rank_")]
-        preview_choices += [c for c in ["composite_risk", "market_risk", "liquidity_risk"] if c in filtered.columns]
-        preview_choices = list(dict.fromkeys(preview_default + preview_choices))
-        selected_preview_cols = st.multiselect(
-            "Raw feature preview columns",
-            options=preview_choices,
-            default=preview_default[:],
-            key="adv_rank_preview_cols",
-        )
-        if selected_preview_cols:
-            st.dataframe(
-                filtered[selected_preview_cols].sort_values("overall_rank").head(min(top_n, 200)),
-                width="stretch",
-                hide_index=True,
-                height=280,
-            )
+def _render_validation_console() -> None:
+    """Walk-forward CV, known-boom backtests, and conformal coverage.
 
-    # Distribution chart
-    col1, col2 = st.columns(2)
-    with col1:
-        fig_opp = px.histogram(
-            filtered, x="opportunity_score", nbins=40,
-            title="Opportunity Score Distribution",
-            color_discrete_sequence=["#2ecc71"],
-        )
-        fig_opp.update_layout(height=300, margin=dict(t=40, b=20))
-        st.plotly_chart(fig_opp, width="stretch")
-
-    with col2:
-        fig_risk = px.histogram(
-            filtered, x="composite_risk", nbins=40,
-            title="Composite Risk Distribution",
-            color_discrete_sequence=["#e74c3c"],
-        )
-        fig_risk.update_layout(height=300, margin=dict(t=40, b=20))
-        st.plotly_chart(fig_risk, width="stretch")
-
-
-# ========================= TAB 2: MAP ======================================
-
-with tab_map:
-    st.header("County Map")
-
-    map_metric = st.selectbox(
-        "Color counties by",
-        ["opportunity_score", "composite_risk"] +
-        [f"pred_avg_{h}yr" for h in HORIZONS if f"pred_avg_{h}yr" in df.columns] +
-        [f"pred_xgboost_{h}yr" for h in HORIZONS if f"pred_xgboost_{h}yr" in df.columns],
-        index=0,
-    )
-
-    try:
-        with st.spinner("Rendering county map..."):
-            map_cols = ["fips", map_metric, "opportunity_score"]
-            # Ensure unique column list (map_metric can equal opportunity_score).
-            map_cols = list(dict.fromkeys(map_cols))
-            for c in ["county_name", "state"]:
-                if c in filtered.columns:
-                    map_cols.append(c)
-            map_df = filtered[map_cols].dropna(subset=["fips", map_metric]).copy()
-            map_df["fips_str"] = map_df["fips"].astype(str).str.zfill(5)
-
-            # Color scale
-            if "risk" in map_metric:
-                color_scale = "RdYlGn_r"
-            elif "pred_" in map_metric:
-                color_scale = "RdYlGn"
-            else:
-                color_scale = "Viridis"
-
-            hover_dict = {"fips_str": False}
-            if "state" in map_df.columns:
-                hover_dict["state"] = True
-            if "opportunity_score" in map_df.columns:
-                hover_dict["opportunity_score"] = ":.1f"
-
-            fig_map = px.choropleth(
-                map_df,
-                geojson=load_county_geojson(_mtime=_file_mtime(COUNTY_GEOJSON_PATH)),
-                locations="fips_str",
-                color=map_metric,
-                hover_name=("county_name" if "county_name" in map_df.columns else None),
-                hover_data=hover_dict,
-                color_continuous_scale=color_scale,
-                scope="usa",
-                title=f"{map_metric} by County",
-            )
-            fig_map.update_layout(
-                height=700,
-                margin=dict(l=0, r=0, t=40, b=0),
-                geo=dict(bgcolor="rgba(0,0,0,0)"),
-                coloraxis_colorbar=dict(title=map_metric, len=0.8, y=0.5),
-            )
-            st.plotly_chart(fig_map, width="stretch")
-            st.caption("Tip: use `County Detail` and `Compare` for deeper context beyond map color.")
-    except Exception as exc:
-        st.error(f"Map rendering failed: {exc}")
-
-    # State summary
-    if not selected_states:
-        st.subheader("Top States by Average Opportunity Score")
-        state_avg = (
-            filtered.groupby("state")["opportunity_score"]
-            .agg(["mean", "count", "max"])
-            .round(1)
-            .sort_values("mean", ascending=False)
-            .head(15)
-            .rename(columns={"mean": "Avg Score", "count": "Counties", "max": "Best County"})
-        )
-        st.dataframe(state_avg, width="stretch")
-
-    if advanced_mode:
-        st.subheader("Advanced Diagnostics")
-        diag_cols = ["fips", "county_name", "state", "opportunity_score", map_metric]
-        diag_cols = [c for c in list(dict.fromkeys(diag_cols)) if c in filtered.columns]
-        st.caption("Sample rows used for map rendering")
-        st.dataframe(
-            filtered[diag_cols].head(200),
-            width="stretch",
-            hide_index=True,
-            height=260,
-        )
-
-
-# ========================= TAB 3: COUNTY DETAIL ============================
-
-with tab_detail:
-    st.header("County Deep Dive")
-
-    try:
-        # County selector
-        county_options = filtered.sort_values("overall_rank").apply(
-            lambda r: f"{r['county_name']}, {r['state']} (rank #{int(r['overall_rank'])})"
-            if pd.notna(r.get("county_name")) else f"FIPS {r['fips']} (rank #{int(r['overall_rank'])})",
-            axis=1,
-        ).tolist()
-
-        if not county_options:
-            st.warning("No counties match the current filters.")
-        else:
-            selected_county_label = st.selectbox("Select a county", county_options)
-            # Parse rank from label
-            rank_num = int(selected_county_label.split("rank #")[1].rstrip(")"))
-            county_row = filtered[filtered["overall_rank"] == rank_num].iloc[0]
-
-            # Header metrics
-            c1, c2, c3, c4 = st.columns(4)
-            c1.metric("Opportunity Score", _fmt_score(county_row["opportunity_score"]))
-            c2.metric("Composite Risk", _fmt_score(county_row["composite_risk"]))
-            c3.metric("Overall Rank", f"#{int(county_row['overall_rank'])}")
-            c4.metric("Confidence", county_row.get("confidence", "—"))
-
-            county_fips = str(county_row["fips"]).zfill(5)
-            is_on_watchlist = county_fips in st.session_state.watchlist_fips
-            history_row = None
-            if run_history_summary_df is not None and not run_history_summary_df.empty:
-                match = run_history_summary_df[run_history_summary_df["fips"] == county_fips]
-                if not match.empty:
-                    history_row = match.iloc[0]
-            b1, b2 = st.columns(2)
-            with b1:
-                if not is_on_watchlist:
-                    if st.button("Add To Watchlist", key=f"watch_add_{county_fips}"):
-                        st.session_state.watchlist_fips = sorted(set(st.session_state.watchlist_fips + [county_fips]))
-                        st.success("County added to watchlist.")
-                else:
-                    st.caption("This county is already on the watchlist.")
-            with b2:
-                if is_on_watchlist and st.button("Remove From Watchlist", key=f"watch_remove_{county_fips}"):
-                    st.session_state.watchlist_fips = [f for f in st.session_state.watchlist_fips if f != county_fips]
-                    st.success("County removed from watchlist.")
-
-            st.subheader("County Notes")
-            note_entry = st.session_state.county_notes.get(county_fips, {})
-            note_default = note_entry.get("note", "")
-            note_text = st.text_area(
-                "Analyst note",
-                value=note_default,
-                height=140,
-                key=f"county_note_{county_fips}",
-                help="Saved to the local per-user SQLite demo store. This is not authentication.",
-            )
-            nsave1, nsave2 = st.columns(2)
-            with nsave1:
-                if st.button("Save County Note", key=f"save_note_{county_fips}"):
-                    st.session_state.county_notes[county_fips] = {
-                        "county_name": county_row.get("county_name"),
-                        "state": county_row.get("state"),
-                        "note": note_text.strip(),
-                        "updated_at": datetime.now().isoformat(),
-                    }
-                    _save_current_user_state()
-                    st.success("County note saved.")
-            with nsave2:
-                if county_fips in st.session_state.county_notes and st.button("Delete County Note", key=f"delete_note_{county_fips}"):
-                    st.session_state.county_notes.pop(county_fips, None)
-                    _save_current_user_state()
-                    st.success("County note deleted.")
-
-            # Predictions across horizons
-            st.subheader("Predicted Appreciation by Horizon")
-            pred_data = []
-            for h in HORIZONS:
-                row_data = {"Horizon": f"{h}-year"}
-                for mt in ["xgboost", "lightgbm"]:
-                    raw_col = f"pred_{mt}_{h}yr"
-                    cal_col = f"{raw_col}_cal"
-                    if raw_col in county_row.index and pd.notna(county_row[raw_col]):
-                        row_data[f"{mt.upper()} (raw)"] = f"{county_row[raw_col]:+.1%}"
-                    if cal_col in county_row.index and pd.notna(county_row[cal_col]):
-                        row_data[f"{mt.upper()} (cal)"] = f"{county_row[cal_col]:+.1%}"
-                avg_col = f"pred_avg_{h}yr"
-                if avg_col in county_row.index and pd.notna(county_row[avg_col]):
-                    row_data["AVG (cal blend)"] = f"{county_row[avg_col]:+.1%}"
-                if h == 3 and "pred_policy_3yr" in county_row.index and pd.notna(county_row["pred_policy_3yr"]):
-                    row_data["POLICY 3YR (effective)"] = f"{county_row['pred_policy_3yr']:+.1%}"
-                pred_data.append(row_data)
-            st.dataframe(pd.DataFrame(pred_data), width="stretch", hide_index=True)
-
-            st.subheader("Why This County?")
-            narrative = _build_county_narrative(county_row, history_row=history_row)
-            st.info(narrative["summary"])
-            n1, n2 = st.columns(2)
-            with n1:
-                st.caption("Upside case")
-                for bullet in narrative["positives"]:
-                    st.markdown(f"- {bullet}")
-            with n2:
-                st.caption("Main cautions")
-                for bullet in narrative["cautions"]:
-                    st.markdown(f"- {bullet}")
-
-            st.subheader("Data Context")
-            policy_context = _family_context_for_row(county_row, wave2_training_policy)
-            if not policy_context.empty:
-                st.dataframe(policy_context, width="stretch", hide_index=True)
-                st.caption(
-                    "Historical-safe families are training-eligible by default. "
-                    "Panel-only and review-static families are currently used as context, not default training signal."
-                )
-            else:
-                st.caption("No explicit Wave 2 family context was detected for this county row.")
-
-            wave3_cols_present = any(
-                c in county_row.index
-                for c in [
-                    "site_thesis_support_index",
-                    "land_developability_index",
-                    "land_constraint_pressure",
-                    "land_fragility_pressure",
-                ]
-            )
-            if wave3_cols_present:
-                st.subheader("Wave 3 Structural Profile")
-                wave3_profile = _build_wave3_profile(county_row)
-                st.info(wave3_profile["summary"])
-                coastal_provenance = _coastal_lane_provenance(county_row, wave3_status)
-                st.caption(f"Coastal lane: `{coastal_provenance['label']}`")
-                st.caption(str(coastal_provenance["summary"]))
-                wp1, wp2, wp3, wp4 = st.columns(4)
-                wp1.metric(
-                    "Site Thesis Support",
-                    f"{float(county_row['site_thesis_support_index']):.3f}"
-                    if pd.notna(county_row.get("site_thesis_support_index")) else "—",
-                )
-                wp2.metric(
-                    "Land Developability",
-                    f"{float(county_row['land_developability_index']):.3f}"
-                    if pd.notna(county_row.get("land_developability_index")) else "—",
-                )
-                wp3.metric(
-                    "Constraint Pressure",
-                    f"{float(county_row['land_constraint_pressure']):.3f}"
-                    if pd.notna(county_row.get("land_constraint_pressure")) else "—",
-                )
-                wp4.metric(
-                    "Fragility Pressure",
-                    f"{float(county_row['land_fragility_pressure']):.3f}"
-                    if pd.notna(county_row.get("land_fragility_pressure")) else "—",
-                )
-
-                metric_df = wave3_profile["metric_df"]
-                if isinstance(metric_df, pd.DataFrame) and not metric_df.empty:
-                    fig_wave3 = px.bar(
-                        metric_df,
-                        x="Value",
-                        y="Metric",
-                        orientation="h",
-                        color="Type",
-                        color_discrete_map={"support": "#1f9d55", "pressure": "#dc2626"},
-                        title="Wave 3 Structural Scores",
-                    )
-                    fig_wave3.update_layout(height=320, margin=dict(t=40, b=20))
-                    st.plotly_chart(fig_wave3, width="stretch")
-
-                ws1, ws2 = st.columns(2)
-                with ws1:
-                    st.caption("Structural supports")
-                    for bullet in wave3_profile["supports"]:
-                        st.markdown(f"- {bullet}")
-                with ws2:
-                    st.caption("Structural brakes")
-                    for bullet in wave3_profile["brakes"]:
-                        st.markdown(f"- {bullet}")
-
-            if history_row is not None and not history_row.empty:
-                health_row = pd.Series(
-                    {
-                        "current_rank": county_row.get("overall_rank"),
-                        "pred_avg_5yr": county_row.get("pred_avg_5yr"),
-                        "composite_risk": county_row.get("composite_risk"),
-                        "top25_presence_share": history_row.get("top25_presence_share"),
-                        "std_rank": history_row.get("std_rank"),
-                    }
-                )
-                if latest_compare_rank_df is not None and not latest_compare_rank_df.empty:
-                    latest_shift = latest_compare_rank_df[latest_compare_rank_df["fips"] == county_fips]
-                    if not latest_shift.empty:
-                        health_row["rank_shift"] = latest_shift.iloc[0].get("rank_shift")
-                fit_status, fit_reasons = _classify_watchlist_health(health_row, settings=st.session_state.watchlist_settings)
-                st.subheader("Why It Still Belongs")
-                if fit_status == "fits_thesis":
-                    st.success("This county still fits the current shortlist thesis.")
-                elif fit_status == "watch_closely":
-                    st.warning("This county still has a case, but it should be watched closely.")
-                else:
-                    st.error("This county may need a thesis review or removal from the shortlist.")
-                for reason in fit_reasons[:5]:
-                    st.markdown(f"- {reason}")
-
-            # Risk breakdown
-            st.subheader("Risk Breakdown")
-            risk_dims = {
-                "Market Risk": county_row.get("market_risk", 50),
-                "Liquidity Risk": county_row.get("liquidity_risk", 50),
-                "Regulatory Risk": county_row.get("regulatory_risk", 50),
-                "Environmental Risk": county_row.get("environmental_risk", 50),
-                "Concentration Risk": county_row.get("concentration_risk", 50),
-            }
-            # Replace NaN with 50 (neutral) for display
-            risk_dims = {k: (v if pd.notna(v) else 50) for k, v in risk_dims.items()}
-            fig_risk_bar = go.Figure(go.Bar(
-                x=list(risk_dims.values()),
-                y=list(risk_dims.keys()),
-                orientation="h",
-                marker_color=[_risk_color(v) for v in risk_dims.values()],
-            ))
-            fig_risk_bar.update_layout(
-                xaxis=dict(range=[0, 100], title="Risk Score (0–100)"),
-                height=250, margin=dict(t=10, b=20),
-            )
-            st.plotly_chart(fig_risk_bar, width="stretch")
-
-            if history_row is not None and not history_row.empty:
-                st.subheader("Run Stability")
-                s1, s2, s3, s4 = st.columns(4)
-                s1.metric("Avg Rank", f"{float(history_row.get('avg_rank', np.nan)):.1f}" if pd.notna(history_row.get("avg_rank")) else "—")
-                s2.metric("Rank Std", f"{float(history_row.get('std_rank', np.nan)):.1f}" if pd.notna(history_row.get("std_rank")) else "—")
-                s3.metric(
-                    "Top-25 Presence",
-                    f"{100 * float(history_row.get('top25_presence_share', 0.0)):.0f}%"
-                    if pd.notna(history_row.get("top25_presence_share")) else "—"
-                )
-                s4.metric("Rank Range", f"{float(history_row.get('rank_range', np.nan)):.0f}" if pd.notna(history_row.get("rank_range")) else "—")
-
-                if run_history_detail_df is not None and not run_history_detail_df.empty:
-                    county_hist = run_history_detail_df[run_history_detail_df["fips"] == county_fips].copy()
-                    if not county_hist.empty:
-                        county_hist = county_hist.sort_values("run_id")
-                        fig_hist = px.line(
-                            county_hist,
-                            x="run_id",
-                            y="overall_rank",
-                            markers=True,
-                            title="Recent Run Rank Path",
-                            labels={"overall_rank": "Overall rank (lower is better)", "run_id": "Run"},
-                            hover_data=["opportunity_score", "pred_policy_3yr", "pred_avg_5yr", "composite_risk", "confidence"],
-                        )
-                        fig_hist.update_yaxes(autorange="reversed")
-                        fig_hist.update_layout(height=320, margin=dict(t=40, b=20))
-                        st.plotly_chart(fig_hist, width="stretch")
-
-            if latest_compare_rank_df is not None and not latest_compare_rank_df.empty:
-                latest_shift = latest_compare_rank_df[latest_compare_rank_df["fips"] == county_fips]
-                if not latest_shift.empty:
-                    latest_shift = latest_shift.iloc[0]
-                    st.subheader("Latest Run Delta")
-                    d1, d2, d3, d4 = st.columns(4)
-                    d1.metric("Prior Rank", f"#{int(latest_shift['overall_rank_old'])}" if pd.notna(latest_shift.get("overall_rank_old")) else "—")
-                    d2.metric("Current Rank", f"#{int(latest_shift['overall_rank_new'])}" if pd.notna(latest_shift.get("overall_rank_new")) else "—")
-                    d3.metric("Opp Score Δ", f"{float(latest_shift['opportunity_score_delta']):+.2f}" if pd.notna(latest_shift.get("opportunity_score_delta")) else "—")
-                    d4.metric("5yr Policy Δ", f"{float(latest_shift['pred_policy_3yr_delta']):+.3f}" if pd.notna(latest_shift.get("pred_policy_3yr_delta")) else "—")
-                    for bullet in _build_latest_run_delta_bullets(latest_shift):
-                        st.markdown(f"- {bullet}")
-
-            # SHAP drivers
-            st.subheader("Growth Drivers (SHAP)")
-            for h in HORIZONS:
-                driver_col = f"drivers_xgboost_{h}yr"
-                if driver_col in county_row.index:
-                    drivers = {k: v for k, v in _parse_drivers(county_row[driver_col]).items()
-                               if v is not None and isinstance(v, (int, float))}
-                    if drivers:
-                        st.caption(f"**{h}-year XGBoost drivers**")
-                        driver_df = pd.DataFrame([
-                            {"Feature": k, "SHAP Impact": v}
-                            for k, v in sorted(drivers.items(), key=lambda x: abs(x[1]), reverse=True)[:8]
-                        ])
-                        fig_shap = go.Figure(go.Bar(
-                            x=driver_df["SHAP Impact"],
-                            y=driver_df["Feature"],
-                            orientation="h",
-                            marker_color=[
-                                "#2ecc71" if v > 0 else "#e74c3c"
-                                for v in driver_df["SHAP Impact"]
-                            ],
-                        ))
-                        fig_shap.update_layout(
-                            height=max(200, 30 * len(driver_df)),
-                            margin=dict(t=5, b=20),
-                            xaxis_title="SHAP value",
-                        )
-                        st.plotly_chart(fig_shap, width="stretch")
-
-            if advanced_mode:
-                st.subheader("Advanced QA")
-                available = county_row.index.tolist()
-                metric_cols = [c for c in available if c.startswith("pred_") or c.endswith("_risk")]
-                qa_cols = [c for c in ["opportunity_score", "composite_risk", "confidence"] if c in available]
-                qa_cols += metric_cols[:20]
-                missing_count = int(pd.Series(county_row[qa_cols]).isna().sum()) if qa_cols else 0
-                st.caption(f"Selected county QA: `{missing_count}` missing values across key prediction/risk fields.")
-                qa_row = pd.DataFrame(
-                    [{"column": c, "value": county_row.get(c), "is_missing": pd.isna(county_row.get(c))} for c in qa_cols]
-                )
-                st.dataframe(qa_row, width="stretch", hide_index=True, height=260)
-
-                with st.expander("Raw county record (full row)"):
-                    raw_cols = st.multiselect(
-                        "Columns",
-                        options=available,
-                        default=[c for c in ["fips", "county_name", "state", "overall_rank", "opportunity_score"] if c in available],
-                        key="adv_detail_raw_cols",
-                    )
-                    if raw_cols:
-                        st.dataframe(
-                            pd.DataFrame([county_row[raw_cols].to_dict()]),
-                            width="stretch",
-                            hide_index=True,
-                        )
-    except Exception as exc:
-        st.error(f"County detail failed: {exc}")
-
-
-# ========================= TAB 4: WATCHLIST ================================
-
-with tab_watch:
-    st.header("Watchlist")
-    st.caption("Track shortlist counties across runs, spot stable winners, and flag volatile boundary movers.")
-
-    with st.expander("Watchlist Sharing & Import"):
-        import_mode = st.radio(
-            "Import mode",
-            ["Append to current session", "Replace current session"],
-            horizontal=True,
-            help="Append keeps your current shortlist and adds imported counties. Replace overwrites only the current in-memory watchlist.",
-        )
-        import_file = st.file_uploader(
-            "Import watchlist bundle or county list",
-            type=["json", "csv", "txt", "md"],
-            help="Supported formats: dashboard JSON export, watchlist share JSON, CSV with a FIPS column, or TXT/Markdown with one FIPS per line.",
-        )
-        if st.button("Apply Import"):
-            if import_file is None:
-                st.warning("Choose a JSON, CSV, TXT, or Markdown file before importing.")
-            else:
-                try:
-                    parsed_import = _parse_watchlist_import(import_file.name, import_file.getvalue())
-                    new_watch, new_saved, new_notes, import_msg = _apply_watchlist_import_payload(
-                        parsed_import,
-                        import_mode=import_mode,
-                        current_watch_fips=st.session_state.watchlist_fips,
-                        saved_watchlists=st.session_state.saved_watchlists,
-                        county_notes=st.session_state.county_notes,
-                    )
-                    st.session_state.watchlist_fips = new_watch
-                    st.session_state.saved_watchlists = new_saved
-                    st.session_state.county_notes = new_notes
-                    _save_current_user_state()
-                    st.success(import_msg)
-                except Exception as exc:
-                    st.error(f"Watchlist import failed: {exc}")
-
-        manual_fips_text = st.text_area(
-            "Quick add by FIPS",
-            value="",
-            height=90,
-            placeholder="Paste county FIPS values separated by commas, spaces, or new lines.",
-        )
-        if st.button("Add Pasted FIPS"):
-            parsed = [
-                f for f in (
-                    _normalize_fips_value(token)
-                    for token in manual_fips_text.replace(",", " ").split()
-                )
-                if f is not None
-            ]
-            if not parsed:
-                st.warning("No valid county FIPS values were found in the pasted text.")
-            else:
-                st.session_state.watchlist_fips = sorted(set(st.session_state.watchlist_fips + parsed))
-                st.success(f"Added `{len(set(parsed))}` counties from pasted FIPS.")
-
-    st.subheader("Saved Watchlists")
-    saved_names = sorted(st.session_state.saved_watchlists.keys())
-    load_options = ["Current Session"] + saved_names
-    selected_saved_watchlist = st.selectbox("Load saved watchlist", options=load_options, index=0)
-    current_meta_payload = (
-        st.session_state.saved_watchlists.get(selected_saved_watchlist, {})
-        if selected_saved_watchlist != "Current Session"
-        else st.session_state.session_watchlist_meta
-    ) or {}
-    sw1, sw2, sw3 = st.columns(3)
-    with sw1:
-        if selected_saved_watchlist != "Current Session" and st.button("Load Watchlist"):
-            payload = st.session_state.saved_watchlists.get(selected_saved_watchlist, {})
-            st.session_state.watchlist_fips = payload.get("fips", [])
-            st.success(f"Loaded watchlist: {selected_saved_watchlist}")
-    with sw2:
-        save_name = st.text_input("Save current as", value="", placeholder="e.g. Rust Belt 5yr shortlist")
-        if st.button("Save Current Watchlist"):
-            cleaned = save_name.strip()
-            if not cleaned:
-                st.warning("Enter a watchlist name before saving.")
-            else:
-                owner_val = st.session_state.get("watchlist_owner_input", "").strip()
-                thesis_val = st.session_state.get("watchlist_thesis_input", "").strip()
-                tags_val = _normalize_tag_list(st.session_state.get("watchlist_tags_input", ""))
-                st.session_state.saved_watchlists[cleaned] = {
-                    "fips": sorted(set(st.session_state.watchlist_fips)),
-                    "updated_at": datetime.now().isoformat(),
-                    "count": len(set(st.session_state.watchlist_fips)),
-                    "owner": owner_val,
-                    "thesis": thesis_val,
-                    "tags": tags_val,
-                }
-                st.session_state.session_watchlist_meta = {
-                    "owner": owner_val,
-                    "thesis": thesis_val,
-                    "tags": tags_val,
-                }
-                _save_current_user_state()
-                st.success(f"Saved watchlist: {cleaned}")
-    with sw3:
-        if selected_saved_watchlist != "Current Session" and st.button("Delete Saved Watchlist"):
-            st.session_state.saved_watchlists.pop(selected_saved_watchlist, None)
-            _save_current_user_state()
-            st.success(f"Deleted watchlist: {selected_saved_watchlist}")
-
-    st.subheader("Watchlist Thesis")
-    meta1, meta2 = st.columns(2)
-    with meta1:
-        owner_input = st.text_input(
-            "Owner / reviewer",
-            value=current_meta_payload.get("owner", ""),
-            key="watchlist_owner_input",
-            help="Useful for handoffs and share packets.",
-        )
-        tags_input = st.text_input(
-            "Tags",
-            value=", ".join(current_meta_payload.get("tags", []) or []),
-            key="watchlist_tags_input",
-            help="Comma-separated thesis or theme tags, e.g. value, exurban, supply constrained.",
-        )
-    with meta2:
-        thesis_input = st.text_area(
-            "Thesis summary",
-            value=current_meta_payload.get("thesis", ""),
-            height=110,
-            key="watchlist_thesis_input",
-            help="Short explanation of why this shortlist exists.",
-        )
-    if selected_saved_watchlist == "Current Session":
-        st.session_state.session_watchlist_meta = {
-            "owner": owner_input.strip(),
-            "thesis": thesis_input.strip(),
-            "tags": _normalize_tag_list(tags_input),
-        }
-    elif st.button("Update Saved Watchlist Thesis"):
-        payload = st.session_state.saved_watchlists.get(selected_saved_watchlist, {})
-        payload.update(
-            {
-                "owner": owner_input.strip(),
-                "thesis": thesis_input.strip(),
-                "tags": _normalize_tag_list(tags_input),
-                "updated_at": datetime.now().isoformat(),
-            }
-        )
-        st.session_state.saved_watchlists[selected_saved_watchlist] = payload
-        _save_current_user_state()
-        st.success(f"Updated thesis metadata for `{selected_saved_watchlist}`.")
-
-    with st.expander("Health Rules & Alerts"):
-        hs = st.session_state.watchlist_settings
-        hr1, hr2, hr3 = st.columns(3)
-        with hr1:
-            top_rank_strong = st.number_input("Top-rank strong cutoff", min_value=1, max_value=500, value=int(hs.get("top_rank_strong", 25)), step=1)
-            top_rank_watch = st.number_input("Top-rank watch cutoff", min_value=1, max_value=1000, value=int(hs.get("top_rank_watch", 100)), step=1)
-            sharp_rank_move = st.number_input("Sharp move alert (ranks)", min_value=1.0, max_value=200.0, value=float(hs.get("sharp_rank_move", 10.0)), step=1.0)
-            alert_rank_exit_boundary = st.number_input("Alert boundary rank", min_value=1, max_value=500, value=int(hs.get("alert_rank_exit_boundary", 50)), step=1)
-        with hr2:
-            durable_top25_share = st.slider("Durable top-25 share", min_value=0.0, max_value=1.0, value=float(hs.get("durable_top25_share", 0.60)), step=0.05)
-            weak_top25_share = st.slider("Weak top-25 share", min_value=0.0, max_value=1.0, value=float(hs.get("weak_top25_share", 0.20)), step=0.05)
-            calm_std_rank = st.number_input("Calm rank std", min_value=0.0, max_value=100.0, value=float(hs.get("calm_std_rank", 12.0)), step=1.0)
-            volatile_std_rank = st.number_input("Volatile rank std", min_value=0.0, max_value=200.0, value=float(hs.get("volatile_std_rank", 25.0)), step=1.0)
-        with hr3:
-            strong_5yr_upside = st.number_input("Strong 5yr upside", min_value=-1.0, max_value=2.0, value=float(hs.get("strong_5yr_upside", 0.15)), step=0.01, format="%.2f")
-            weak_5yr_upside = st.number_input("Weak 5yr upside", min_value=-1.0, max_value=2.0, value=float(hs.get("weak_5yr_upside", 0.05)), step=0.01, format="%.2f")
-            elevated_risk = st.number_input("Elevated risk cutoff", min_value=0.0, max_value=100.0, value=float(hs.get("elevated_risk", 60.0)), step=1.0)
-        if st.button("Save Health Rules"):
-            st.session_state.watchlist_settings = {
-                "top_rank_strong": int(top_rank_strong),
-                "top_rank_watch": int(top_rank_watch),
-                "durable_top25_share": float(durable_top25_share),
-                "weak_top25_share": float(weak_top25_share),
-                "calm_std_rank": float(calm_std_rank),
-                "volatile_std_rank": float(volatile_std_rank),
-                "sharp_rank_move": float(sharp_rank_move),
-                "strong_5yr_upside": float(strong_5yr_upside),
-                "weak_5yr_upside": float(weak_5yr_upside),
-                "elevated_risk": float(elevated_risk),
-                "alert_rank_exit_boundary": int(alert_rank_exit_boundary),
-            }
-            _save_current_user_state()
-            st.success("Saved watchlist health rules.")
-
-    if saved_names:
-        saved_meta_rows = []
-        for name in saved_names:
-            payload = st.session_state.saved_watchlists.get(name, {})
-            saved_meta_rows.append(
-                {
-                    "watchlist": name,
-                    "count": payload.get("count", len(payload.get("fips", []))),
-                    "owner": payload.get("owner"),
-                    "tags": ", ".join(payload.get("tags", []) or []),
-                    "updated_at": payload.get("updated_at"),
-                }
-            )
-        st.dataframe(pd.DataFrame(saved_meta_rows), width="stretch", hide_index=True, height=180)
-    st.download_button(
-        "Export saved watchlists + notes (JSON)",
-        data=json.dumps(
-            {
-                "saved_watchlists": st.session_state.saved_watchlists,
-                "county_notes": st.session_state.county_notes,
-                "saved_compare_sets": st.session_state.saved_compare_sets,
-                "watchlist_alert_state": st.session_state.watchlist_alert_state,
-                "watchlist_settings": st.session_state.watchlist_settings,
-            },
-            indent=2,
-        ).encode("utf-8"),
-        file_name=f"dashboard_user_data_{_current_user_id()}.json",
-        mime="application/json",
-    )
-
-    watch_options_df = df.sort_values("overall_rank")[["fips", "county_name", "state", "overall_rank"]].copy()
-    watch_options_df["fips"] = watch_options_df["fips"].astype(str).str.zfill(5)
-    watch_options_df["label"] = watch_options_df.apply(
-        lambda r: f"{r['county_name']}, {r['state']} [FIPS {r['fips']}] (#{int(r['overall_rank'])})",
-        axis=1,
-    )
-    label_to_fips = dict(zip(watch_options_df["label"], watch_options_df["fips"]))
-    fips_to_label = dict(zip(watch_options_df["fips"], watch_options_df["label"]))
-
-    current_watch_labels = [fips_to_label[f] for f in st.session_state.watchlist_fips if f in fips_to_label]
-    selected_watch_labels = st.multiselect(
-        "Manage watchlist counties",
-        options=watch_options_df["label"].tolist(),
-        default=current_watch_labels,
-        key="watchlist_labels",
-    )
-    st.session_state.watchlist_fips = [label_to_fips[label] for label in selected_watch_labels]
-
-    watch_fips = st.session_state.watchlist_fips
-    watch_current = df[df["fips"].astype(str).str.zfill(5).isin(watch_fips)].copy()
-
-    if watch_current.empty:
-        st.info("Add counties to the watchlist from here or from the County Detail tab.")
-    else:
-        active_watchlist_name = selected_saved_watchlist if selected_saved_watchlist != "Current Session" else None
-        active_watchlist_meta = (
-            st.session_state.saved_watchlists.get(selected_saved_watchlist, {})
-            if selected_saved_watchlist != "Current Session"
-            else st.session_state.session_watchlist_meta
-        ) or {}
-        keep_cols = [
-            c for c in [
-                "fips", "county_name", "state", "overall_rank", "opportunity_score",
-                "pred_policy_3yr", "pred_avg_5yr", "composite_risk", "confidence",
-                "site_thesis_support_index", "land_developability_index",
-                "land_constraint_pressure", "land_fragility_pressure",
-                "wave3_overlay_rank", "wave3_net_support", "wave3_support_score",
-                "wave3_brake_score", "wave3_overlay_adjustment", "wave3_structural_summary",
-            ] if c in watch_current.columns
-        ]
-        watch_table = watch_current[keep_cols].copy()
-        watch_table["fips"] = watch_table["fips"].astype(str).str.zfill(5)
-        if run_history_summary_df is not None and not run_history_summary_df.empty:
-            enrich_cols = [
-                c for c in [
-                    "fips", "avg_rank", "std_rank", "rank_range",
-                    "top25_presence_share", "top50_presence_share", "net_rank_change"
-                ] if c in run_history_summary_df.columns
-            ]
-            watch_table = watch_table.merge(run_history_summary_df[enrich_cols], on="fips", how="left")
-
-        for col in ["pred_policy_3yr", "pred_avg_5yr"]:
-            if col in watch_table.columns:
-                watch_table[col] = watch_table[col].map(_fmt_pct)
-        for col in [
-            "opportunity_score", "composite_risk", "avg_rank", "std_rank", "rank_range", "net_rank_change",
-            "site_thesis_support_index", "land_developability_index",
-            "land_constraint_pressure", "land_fragility_pressure",
-            "wave3_net_support", "wave3_support_score", "wave3_brake_score", "wave3_overlay_adjustment",
-        ]:
-            if col in watch_table.columns:
-                watch_table[col] = watch_table[col].map(lambda x: f"{x:.1f}" if pd.notna(x) else "—")
-        for col in ["wave3_overlay_rank"]:
-            if col in watch_table.columns:
-                watch_table[col] = watch_table[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
-        for col in ["top25_presence_share", "top50_presence_share"]:
-            if col in watch_table.columns:
-                watch_table[col] = watch_table[col].map(lambda x: f"{100*x:.0f}%" if pd.notna(x) else "—")
-
-        st.dataframe(watch_table.sort_values("overall_rank"), width="stretch", hide_index=True, height=320)
-        st.download_button(
-            "Export watchlist (CSV)",
-            data=watch_current.sort_values("overall_rank").to_csv(index=False).encode("utf-8"),
-            file_name="watchlist_current_snapshot.csv",
-            mime="text/csv",
-        )
-        share_payload = _build_watchlist_share_payload(
-            watch_current,
-            notes=st.session_state.county_notes,
-            watchlist_name=active_watchlist_name,
-            watchlist_meta=active_watchlist_meta,
-        )
-        st.download_button(
-            "Export watchlist share packet (JSON)",
-            data=json.dumps(share_payload, indent=2).encode("utf-8"),
-            file_name="watchlist_share_packet.json",
-            mime="application/json",
-        )
-
-        history = None
-        if run_history_detail_df is not None and not run_history_detail_df.empty:
-            history = run_history_detail_df[run_history_detail_df["fips"].isin(watch_fips)].copy()
-        watchlist_md = _build_watchlist_markdown(
-            watch_current,
-            history_df=history,
-            notes=st.session_state.county_notes,
-            watchlist_name=active_watchlist_name,
-            watchlist_meta=active_watchlist_meta,
-        )
-        st.download_button(
-            "Export watchlist memo (Markdown)",
-            data=watchlist_md.encode("utf-8"),
-            file_name="watchlist_memo.md",
-            mime="text/markdown",
-        )
-
-        run_summary_df, run_summary_md = _build_watchlist_latest_run_summary(
-            watch_current,
-            latest_compare_rank_df=latest_compare_rank_df,
-            run_history_summary_df=run_history_summary_df,
-            notes=st.session_state.county_notes,
-            watchlist_name=active_watchlist_name,
-        )
-        if not run_summary_df.empty:
-            health_eval = run_summary_df.copy()
-            health_eval["composite_risk"] = watch_current.set_index(watch_current["fips"].astype(str).str.zfill(5))["composite_risk"].reindex(health_eval["fips"]).values
-            for structural_col in [
-                "site_thesis_support_index",
-                "land_developability_index",
-                "land_constraint_pressure",
-                "land_fragility_pressure",
-                "fragility_balance_index",
-                "scarcity_amenity_balance_index",
-                "optionality_profile_index",
-                "constraint_cluster_label",
-                "wave3_overlay_rank",
-                "wave3_overlay_adjustment",
-                "wave3_net_support",
-                "wave3_support_score",
-                "wave3_brake_score",
-                "wave3_structural_summary",
-            ]:
-                if structural_col in watch_current.columns:
-                    health_eval[structural_col] = (
-                        watch_current.set_index(watch_current["fips"].astype(str).str.zfill(5))[structural_col]
-                        .reindex(health_eval["fips"]).values
-                    )
-            county_lookup = watch_current.set_index(watch_current["fips"].astype(str).str.zfill(5))
-            health_eval["coastal_lane"] = [
-                _coastal_lane_provenance(
-                    county_lookup.loc[fips] if fips in county_lookup.index else pd.Series(dtype=object),
-                    wave3_status,
-                ).get("label")
-                for fips in health_eval["fips"]
-            ]
-            health_eval["health_status"], health_eval["health_reasons"] = zip(
-                *health_eval.apply(lambda row: _classify_watchlist_health(row, settings=st.session_state.watchlist_settings), axis=1)
-            )
-            st.subheader("Wave 3 Watchlist Context")
-            wv1, wv2, wv3 = st.columns(3)
-            high_support_count = int((health_eval["site_thesis_support_index"].fillna(0) >= 0.66).sum()) if "site_thesis_support_index" in health_eval.columns else 0
-            high_fragility_count = int((health_eval["land_fragility_pressure"].fillna(0) >= 0.66).sum()) if "land_fragility_pressure" in health_eval.columns else 0
-            high_constraint_count = int((health_eval["land_constraint_pressure"].fillna(0) >= 0.66).sum()) if "land_constraint_pressure" in health_eval.columns else 0
-            wv1.metric("High Site Support", high_support_count)
-            wv2.metric("High Fragility", high_fragility_count)
-            wv3.metric("High Constraint", high_constraint_count)
-            provenance_counts = health_eval["coastal_lane"].value_counts(dropna=False).to_dict()
-            if provenance_counts:
-                st.caption(
-                    "Coastal lane mix: "
-                    + ", ".join(f"{label}={count}" for label, count in provenance_counts.items())
-                )
-
-            wave3_watch_cols = [
-                c for c in [
-                    "county_name", "state", "current_rank", "site_thesis_support_index",
-                    "land_developability_index", "land_constraint_pressure", "land_fragility_pressure",
-                    "fragility_balance_index", "scarcity_amenity_balance_index", "optionality_profile_index",
-                    "constraint_cluster_label",
-                    "wave3_overlay_rank", "wave3_net_support", "wave3_support_score",
-                    "wave3_brake_score", "wave3_overlay_adjustment", "wave3_structural_summary",
-                    "coastal_lane",
-                    "pred_avg_5yr", "composite_risk",
-                ] if c in health_eval.columns
-            ]
-            wave3_watch = health_eval[wave3_watch_cols].copy()
-            for col in ["pred_avg_5yr"]:
-                if col in wave3_watch.columns:
-                    wave3_watch[col] = wave3_watch[col].map(_fmt_pct)
-            for col in [
-                "site_thesis_support_index", "land_developability_index",
-                "land_constraint_pressure", "land_fragility_pressure",
-                "fragility_balance_index", "scarcity_amenity_balance_index", "optionality_profile_index",
-                "wave3_net_support", "wave3_support_score", "wave3_brake_score", "wave3_overlay_adjustment",
-                "composite_risk",
-            ]:
-                if col in wave3_watch.columns:
-                    wave3_watch[col] = wave3_watch[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "—")
-            for col in ["current_rank", "wave3_overlay_rank"]:
-                if col in wave3_watch.columns:
-                    wave3_watch[col] = wave3_watch[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
-            st.dataframe(
-                wave3_watch.sort_values("county_name"),
-                width="stretch",
-                hide_index=True,
-                height=260,
-            )
-
-            st.subheader("Thesis Health Check")
-            hc1, hc2, hc3 = st.columns(3)
-            hc1.metric("Fits Thesis", int((health_eval["health_status"] == "fits_thesis").sum()))
-            hc2.metric("Watch Closely", int((health_eval["health_status"] == "watch_closely").sum()))
-            hc3.metric("Review / Drop", int((health_eval["health_status"] == "review_or_drop").sum()))
-            health_view = health_eval.copy()
-            health_view["health_reasons"] = health_view["health_reasons"].map(lambda xs: "; ".join(xs[:3]))
-            if "top25_presence_share" in health_view.columns:
-                health_view["top25_presence_share"] = health_view["top25_presence_share"].map(
-                    lambda x: f"{100*x:.0f}%" if pd.notna(x) else "—"
-                )
-            for col in ["pred_policy_3yr", "pred_avg_5yr"]:
-                if col in health_view.columns:
-                    health_view[col] = health_view[col].map(_fmt_pct)
-            for col in ["current_rank", "prior_rank"]:
-                if col in health_view.columns:
-                    health_view[col] = health_view[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
-            for col in ["rank_shift", "std_rank", "site_thesis_support_index", "land_developability_index", "land_constraint_pressure", "land_fragility_pressure"]:
-                if col in health_view.columns:
-                    if col == "rank_shift":
-                        health_view[col] = health_view[col].map(lambda x: f"{x:+.1f}" if pd.notna(x) else "—")
-                    elif col == "std_rank":
-                        health_view[col] = health_view[col].map(lambda x: f"{x:.1f}" if pd.notna(x) else "—")
-                    else:
-                        health_view[col] = health_view[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "—")
-            st.dataframe(
-                health_view[
-                    [
-                        c for c in [
-                            "county_name", "state", "health_status", "current_rank", "prior_rank",
-                            "rank_shift", "pred_policy_3yr", "pred_avg_5yr",
-                            "top25_presence_share", "std_rank",
-                            "site_thesis_support_index", "land_developability_index",
-                            "land_constraint_pressure", "land_fragility_pressure",
-                            "health_reasons"
-                        ] if c in health_view.columns
-                    ]
-                ],
-                width="stretch",
-                hide_index=True,
-                height=260,
-            )
-            alert_df = _build_watchlist_alerts(health_eval, settings=st.session_state.watchlist_settings)
-            st.subheader("Watchlist Alerts")
-            if alert_df.empty:
-                st.success("No current watchlist alerts are firing under the saved health rules.")
-            else:
-                alert_df = alert_df.copy()
-                alert_df["alert_key"] = alert_df.apply(_alert_key, axis=1)
-                alert_state = st.session_state.watchlist_alert_state
-                alert_df["alert_status"] = alert_df["alert_key"].map(
-                    lambda k: (alert_state.get(k) or {}).get("status", "active")
-                )
-                alert_df["alert_note"] = alert_df["alert_key"].map(
-                    lambda k: (alert_state.get(k) or {}).get("note", "")
-                )
-                alert_df["alert_updated_at"] = alert_df["alert_key"].map(
-                    lambda k: (alert_state.get(k) or {}).get("updated_at", "")
-                )
-                show_suppressed = st.checkbox("Show suppressed alerts", value=False)
-                visible_alerts = alert_df if show_suppressed else alert_df[alert_df["alert_status"] != "suppressed"].copy()
-                ac1, ac2, ac3 = st.columns(3)
-                ac1.metric("High Severity", int((visible_alerts["severity"] == "high").sum()))
-                ac2.metric("Medium Severity", int((visible_alerts["severity"] == "medium").sum()))
-                ac3.metric("Low Severity", int((visible_alerts["severity"] == "low").sum()))
-                digest_payload, digest_md = _build_watchlist_alert_digest(
-                    alert_df,
-                    alert_state=st.session_state.watchlist_alert_state,
-                    watchlist_name=active_watchlist_name,
-                )
-                dc1, dc2, dc3 = st.columns(3)
-                dc1.metric("Active", int(digest_payload["counts"].get("active", 0)))
-                dc2.metric("Acknowledged", int(digest_payload["counts"].get("acknowledged", 0)))
-                dc3.metric("Suppressed", int(digest_payload["counts"].get("suppressed", 0)))
-                manage_cols = [c for c in ["county_name", "state", "severity", "alert_type", "alert_status", "message"] if c in visible_alerts.columns]
-                selected_alert_labels = st.multiselect(
-                    "Select alerts to manage",
-                    options=[
-                        f"{row['county_name']}, {row['state']} | {row['alert_type']} | {row['severity']} | {row['alert_status']}"
-                        for _, row in visible_alerts.iterrows()
-                    ],
-                    default=[],
-                )
-                label_to_key = {
-                    f"{row['county_name']}, {row['state']} | {row['alert_type']} | {row['severity']} | {row['alert_status']}": row["alert_key"]
-                    for _, row in visible_alerts.iterrows()
-                }
-                alert_note_input = st.text_input(
-                    "Alert review note",
-                    value="",
-                    help="Optional note saved with acknowledgement or suppression.",
-                )
-                m1, m2, m3 = st.columns(3)
-                selected_keys = [label_to_key[x] for x in selected_alert_labels if x in label_to_key]
-                with m1:
-                    if st.button("Acknowledge Selected Alerts"):
-                        for key in selected_keys:
-                            st.session_state.watchlist_alert_state[key] = {
-                                "status": "acknowledged",
-                                "note": alert_note_input.strip(),
-                                "updated_at": datetime.now().isoformat(),
-                            }
-                        if selected_keys:
-                            _save_current_user_state()
-                            st.success(f"Acknowledged `{len(selected_keys)}` alerts.")
-                with m2:
-                    if st.button("Suppress Selected Alerts"):
-                        for key in selected_keys:
-                            st.session_state.watchlist_alert_state[key] = {
-                                "status": "suppressed",
-                                "note": alert_note_input.strip(),
-                                "updated_at": datetime.now().isoformat(),
-                            }
-                        if selected_keys:
-                            _save_current_user_state()
-                            st.success(f"Suppressed `{len(selected_keys)}` alerts.")
-                with m3:
-                    if st.button("Clear Selected Alert State"):
-                        for key in selected_keys:
-                            st.session_state.watchlist_alert_state.pop(key, None)
-                        if selected_keys:
-                            _save_current_user_state()
-                            st.success(f"Cleared saved state for `{len(selected_keys)}` alerts.")
-
-                alert_view = visible_alerts.copy()
-                for col in ["current_rank", "prior_rank"]:
-                    if col in alert_view.columns:
-                        alert_view[col] = alert_view[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
-                for col in ["rank_shift", "std_rank"]:
-                    if col in alert_view.columns:
-                        alert_view[col] = alert_view[col].map(lambda x: f"{x:+.1f}" if pd.notna(x) and col == "rank_shift" else (f"{x:.1f}" if pd.notna(x) else "—"))
-                st.dataframe(
-                    alert_view[
-                        [
-                            c for c in [
-                                "county_name", "state", "severity", "alert_type", "current_rank",
-                                "prior_rank", "rank_shift", "std_rank", "health_status",
-                                "alert_status", "message", "alert_note", "alert_updated_at"
-                            ] if c in alert_view.columns
-                        ]
-                    ],
-                    width="stretch",
-                    hide_index=True,
-                    height=260,
-                )
-                with st.expander("Alert Digest & Export", expanded=False):
-                    top_review = pd.DataFrame(digest_payload.get("top_review_counties") or [])
-                    if not top_review.empty:
-                        review_view = top_review.copy()
-                        if "current_rank" in review_view.columns:
-                            review_view["current_rank"] = review_view["current_rank"].map(
-                                lambda x: f"#{int(x)}" if pd.notna(x) else "—"
-                            )
-                        st.dataframe(review_view, width="stretch", hide_index=True, height=220)
-                    else:
-                        st.caption("No unsuppressed alert clusters currently need review.")
-                    dg1, dg2 = st.columns(2)
-                    with dg1:
-                        st.download_button(
-                            "Export alert digest (Markdown)",
-                            data=digest_md.encode("utf-8"),
-                            file_name="watchlist_alert_digest.md",
-                            mime="text/markdown",
-                        )
-                    with dg2:
-                        st.download_button(
-                            "Export alert digest (JSON)",
-                            data=json.dumps(digest_payload, indent=2).encode("utf-8"),
-                            file_name="watchlist_alert_digest.json",
-                            mime="application/json",
-                        )
-
-            st.subheader("Run-to-Run Explanation Summary")
-            summary_view = run_summary_df.copy()
-            if "top25_presence_share" in summary_view.columns:
-                summary_view["top25_presence_share"] = summary_view["top25_presence_share"].map(
-                    lambda x: f"{100*x:.0f}%" if pd.notna(x) else "—"
-                )
-            for col in ["opportunity_score", "pred_policy_3yr", "pred_avg_5yr"]:
-                if col in summary_view.columns:
-                    fmt = _fmt_score if col == "opportunity_score" else _fmt_pct
-                    summary_view[col] = summary_view[col].map(fmt)
-            for col in ["rank_shift", "std_rank"]:
-                if col in summary_view.columns:
-                    summary_view[col] = summary_view[col].map(lambda x: f"{x:+.1f}" if pd.notna(x) and col == "rank_shift" else (f"{x:.1f}" if pd.notna(x) else "—"))
-            for col in [
-                "site_thesis_support_index",
-                "land_developability_index",
-                "land_constraint_pressure",
-                "land_fragility_pressure",
-            ]:
-                if col in summary_view.columns:
-                    summary_view[col] = summary_view[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "—")
-            show_cols = [
-                c for c in [
-                    "county_name", "state", "current_rank", "prior_rank", "rank_shift", "movement",
-                    "opportunity_score", "pred_policy_3yr", "pred_avg_5yr",
-                    "top25_presence_share", "std_rank",
-                    "site_thesis_support_index", "land_developability_index",
-                    "land_constraint_pressure", "land_fragility_pressure",
-                    "wave3_support_short", "wave3_brake_short", "wave3_decision_verdict",
-                    "explanation", "note"
-                ] if c in summary_view.columns
-            ]
-            st.dataframe(summary_view[show_cols], width="stretch", hide_index=True, height=320)
-            st.download_button(
-                "Export run-to-run summary (Markdown)",
-                data=run_summary_md.encode("utf-8"),
-                file_name="watchlist_run_summary.md",
-                mime="text/markdown",
-            )
-            wave3_brief_md = _build_wave3_shortlist_brief(
-                watch_current,
-                run_summary_df=run_summary_df,
-                watchlist_name=active_watchlist_name,
-                watchlist_meta=active_watchlist_meta,
-            )
-            st.download_button(
-                "Export Wave 3 shortlist brief (Markdown)",
-                data=wave3_brief_md.encode("utf-8"),
-                file_name="watchlist_wave3_structural_brief.md",
-                mime="text/markdown",
-            )
-            scorecard_df, scorecard_md = _build_wave3_shortlist_scorecard(
-                watch_current,
-                run_summary_df=run_summary_df,
-            )
-            if not scorecard_df.empty:
-                st.subheader("Wave 3 Structural Scorecard")
-                posture_counts = scorecard_df["structural_posture"].value_counts().to_dict()
-                sc1, sc2, sc3 = st.columns(3)
-                sc1.metric("Structurally Supported", int(posture_counts.get("structurally_supported", 0)))
-                sc2.metric("Mixed Structural Read", int(posture_counts.get("mixed_structural_read", 0)))
-                sc3.metric("Structurally Constrained", int(posture_counts.get("structurally_constrained", 0)))
-
-                scorecard_view = scorecard_df.copy()
-                for col in ["pred_policy_3yr", "pred_avg_5yr"]:
-                    if col in scorecard_view.columns:
-                        scorecard_view[col] = scorecard_view[col].map(_fmt_pct)
-                for col in [
-                    "site_thesis_support_index",
-                    "land_developability_index",
-                    "land_constraint_pressure",
-                    "land_fragility_pressure",
-                    "composite_risk",
-                ]:
-                    if col in scorecard_view.columns:
-                        scorecard_view[col] = scorecard_view[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "—")
-                if "overall_rank" in scorecard_view.columns:
-                    scorecard_view["overall_rank"] = scorecard_view["overall_rank"].map(
-                        lambda x: f"#{int(x)}" if pd.notna(x) else "—"
-                    )
-                if "rank_shift" in scorecard_view.columns:
-                    scorecard_view["rank_shift"] = scorecard_view["rank_shift"].map(
-                        lambda x: f"{x:+.1f}" if pd.notna(x) else "—"
-                    )
-                st.dataframe(
-                    scorecard_view[
-                        [
-                            c for c in [
-                                "county_name", "state", "overall_rank", "structural_posture",
-                                "site_thesis_support_index", "land_developability_index",
-                                "land_constraint_pressure", "land_fragility_pressure",
-                                "wave3_support_short", "wave3_brake_short", "wave3_decision_verdict",
-                                "movement", "rank_shift",
-                                "structural_posture_reasons",
-                            ] if c in scorecard_view.columns
-                        ]
-                    ],
-                    width="stretch",
-                    hide_index=True,
-                    height=280,
-                )
-                sg1, sg2 = st.columns(2)
-                with sg1:
-                    st.download_button(
-                        "Export structural scorecard (CSV)",
-                        data=scorecard_df.to_csv(index=False).encode("utf-8"),
-                        file_name="watchlist_wave3_structural_scorecard.csv",
-                        mime="text/csv",
-                    )
-                with sg2:
-                    st.download_button(
-                        "Export structural scorecard (Markdown)",
-                        data=scorecard_md.encode("utf-8"),
-                        file_name="watchlist_wave3_structural_scorecard.md",
-                        mime="text/markdown",
-                    )
-            template_choice = st.selectbox(
-                "Share template",
-                options=["Teammate Brief", "IC Summary"],
-                index=0,
-                help="Generate a more opinionated reusable handoff format from the current watchlist.",
-            )
-            template_md = _build_watchlist_share_template(
-                template_choice,
-                watch_current,
-                run_summary_df=run_summary_df,
-                watchlist_name=active_watchlist_name,
-                watchlist_meta=active_watchlist_meta,
-            )
-            st.download_button(
-                f"Export {template_choice} (Markdown)",
-                data=template_md.encode("utf-8"),
-                file_name=f"watchlist_{template_choice.lower().replace(' ', '_')}.md",
-                mime="text/markdown",
-            )
-
-        if run_history_detail_df is not None and not run_history_detail_df.empty:
-            history = run_history_detail_df[run_history_detail_df["fips"].isin(watch_fips)].copy()
-            if not history.empty:
-                history["county_state"] = history["county_name"] + ", " + history["state"]
-                history = history.sort_values(["run_id", "overall_rank"], ascending=[True, True])
-                fig_watch = px.line(
-                    history,
-                    x="run_id",
-                    y="overall_rank",
-                    color="county_state",
-                    markers=True,
-                    title="Watchlist Rank Trajectory Across Recent Runs",
-                    labels={"overall_rank": "Overall rank (lower is better)", "run_id": "Run"},
-                    hover_data=["opportunity_score", "pred_policy_3yr", "pred_avg_5yr", "composite_risk", "confidence"],
-                )
-                fig_watch.update_yaxes(autorange="reversed")
-                fig_watch.update_layout(height=420, margin=dict(t=40, b=20))
-                st.plotly_chart(fig_watch, width="stretch")
-
-                hist_cols = [
-                    c for c in [
-                        "run_id", "county_name", "state", "overall_rank",
-                        "opportunity_score", "pred_policy_3yr", "pred_avg_5yr",
-                        "composite_risk", "confidence"
-                    ] if c in history.columns
-                ]
-                st.caption("Per-run watchlist detail")
-                st.dataframe(history[hist_cols], width="stretch", hide_index=True, height=320)
-        else:
-            st.warning(
-                "Run history artifacts are missing. Run "
-                "`./.venv/bin/python scripts/build_run_history_summary.py` "
-                "to enable movement tracking."
-            )
-
-        if latest_compare_rank_df is not None and not latest_compare_rank_df.empty:
-            movers = latest_compare_rank_df[latest_compare_rank_df["fips"].isin(watch_fips)].copy()
-            if not movers.empty:
-                movers["abs_rank_shift"] = movers["rank_shift"].abs()
-                movers = movers.sort_values("abs_rank_shift", ascending=False)
-                show_cols = [
-                    c for c in [
-                        "fips", "county_name_new", "state_new", "overall_rank_old", "overall_rank_new",
-                        "rank_shift", "opportunity_score_delta", "pred_policy_3yr_delta",
-                        "pred_xgboost_5yr_delta", "pred_lightgbm_5yr_delta"
-                    ] if c in movers.columns
-                ]
-                st.subheader("Watchlist Latest Run Movers")
-                st.dataframe(movers[show_cols].head(20), width="stretch", hide_index=True, height=260)
-
-        watch_notes_rows = []
-        for fips in watch_fips:
-            note = st.session_state.county_notes.get(fips)
-            if note and (note.get("note") or "").strip():
-                watch_notes_rows.append(
-                    {
-                        "fips": fips,
-                        "county_name": note.get("county_name"),
-                        "state": note.get("state"),
-                        "updated_at": note.get("updated_at"),
-                        "note": note.get("note"),
-                    }
-                )
-        if watch_notes_rows:
-            st.subheader("Watchlist Notes")
-            st.dataframe(pd.DataFrame(watch_notes_rows), width="stretch", hide_index=True, height=240)
-
-    if run_history_summary:
-        st.subheader("Stable Top-25 Counties Across Recent Runs")
-        stable = pd.DataFrame(run_history_summary.get("stable_top25") or [])
-        if not stable.empty:
-            stable["top25_presence_share"] = (100 * stable["top25_presence_share"]).round(0).astype("Int64").astype(str) + "%"
-            st.dataframe(stable, width="stretch", hide_index=True, height=260)
-
-        st.subheader("Volatile Boundary Movers")
-        volatile = pd.DataFrame(run_history_summary.get("volatile_boundary") or [])
-        if not volatile.empty:
-            st.dataframe(volatile, width="stretch", hide_index=True, height=260)
-
-
-# ========================= TAB 5: MODEL COMPARISON =========================
-
-with tab_compare:
-    st.header("Model Comparison")
-
-    try:
-        col_left, col_right = st.columns(2)
-
-        with col_left:
-            h_compare = st.selectbox(
-                "Horizon to compare", HORIZONS,
-                format_func=lambda h: f"{h}-year", index=2, key="compare_horizon"
-            )
-
-        xgb_col = f"pred_xgboost_{h_compare}yr"
-        lgb_col = f"pred_lightgbm_{h_compare}yr"
-
-        if xgb_col in filtered.columns and lgb_col in filtered.columns:
-            scatter_cols = [xgb_col, lgb_col, "opportunity_score"]
-            for c in ["county_name", "state"]:
-                if c in filtered.columns:
-                    scatter_cols.append(c)
-            scatter_df = filtered[scatter_cols].dropna(subset=[xgb_col, lgb_col])
-
-            if scatter_df.empty:
-                st.warning("No data available for this horizon after filtering.")
-            else:
-                fig_scatter = px.scatter(
-                    scatter_df,
-                    x=xgb_col, y=lgb_col,
-                    hover_name=("county_name" if "county_name" in scatter_df.columns else None),
-                    color="opportunity_score",
-                    color_continuous_scale="Viridis",
-                    title=f"XGBoost vs LightGBM — {h_compare}-year predictions",
-                    labels={xgb_col: "XGBoost prediction", lgb_col: "LightGBM prediction"},
-                )
-                # Add diagonal line
-                min_val = min(scatter_df[xgb_col].min(), scatter_df[lgb_col].min())
-                max_val = max(scatter_df[xgb_col].max(), scatter_df[lgb_col].max())
-                fig_scatter.add_shape(
-                    type="line", x0=min_val, y0=min_val, x1=max_val, y1=max_val,
-                    line=dict(color="gray", dash="dash"),
-                )
-                fig_scatter.update_layout(height=500)
-                st.plotly_chart(fig_scatter, width="stretch")
-
-                # Agreement metrics
-                corr = scatter_df[xgb_col].corr(scatter_df[lgb_col])
-                mean_diff = (scatter_df[xgb_col] - scatter_df[lgb_col]).mean()
-                st.caption(
-                    f"Correlation: **{corr:.3f}** · Mean difference (XGB - LGB): **{mean_diff:+.3f}**"
-                )
-
-                # Distribution comparison
-                fig_dist = go.Figure()
-                fig_dist.add_trace(go.Histogram(
-                    x=scatter_df[xgb_col], name="XGBoost",
-                    opacity=0.6, marker_color="#3498db", nbinsx=50,
-                ))
-                fig_dist.add_trace(go.Histogram(
-                    x=scatter_df[lgb_col], name="LightGBM",
-                    opacity=0.6, marker_color="#e67e22", nbinsx=50,
-                ))
-                fig_dist.update_layout(
-                    barmode="overlay", height=300,
-                    title=f"Prediction Distribution — {h_compare}-year",
-                    xaxis_title="Predicted appreciation",
-                )
-                st.plotly_chart(fig_dist, width="stretch")
-
-        else:
-            st.warning(f"Missing model predictions for {h_compare}-year horizon.")
-
-        st.subheader("Calibration Diagnostics")
-        st.caption(
-            "Raw vs calibrated prediction shifts by model/horizon. "
-            "Cap-hit rate uses the same dynamic cap formula as scoring."
-        )
-        if calibration_diag.empty:
-            st.info("No calibrated prediction columns found (`pred_*_cal`).")
-        else:
-            diag_view = calibration_diag.copy()
-            diag_view["cap_hit_rate"] = (100 * diag_view["cap_hit_rate"]).round(2)
-            for c in ["raw_mean", "cal_mean", "mean_shift", "mean_abs_shift", "max_abs_shift", "dynamic_cap"]:
-                diag_view[c] = diag_view[c].round(4)
-            st.dataframe(diag_view, width="stretch", hide_index=True)
-
-            fig_cap = px.bar(
-                diag_view,
-                x="horizon_yr",
-                y="cap_hit_rate",
-                color="model",
-                barmode="group",
-                title="Calibration Cap-Hit Rate (%)",
-                labels={"horizon_yr": "Horizon (years)", "cap_hit_rate": "Cap-hit rate (%)"},
-            )
-            fig_cap.update_layout(height=320, margin=dict(t=40, b=20))
-            st.plotly_chart(fig_cap, width="stretch")
-
-            fig_shift = px.bar(
-                diag_view,
-                x="horizon_yr",
-                y="mean_abs_shift",
-                color="model",
-                barmode="group",
-                title="Mean Absolute Calibration Shift",
-                labels={"horizon_yr": "Horizon (years)", "mean_abs_shift": "Mean |shift|"},
-            )
-            fig_shift.update_layout(height=320, margin=dict(t=40, b=20))
-            st.plotly_chart(fig_shift, width="stretch")
-
-        # Cross-horizon consistency
-        st.subheader("Cross-Horizon Consistency")
-        st.caption("Do models agree on which counties are high-growth across all horizons?")
-
-        rank_cols = [f"rank_avg_{h}yr" for h in HORIZONS if f"rank_avg_{h}yr" in filtered.columns]
-        if len(rank_cols) >= 2:
-            rank_df = filtered[rank_cols].dropna().head(100)
-            corr_matrix = rank_df.corr()
-            fig_corr = px.imshow(
-                corr_matrix,
-                text_auto=".2f",
-                color_continuous_scale="RdBu_r",
-                zmin=-1, zmax=1,
-                title="Rank Correlation Across Horizons",
-            )
-            fig_corr.update_layout(height=350)
-            st.plotly_chart(fig_corr, width="stretch")
-
-        st.divider()
-        st.subheader("County Compare")
-        compare_source = df.sort_values("overall_rank").head(1000).copy()
-        compare_options = compare_source.apply(
-            lambda r: f"{r['county_name']}, {r['state']} (#{int(r['overall_rank'])})",
-            axis=1,
-        ).tolist()
-        compare_label_to_fips = dict(
-            zip(
-                compare_options,
-                compare_source["fips"].astype(str).str.zfill(5).tolist(),
-            )
-        )
-        compare_fips_to_label = {v: k for k, v in compare_label_to_fips.items()}
-        with st.expander("Compare Set Import / Export"):
-            compare_import = st.file_uploader(
-                "Import compare set JSON",
-                type=["json"],
-                key="compare_set_import_file",
-                help="Use a compare-set JSON export from this dashboard or a full dashboard user-data bundle.",
-            )
-            if st.button("Apply Compare Set Import"):
-                if compare_import is None:
-                    st.warning("Choose a compare-set JSON file before importing.")
-                else:
-                    try:
-                        payload = json.loads(compare_import.getvalue().decode("utf-8"))
-                        if "saved_compare_sets" in payload:
-                            st.session_state.saved_compare_sets.update(payload.get("saved_compare_sets") or {})
-                            _save_current_user_state()
-                            st.success("Merged compare sets from dashboard user-data bundle.")
-                        else:
-                            compare_name = payload.get("compare_set_name") or payload.get("name") or "Imported Compare Set"
-                            compare_fips = [
-                                f for f in (_normalize_fips_value(x) for x in (payload.get("fips") or []))
-                                if f is not None
-                            ]
-                            st.session_state.saved_compare_sets[compare_name] = {
-                                "fips": compare_fips,
-                                "updated_at": datetime.now().isoformat(),
-                                "count": len(compare_fips),
-                            }
-                            st.session_state.compare_pick = [
-                                compare_fips_to_label[f] for f in compare_fips if f in compare_fips_to_label
-                            ]
-                            _save_current_user_state()
-                            st.success(f"Imported compare set: {compare_name}")
-                    except Exception as exc:
-                        st.error(f"Compare set import failed: {exc}")
-        saved_compare_names = ["Current Selection"] + sorted(st.session_state.saved_compare_sets.keys())
-        cs1, cs2, cs3 = st.columns(3)
-        with cs1:
-            selected_compare_set = st.selectbox("Load compare set", options=saved_compare_names, index=0)
-            if selected_compare_set != "Current Selection" and st.button("Load Compare Set"):
-                payload = st.session_state.saved_compare_sets.get(selected_compare_set, {})
-                st.session_state.compare_pick = [
-                    compare_fips_to_label[f]
-                    for f in payload.get("fips", [])
-                    if f in compare_fips_to_label
-                ]
-                st.success(f"Loaded compare set: {selected_compare_set}")
-        with cs2:
-            compare_set_name = st.text_input("Save compare set as", value="", placeholder="e.g. Midwest value check")
-            if st.button("Save Compare Set"):
-                cleaned = compare_set_name.strip()
-                selected_labels = st.session_state.get("compare_pick", [])
-                selected_fips = [compare_label_to_fips[label] for label in selected_labels if label in compare_label_to_fips]
-                if not cleaned:
-                    st.warning("Enter a name before saving the compare set.")
-                elif len(selected_fips) < 2:
-                    st.warning("Select at least two counties before saving a compare set.")
-                else:
-                    st.session_state.saved_compare_sets[cleaned] = {
-                        "fips": selected_fips,
-                        "updated_at": datetime.now().isoformat(),
-                        "count": len(selected_fips),
-                    }
-                    _save_current_user_state()
-                    st.success(f"Saved compare set: {cleaned}")
-        with cs3:
-            if selected_compare_set != "Current Selection" and st.button("Delete Compare Set"):
-                st.session_state.saved_compare_sets.pop(selected_compare_set, None)
-                _save_current_user_state()
-                st.success(f"Deleted compare set: {selected_compare_set}")
-        pick = st.multiselect(
-            "Select 2-4 counties to compare",
-            options=compare_options,
-            default=st.session_state.get("compare_pick", compare_options[:2] if len(compare_options) >= 2 else compare_options),
-            max_selections=4,
-            key="compare_pick",
-        )
-        if len(pick) >= 2:
-            ranks = [int(x.split("(#")[1].rstrip(")")) for x in pick]
-            cmp = df[df["overall_rank"].isin(ranks)].copy()
-            cmp["fips"] = cmp["fips"].astype(str).str.zfill(5)
-            cmp_raw = cmp.copy()
-            keep = ["overall_rank", "county_name", "state", "opportunity_score", "composite_risk", "confidence"]
-            for h in HORIZONS:
-                col = f"pred_avg_{h}yr"
-                if col in cmp.columns:
-                    keep.append(col)
-            for col in [
-                "site_thesis_support_index",
-                "land_developability_index",
-                "land_constraint_pressure",
-                "land_fragility_pressure",
-                "recreation_access_score",
-                "coastal_flood_pressure",
-            ]:
-                if col in cmp.columns:
-                    keep.append(col)
-            keep.append("fips")
-            cmp = cmp[keep].sort_values("overall_rank")
-            cmp_raw = cmp_raw[keep].sort_values("overall_rank")
-            if run_history_summary_df is not None and not run_history_summary_df.empty:
-                hist_keep = [
-                    c for c in ["fips", "avg_rank", "std_rank", "top25_presence_share", "rank_range"]
-                    if c in run_history_summary_df.columns
-                ]
-                cmp = cmp.merge(run_history_summary_df[hist_keep], on="fips", how="left")
-                cmp_raw = cmp_raw.merge(run_history_summary_df[hist_keep], on="fips", how="left")
-            for c in cmp.columns:
-                if c.startswith("pred_"):
-                    cmp[c] = cmp[c].map(_fmt_pct)
-            if "opportunity_score" in cmp.columns:
-                cmp["opportunity_score"] = cmp["opportunity_score"].map(_fmt_score)
-            if "composite_risk" in cmp.columns:
-                cmp["composite_risk"] = cmp["composite_risk"].map(_fmt_score)
-            for col in [
-                "avg_rank", "std_rank", "rank_range",
-                "site_thesis_support_index", "land_developability_index",
-                "land_constraint_pressure", "land_fragility_pressure",
-                "fragility_balance_index", "scarcity_amenity_balance_index",
-                "optionality_profile_index", "constraint_cluster_label",
-                "recreation_access_score", "coastal_flood_pressure",
-            ]:
-                if col in cmp.columns:
-                    if col in {"avg_rank", "std_rank", "rank_range"}:
-                        cmp[col] = cmp[col].map(lambda x: f"{x:.1f}" if pd.notna(x) else "—")
-                    elif col == "constraint_cluster_label":
-                        cmp[col] = cmp[col].fillna("—")
-                    else:
-                        cmp[col] = cmp[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "—")
-            if "top25_presence_share" in cmp.columns:
-                cmp["top25_presence_share"] = cmp["top25_presence_share"].map(lambda x: f"{100*x:.0f}%" if pd.notna(x) else "—")
-            cmp = cmp.drop(columns=["fips"], errors="ignore")
-            st.dataframe(cmp, width="stretch", hide_index=True)
-
-            wave3_compare_cols = [
-                c for c in [
-                    "site_thesis_support_index",
-                    "land_developability_index",
-                    "land_constraint_pressure",
-                    "land_fragility_pressure",
-                    "fragility_balance_index",
-                    "scarcity_amenity_balance_index",
-                    "optionality_profile_index",
-                    "wave3_overlay_rank",
-                    "wave3_overlay_adjustment",
-                    "wave3_net_support",
-                    "wave3_support_score",
-                    "wave3_brake_score",
-                    "recreation_access_score",
-                    "coastal_flood_pressure",
-                ] if c in cmp_raw.columns
-            ]
-            if wave3_compare_cols:
-                st.subheader("Wave 3 Structural Comparison")
-                structural_view = _build_wave3_compare_rows(cmp_raw, wave3_status)
-                structural_fmt = structural_view.copy()
-                if "overall_rank" in structural_fmt.columns:
-                    structural_fmt["overall_rank"] = structural_fmt["overall_rank"].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
-                if "wave3_overlay_rank" in structural_fmt.columns:
-                    structural_fmt["wave3_overlay_rank"] = structural_fmt["wave3_overlay_rank"].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
-                for col in wave3_compare_cols:
-                    if col in structural_fmt.columns and col != "wave3_overlay_rank":
-                        structural_fmt[col] = structural_fmt[col].map(lambda x: f"{x:.3f}" if pd.notna(x) else "—")
-                st.dataframe(structural_fmt, width="stretch", hide_index=True, height=240)
-
-                radar_rows = []
-                for _, row in cmp_raw.iterrows():
-                    for metric in wave3_compare_cols:
-                        val = row.get(metric)
-                        if pd.notna(val):
-                            radar_rows.append(
-                                {
-                                    "county": f"{row.get('county_name')}, {row.get('state')}",
-                                    "metric": metric,
-                                    "value": float(val),
-                                }
-                            )
-                if radar_rows:
-                    radar_df = pd.DataFrame(radar_rows)
-                    fig_wave3_cmp = px.line_polar(
-                        radar_df,
-                        r="value",
-                        theta="metric",
-                        color="county",
-                        line_close=True,
-                        title="Wave 3 Structural Land-Thesis Surface",
-                    )
-                    fig_wave3_cmp.update_layout(height=520, margin=dict(t=50, b=20))
-                    st.plotly_chart(fig_wave3_cmp, width="stretch")
-
-                for bullet in _build_wave3_compare_bullets(cmp_raw, wave3_status):
-                    st.markdown(f"- {bullet}")
-
-            compare_export_payload = {
-                "compare_set_name": selected_compare_set if selected_compare_set != "Current Selection" else "Current Selection",
-                "exported_at": datetime.now().isoformat(),
-                "fips": [compare_label_to_fips[label] for label in pick if label in compare_label_to_fips],
-                "labels": pick,
-            }
-            st.download_button(
-                "Export compare set (JSON)",
-                data=json.dumps(compare_export_payload, indent=2).encode("utf-8"),
-                file_name="compare_set.json",
-                mime="application/json",
-            )
-    except Exception as exc:
-        st.error(f"Model comparison failed: {exc}")
-
-
-# ========================= TAB 6: VALIDATION ===============================
-
-with tab_valid:
+    Analyst-only diagnostics; references module-level loaders/globals
+    (load_eval_report, EVAL_PATH, conformal_diag). Surfaced under Pro ->
+    Advanced; report-only, no rank or scoring change."""
     st.header("Model Validation")
+    _render_honest_coordinates()
+    st.divider()
+    st.caption("Below: legacy engineering diagnostics (contemporaneous-trained CV). "
+               "These are NOT honest forward-skill claims — the coordinates above are.")
     eval_report = load_eval_report(_mtime=_file_mtime(EVAL_PATH))
 
     if eval_report is None:
@@ -10848,9 +7972,13 @@ with tab_valid:
             st.error(f"Validation tab failed: {exc}")
 
 
-# ========================= TAB 7: SYSTEM STATUS ============================
+def _render_system_status_console() -> None:
+    """Source health, latest-year completeness, drift, and Wave 2/3 posture.
 
-with tab_status:
+    Analyst-only diagnostics; references module-level globals (status_bundle,
+    fiveyr_policy_status, wave3_status, wave3_overlay_summary,
+    latest_compare_boundary_df, run_compare_files). Surfaced under Pro ->
+    Advanced; report-only, no rank or scoring change."""
     st.header("System Status")
     st.caption("Operational visibility for source health, latest-year completeness, drift, and Wave 2 promotion posture.")
 
@@ -11288,4 +8416,2623 @@ with tab_status:
             ]
             st.dataframe(rr_df[show_rr_cols], width="stretch", hide_index=True, height=320)
 
-_render_demo_footer(latest_run, status_bundle, demo_readiness_report)
+
+def _render_tokenization_readiness_tab(packet: dict | None) -> None:
+    """Internal, report-only Tokenization Readiness surface (backlog TK1).
+
+    Renders the SOURCING-readiness packet from
+    `scripts/build_tokenization_readiness_packet.py`: A/B/C tiers over the quiet
+    shortlist, best land-type strategy signal, income-fit flag, and the six
+    investability gates that stay blocked pending parcel data + counsel. A high
+    tier means "worth parcel diligence," never investable or offered. No
+    securities, no production or rank change."""
+    st.header("Tokenization Readiness (Sourcing Screen)")
+    st.caption(
+        "Internal, report-only. County-grain SOURCING readiness only — NOT investability, "
+        "NOT an offering, NOT a security. Surfaces the existing readiness packet; it does "
+        "not change any rank, score, or production artifact."
+    )
+    if not packet or not packet.get("rows"):
+        st.info(
+            "No tokenization-readiness packet is loaded. Generate it with "
+            "`./.venv/bin/python scripts/build_tokenization_readiness_packet.py` "
+            "(reads the latest boom-onset shortlist)."
+        )
+        return
+
+    tiers = packet.get("tier_counts") or {}
+    shortlist_year = packet.get("shortlist_year", "n/a")
+    rows = packet.get("rows") or []
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Shortlist Year", str(shortlist_year))
+    c2.metric("Tier A", tiers.get("A", 0))
+    c3.metric("Tier B", tiers.get("B", 0))
+    c4.metric("Tier C", tiers.get("C", 0))
+
+    income_fit_count = sum(1 for r in rows if r.get("income_fit"))
+    st.caption(
+        f"{len(rows)} quiet-shortlist counties screened · {income_fit_count} flagged "
+        "income-fit (farmland-cash-rent or amenity — the retail/non-accredited-friendly "
+        "land types per the feasibility memo)."
+    )
+
+    table = pd.DataFrame(
+        [
+            {
+                "County": r.get("county"),
+                "St": r.get("state_abbr"),
+                "Tier": r.get("sourcing_readiness_tier"),
+                "Readiness": round(float(r["sourcing_readiness_score"]), 3)
+                if r.get("sourcing_readiness_score") is not None else None,
+                "Thesis": round(float(r["gate1_thesis_strength"]), 2)
+                if r.get("gate1_thesis_strength") is not None else None,
+                "Best Land-Type Strategy": r.get("gate4_best_strategy"),
+                "Signal": round(float(r["gate4_best_signal"]), 3)
+                if r.get("gate4_best_signal") is not None else None,
+                "Income Fit": "yes" if r.get("income_fit") else "no",
+            }
+            for r in rows
+        ]
+    )
+    st.dataframe(table, width="stretch", hide_index=True, height=460)
+
+    assessable = ", ".join(packet.get("assessable_gates") or []) or "n/a"
+    blocked = ", ".join(packet.get("blocked_gates") or []) or "n/a"
+    st.markdown(
+        f"- **Assessable gates** (scored here): `{assessable}`.\n"
+        f"- **Blocked gates** (need parcel data + counsel): `{blocked}`. Every county above "
+        "still has all six investability gates blocked — there is no parcel, legal, "
+        "underwriting, offering, token, or servicing assessment here.\n"
+        "- **Tier A/B/C** ranks how worth-pursuing a county is for *parcel diligence*, from "
+        "its boom-onset thesis strength + best land-type signal + income fit.\n"
+        "- **Best Land-Type Strategy** is the county's highest land-type signal (farmland "
+        "cash rent, recreation/amenity, supply-constrained, or development dynamism) — a "
+        "hypothesis to test on the ground, not an underwriting.\n"
+        f"- Gate spec: `{packet.get('matrix', 'documentation/TOKENIZATION_READINESS_MATRIX.md')}`."
+    )
+    st.download_button(
+        "Export Tokenization Readiness JSON",
+        data=json.dumps(packet, indent=2).encode("utf-8"),
+        file_name="tokenization_readiness_packet.json",
+        mime="application/json",
+        key="product_tokenization_readiness_json",
+    )
+    st.caption(f"Packet generated: `{packet.get('generated_at', 'n/a')}` · status: `{packet.get('status', 'n/a')}`.")
+
+
+def _recal_badges(row: pd.Series) -> str:
+    flags = [("badge_urban_core", "urban core"), ("badge_tiny_market", "tiny market"), ("badge_already_hot", "already hot"),
+             ("badge_declining", "declining"), ("badge_commodity_cycle", "commodity cycle"), ("badge_no_demand_signal", "no demand signal")]
+    out = [label for col, label in flags if bool(row.get(col)) and pd.notna(row.get(col))]
+    return ", ".join(out) if out else "—"
+
+
+def _render_quiet_shortlist_tab(sim_df: pd.DataFrame, reads: dict | None) -> None:
+    """RECAL-1 headline discovery surface: the classifier's quiet shortlist inside universe B."""
+    st.header("Quiet Shortlist — universe B")
+    if "boom_onset_score" not in sim_df.columns or "universe_B" not in sim_df.columns:
+        st.warning("Recalibration surfaces missing — run `scripts/publish_recal_surfaces.py` to publish `output/recal/`.")
+        return
+    st.caption(
+        "Report-only. Quiet counties (prior 3-yr momentum rank 0.10–0.667, demand floor met, population ≥ 25k) inside the "
+        "investable universe (density pct ≤ 0.95, population < 1M), ranked by the boom-onset classifier's champion lane "
+        "(the same basis as the operator packets and the frozen forward-validation snapshots); the lane-agnostic class rank "
+        "is shown beside it. Value is observed facts. Nothing here changes production ranks."
+    )
+    uc = (reads or {}).get("universe_capture") or {}
+    hc = (reads or {}).get("honest") or {}
+    b = (uc.get("universes") or {}).get("B") or {}
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Universe B counties", f"{b.get('n_counties', '—')}")
+    c2.metric("Capture inside vs unrestricted", f"{b.get('ratio_vs_unrestricted', float('nan')):.2f}×" if b.get("ratio_vs_unrestricted") else "—",
+              "UNIV-1 pass" if b.get("UNIV-1_capture_floor_0.8x") else "", delta_color="off")
+    c3.metric("Honest capture (held-out)", f"{hc.get('classifier', {}).get('honest_held_out_capture_at_100', float('nan')):.3f}" if hc else "—",
+              f"{hc.get('classifier', {}).get('vs_random_multiple', '')}× random" if hc else "", delta_color="off")
+    c4.metric("Operator precision (proxy)", f"{hc.get('operator_review', {}).get('operator_precision', float('nan')):.2f}" if hc else "—")
+    pool = sim_df[
+        sim_df["universe_B"].fillna(False).astype(bool)
+        & sim_df["quiet_now"].fillna(False).astype(bool)
+        & sim_df["demand_floor_ok"].fillna(False).astype(bool)
+        & (pd.to_numeric(sim_df.get("population"), errors="coerce").fillna(0) >= 25_000)
+    ].copy()
+    pool = pool.sort_values("boom_onset_score", ascending=False)
+    top_n = st.slider("Rows", 10, 100, 30, step=10, key="quiet_shortlist_rows")
+    show = pool.head(top_n)
+    table = pd.DataFrame({
+        "#": range(1, len(show) + 1),
+        "County": show.apply(lambda r: f"{r.get('county_name', '')}, {r.get('state', '')}", axis=1).values,
+        "Timing": show["sim_timing_score"].map(_fmt_score).values,
+        "Boom-onset score": show["boom_onset_score"].map(lambda x: f"{x:.3f}" if pd.notna(x) else "—").values,
+        "Class rank (lane-agnostic)": show["timing_class_median_rank_pct"].map(lambda x: f"{x:.2f}" if pd.notna(x) else "—").values if "timing_class_median_rank_pct" in show.columns else "—",
+        "Value": show["sim_value_score"].map(_fmt_score).values,
+        "Gross rent yield": show["fmr_gross_yield"].map(_fmt_pct).values if "fmr_gross_yield" in show.columns else "—",
+        "Farm land $/ac": show["nass_land_value_per_acre"].map(lambda x: f"${x:,.0f}" if pd.notna(x) else "—").values if "nass_land_value_per_acre" in show.columns else "—",
+        "Tourism idx": show["tourism_intensity_index"].map(lambda x: f"{x:.2f}" if pd.notna(x) else "—").values if "tourism_intensity_index" in show.columns else "—",
+        "STR RevPAR (AirROI)": show["str_revpar"].map(lambda x: f"${x:,.0f}" if pd.notna(x) else "—").values if "str_revpar" in show.columns else "—",
+        "STR demand pressure 3y": show["str_demand_pressure_3yr"].map(lambda x: f"{x:+.0%}" if pd.notna(x) else "—").values if "str_demand_pressure_3yr" in show.columns else "—",
+        "Archetype lens": show.get("archetype_lens_best", pd.Series("—", index=show.index)).fillna("—").values,
+        "Momentum rank": show["momentum_rank_pct"].map(lambda x: f"{x:.2f}" if pd.notna(x) else "—").values,
+        "Density pct": show["density_pct"].map(lambda x: f"{x:.2f}" if pd.notna(x) else "—").values,
+        "2025 review": show.get("operator_review_2025", pd.Series("", index=show.index)).fillna("").values,
+        "On clock (snapshot 4)": show.get("forward_snapshot_20260909_role", pd.Series("", index=show.index)).fillna("").map(lambda x: "pick" if x == "pick" else ("control" if x == "control" else "")).values,
+        "Badges": show.apply(_recal_badges, axis=1).values,
+    })
+    st.dataframe(table, width="stretch", hide_index=True, height=min(60 + 36 * len(table), 720))
+    if not pool.empty:
+        fig = px.scatter(
+            pool.head(300), x="sim_value_score", y="sim_timing_score", hover_name=pool.head(300).apply(lambda r: f"{r.get('county_name', '')}, {r.get('state', '')}", axis=1),
+            color="opportunity_archetype", labels={"sim_value_score": "Value (yield & cheapness)", "sim_timing_score": "Timing (boom-onset class rank)"},
+            title="Value × timing — quiet counties inside universe B (top 300 by timing)",
+        )
+        fig.update_layout(height=460, legend_title_text="Archetype")
+        st.plotly_chart(fig, width="stretch")
+    st.download_button("Export quiet shortlist (CSV)", data=table.to_csv(index=False).encode("utf-8"),
+                       file_name="landinvest_quiet_shortlist_universe_b.csv", mime="text/csv", key="quiet_shortlist_export")
+    st.caption("Badges are the documented false-positive modes; a county can be on this list and still carry one — read them as diligence flags. "
+               "Honest coordinates for this surface live under Advanced → Validation.")
+
+
+def _render_product_mode(
+    df: pd.DataFrame,
+    states: list[str],
+    latest_run: dict | None,
+    latest_deltas: dict | None,
+    status_bundle: dict | None,
+    run_history_summary_df: pd.DataFrame | None,
+    run_history_detail_df: pd.DataFrame | None,
+    latest_compare_rank_df: pd.DataFrame | None,
+    latest_compare_boundary_df: pd.DataFrame | None,
+    wave3_status: dict | None,
+    preboom_surfaces: dict[str, pd.DataFrame | None] | None = None,
+    preboom_blend_report: dict | None = None,
+    preboom_analog_report: dict | None = None,
+    preboom_promotion_gate: dict | None = None,
+    known_analog_suite: dict | None = None,
+    xfactor_scoreboard: dict | None = None,
+    xfactor_ablation_queue: dict | None = None,
+    xfactor_promotion_gate: dict | None = None,
+    demo_readiness_report: dict | None = None,
+    p0_repeatable_residual_guardrail: dict | None = None,
+    p0_repeatable_residual_candidates: pd.DataFrame | None = None,
+    tokenization_readiness_packet: dict | None = None,
+) -> None:
+    presets = _product_thesis_presets()
+
+    pending_profile = st.session_state.pop("pending_product_strategy_profile", None)
+    if isinstance(pending_profile, dict):
+        for key, value in pending_profile.items():
+            st.session_state[key] = value
+
+    with st.sidebar:
+        st.subheader("Strategy")
+        saved_profiles = st.session_state.get("saved_strategy_profiles", {})
+        if saved_profiles:
+            profile_name = st.selectbox("Saved strategy profile", ["None"] + sorted(saved_profiles), key="product_saved_profile")
+            if profile_name != "None" and st.button("Apply saved profile"):
+                profile = saved_profiles.get(profile_name, {})
+                st.session_state.pending_product_strategy_profile = {
+                    "product_h1": int(profile.get("h1", 0)),
+                    "product_growth": int(profile.get("growth", 60)),
+                    "product_value": int(profile.get("value", 15)),
+                    "product_value_focus": profile.get("value_focus", "Balanced"),
+                    "product_universe_only": bool(profile.get("universe_only", True)),
+                    "product_quiet_only": bool(profile.get("quiet_only", True)),
+                    "product_risk": int(profile.get("risk", 15)),
+                    "product_structure": int(profile.get("structure", 5)),
+                    "product_confidence": int(profile.get("confidence", 5)),
+                    "product_uncertainty": int(profile.get("uncertainty", 5)),
+                    "product_structural_focus": profile.get("structural_focus", "Overall land thesis"),
+                    "product_max_risk": float(profile.get("max_risk", 70)),
+                    "product_min_confidence": profile.get("min_confidence", "Any"),
+                    "product_states": profile.get("states", []),
+                }
+                st.rerun()
+        preset_name = st.selectbox("Thesis preset", list(presets.keys()), index=0, key="product_preset")
+        preset = presets[preset_name]
+        selected_states = st.multiselect("States", states, default=[], placeholder="All states", key="product_states")
+        min_confidence = st.selectbox(
+            "Minimum confidence",
+            ["Any", "MEDIUM+", "HIGH"],
+            index=["Any", "MEDIUM+", "HIGH"].index(preset["min_confidence"]),
+            key="product_min_confidence",
+        )
+        max_risk = st.slider("Maximum risk", 20.0, 100.0, float(preset["max_risk"]), step=1.0, key="product_max_risk")
+        st.divider()
+        st.caption("Scope")
+        universe_only = st.toggle(
+            "Investable universe B only", value=bool(preset.get("universe_only", True)), key="product_universe_only",
+            help="Density percentile <= 0.95 and population < 1M — the adopted scope rule (2026-09-09). Removes cooled big-city cores; keeps 91% of documented boom-family counties.",
+        )
+        quiet_only = st.toggle(
+            "Quiet-shortlist brakes", value=bool(preset.get("quiet_only", True)), key="product_quiet_only",
+            help="The classifier shortlist's own brakes: prior 3-year momentum rank between 0.10 and 0.667 (not already moving, not collapsing), population >= 25k, and an observed demand signal (positive net migration or above-median business formation).",
+        )
+        st.caption("Score mix")
+        growth = st.slider("Timing (boom-onset resemblance)", 0, 100, int(preset["growth"]), step=5, key="product_growth",
+                           help="Classifier ensemble-class rank: how much this quiet county resembles the years before past booms.")
+        value = st.slider("Value (yield & cheapness)", 0, 100, int(preset.get("value", 15)), step=5, key="product_value",
+                          help="Observed facts: gross rent yield within the county's RUCC band, home-value and land cheapness, farm cap-rate proxy.")
+        value_focus = st.selectbox("Value focus", ["Balanced", "Rent yield", "Farmland income"],
+                                   index=["Balanced", "Rent yield", "Farmland income"].index(preset.get("value_focus", "Balanced")), key="product_value_focus")
+        h1 = st.slider("1yr ordinal context (optional)", 0, 100, int(preset["h1"]), step=5, key="product_h1",
+                       help="Blends the validated 1yr ordering signal into timing. 3yr/5yr are never used — falsified under honest validation.")
+        h3, h5 = 0, 0
+        risk = st.slider("Risk control", 0, 100, int(preset["risk"]), step=5, key="product_risk")
+        structure = st.slider("Land thesis", 0, 100, int(preset["structure"]), step=5, key="product_structure")
+        confidence = st.slider("Confidence", 0, 100, int(preset["confidence"]), step=5, key="product_confidence")
+        uncertainty = st.slider("Uncertainty penalty", 0, 25, int(preset["uncertainty"]), step=1, key="product_uncertainty")
+        _focus_options = ["Overall land thesis", "Optionality", "Low fragility", "Recreation access", "Buildable scarcity", "Tourism intensity", "Farmland income"]
+        structural_focus = st.selectbox(
+            "Land thesis focus",
+            _focus_options,
+            index=_focus_options.index(preset["structural_focus"]) if preset["structural_focus"] in _focus_options else 0,
+            key="product_structural_focus",
+        )
+        profile_save_name = st.text_input("Save strategy as", value="", placeholder="e.g. Mountain West low-risk")
+
+    cfg = {
+        "h1": h1,
+        "h3": h3,
+        "h5": h5,
+        "growth": growth,
+        "value": value,
+        "value_focus": value_focus,
+        "universe_only": universe_only,
+        "quiet_only": quiet_only,
+        "risk": risk,
+        "structure": structure,
+        "confidence": confidence,
+        "uncertainty": uncertainty,
+        "structural_focus": structural_focus,
+        "max_risk": max_risk,
+        "min_confidence": min_confidence,
+        "states": selected_states,
+        "preset_name": preset_name,
+    }
+    if profile_save_name.strip():
+        with st.sidebar:
+            if st.button("Save strategy profile", type="secondary"):
+                st.session_state.saved_strategy_profiles[profile_save_name.strip()] = cfg.copy()
+                _save_current_user_state()
+                st.success(f"Saved strategy profile: {profile_save_name.strip()}")
+    st.sidebar.caption(_strategy_profile_description(cfg))
+    sim_df = _simulate_strategy_rankings(df, cfg)
+    sim_df = _add_product_lenses(sim_df)
+    if run_history_summary_df is not None and not run_history_summary_df.empty:
+        hist_cols = [
+            c for c in ["fips", "avg_rank", "std_rank", "top25_presence_share", "rank_range"]
+            if c in run_history_summary_df.columns
+        ]
+        sim_df["fips"] = sim_df["fips"].astype(str).str.zfill(5)
+        sim_df = sim_df.merge(run_history_summary_df[hist_cols], on="fips", how="left")
+    filtered = _apply_product_filter(sim_df, selected_states, max_risk, min_confidence,
+                                     universe_only=universe_only, quiet_only=quiet_only).sort_values("sim_rank")
+
+    if "product_selected_fips" not in st.session_state and not filtered.empty:
+        st.session_state.product_selected_fips = str(filtered.iloc[0]["fips"]).zfill(5)
+
+    run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
+    churn = latest_deltas.get("top25_churn") if latest_deltas and latest_deltas.get("has_previous") else None
+    chips = [
+        f"Run: {run_id}",
+        f"Counties: {len(filtered):,} / {len(df):,}",
+        f"Preset: {preset_name}",
+        f"Top-25 churn: {100 * churn:.1f}%" if churn is not None else "Top-25 churn: n/a",
+    ]
+    chips.append(f"Timing engine: {_timing_chip_text((globals().get('recal_reads') or {}).get('honest'))}")
+    st.markdown(" ".join(f'<span class="run-chip">{chip}</span>' for chip in chips), unsafe_allow_html=True)
+    _render_trust_banner(latest_run, df, xfactor_promotion_gate)
+
+    (
+        top_start,
+        top_discover,
+        top_map,
+        top_memo,
+        top_watch,
+        top_reports,
+        top_advanced,
+    ) = st.tabs(
+        [
+            "Start",
+            "Discover",
+            "Map",
+            "County Memo",
+            "Watchlist",
+            "Reports",
+            "Advanced",
+        ]
+    )
+    st.caption("Main workflow: Start -> Discover -> Map -> County Memo -> Watchlist -> Reports. Advanced keeps diagnostics, model QA, and promotion gates out of the default path.")
+    _render_pro_term_guide()
+
+    tab_start = top_start
+    tab_map = top_map
+    tab_memo = top_memo
+
+    with top_discover:
+        st.caption("Find counties: search in plain English, explore the universe, or run the pre-boom, strategy, screening, and regional lenses. Model QA tools (stress tests, peer sets, disagreement) live under Advanced.")
+        (
+            tab_search,
+            tab_explore,
+            tab_preboom,
+            tab_play,
+            tab_screen,
+            tab_region,
+        ) = st.tabs(
+            [
+                "Search",
+                "Explore",
+                "Quiet Shortlist",
+                "Strategy",
+                "Screening",
+                "Region",
+            ]
+        )
+
+    with top_watch:
+        tab_watch, tab_workflow = st.tabs(
+            [
+                "Watchlist",
+                "Funnel",
+            ]
+        )
+
+    with top_reports:
+        tab_reports, tab_thesis = st.tabs(
+            [
+                "Reports",
+                "Investment Memo",
+            ]
+        )
+
+    with top_advanced:
+        st.caption(
+            "Analyst diagnostics: model QA, evidence governance, and run forensics. "
+            "Nothing here changes your shortlist — these tools explain and stress the "
+            "signals, they do not produce new ranks."
+        )
+        (
+            tab_evidence_center,
+            tab_run,
+            tab_autopsy,
+            tab_promo,
+            tab_health,
+            tab_stress,
+            tab_peers,
+            tab_disagree,
+            tab_validation,
+            tab_system_status,
+            tab_tokenization,
+            tab_parcels,
+        ) = st.tabs(
+            [
+                "Evidence Center",
+                "Run Review",
+                "Autopsy",
+                "Promotion Gate",
+                "Model Health",
+                "Stress Tests",
+                "Peer Sets",
+                "Disagreement",
+                "Validation",
+                "System Status",
+                "Tokenization",
+                "Parcels",
+            ]
+        )
+
+    with tab_start:
+        _render_pro_tab_guide("start")
+        _render_start_here_tab(filtered, cfg, latest_run, xfactor_scoreboard, xfactor_promotion_gate, demo_readiness_report)
+
+    with tab_search:
+        _render_pro_tab_guide("search")
+        st.header("Natural-Language Search")
+        if "product_nl_query" not in st.session_state:
+            st.session_state.product_nl_query = ""
+        st.caption("Use transparent keyword search for quick county-set discovery, then tune the sidebar strategy for precise policy changes.")
+        examples = [
+            ("Low-risk Mountain West", "low-risk counties with a strong growth signal in the Mountain West"),
+            ("High-confidence recreation", "high confidence recreation"),
+            ("Model disagreement", "model disagreement"),
+        ]
+        ecols = st.columns(len(examples))
+        for col, (label, example_query) in zip(ecols, examples):
+            if col.button(label, key=f"product_nl_example_{label.lower().replace(' ', '_').replace('-', '_')}"):
+                st.session_state.product_nl_query = example_query
+                st.rerun()
+        with st.form("product_nl_search_form", clear_on_submit=False):
+            query = st.text_input(
+                "Ask for a county set",
+                placeholder="e.g. low-risk counties with a strong growth signal in the Mountain West",
+                key="product_nl_query",
+            )
+            st.form_submit_button("Apply search", type="primary")
+        if st.button("Clear search", key="product_nl_clear_search"):
+            st.session_state.product_nl_query = ""
+            st.rerun()
+        query = st.session_state.get("product_nl_query", query)
+        result_df, query_notes = _apply_natural_language_query(filtered, query)
+        for note in query_notes:
+            st.caption(note)
+        st.dataframe(_product_table(result_df, limit=40), width="stretch", hide_index=True, height=520)
+        if not result_df.empty:
+            st.caption("Natural-language search uses a transparent keyword parser; use Strategy controls for precise policy changes.")
+
+    with tab_explore:
+        _render_pro_tab_guide("explore")
+        st.header("Explore")
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Best Strategy Score", _fmt_score(filtered["sim_score"].max()) if not filtered.empty else "—")
+        m2.metric("Median Risk", _fmt_score(filtered["composite_risk"].median()) if not filtered.empty else "—")
+        high_conf = filtered["confidence"].astype(str).str.upper().eq("HIGH").mean() if not filtered.empty else np.nan
+        m3.metric("High Confidence", f"{100 * high_conf:.0f}%" if pd.notna(high_conf) else "—")
+        fallback = filtered.get("use_stable_3yr_fallback", pd.Series(dtype=bool)).mean() if not filtered.empty else np.nan
+        m4.metric("3yr Fallback", f"{100 * fallback:.0f}%" if pd.notna(fallback) else "—")
+
+        for title, caption, slice_df in _insight_slices(filtered):
+            st.subheader(title)
+            st.caption(caption)
+            st.dataframe(_product_table(slice_df, limit=8), width="stretch", hide_index=True, height=320)
+
+        if "opportunity_archetype" in filtered.columns and not filtered.empty:
+            st.subheader("Opportunity Archetypes")
+            arch_counts = filtered["opportunity_archetype"].value_counts().reset_index()
+            arch_counts.columns = ["Archetype", "Count"]
+            a1, a2 = st.columns([1, 2])
+            with a1:
+                st.dataframe(arch_counts, width="stretch", hide_index=True, height=260)
+            with a2:
+                fig_arch = px.bar(
+                    arch_counts.sort_values("Count", ascending=True),
+                    x="Count",
+                    y="Archetype",
+                    orientation="h",
+                    title="Active Strategy Archetype Mix",
+                    color="Count",
+                    color_continuous_scale="Teal",
+                )
+                fig_arch.update_layout(height=320, margin=dict(t=45, b=20))
+                st.plotly_chart(fig_arch, width="stretch")
+
+    with tab_reports:
+        _render_pro_tab_guide("reports")
+        st.header("Review Package")
+        st.caption("Exports are shareable screening artifacts for discussion. They preserve the current Product Mode strategy settings.")
+        st.info(
+            "Use this after County Memo and Watchlist review: export a Top 25/Top 100 package, "
+            "then attach a compare set for the counties you want to discuss."
+        )
+        if filtered.empty:
+            st.warning("No counties match the active strategy filters.")
+        else:
+            report_df = filtered.sort_values("sim_rank").copy()
+            c1, c2, c3, c4 = st.columns(4)
+            with c1:
+                top25_md = _top_report_markdown(
+                    report_df,
+                    cfg,
+                    latest_run,
+                    limit=25,
+                    title="LandInvest Top 25 Strategy Report",
+                )
+                st.download_button(
+                    "Top 25 Markdown",
+                    data=top25_md.encode("utf-8"),
+                    file_name="landinvest_top25_strategy_report.md",
+                    mime="text/markdown",
+                    key="product_report_top25_md",
+                )
+            with c2:
+                top100_md = _top_report_markdown(
+                    report_df,
+                    cfg,
+                    latest_run,
+                    limit=100,
+                    title="LandInvest Top 100 Opportunity Report",
+                )
+                st.download_button(
+                    "Top 100 Markdown",
+                    data=top100_md.encode("utf-8"),
+                    file_name="landinvest_top100_opportunity_report.md",
+                    mime="text/markdown",
+                    key="product_report_top100_md",
+                )
+            with c3:
+                shortlist = _format_export_frame(report_df, 100)
+                st.download_button(
+                    "Shortlist CSV",
+                    data=shortlist.to_csv(index=False).encode("utf-8"),
+                    file_name="landinvest_active_shortlist_top100.csv",
+                    mime="text/csv",
+                    key="product_report_shortlist_csv",
+                )
+            with c4:
+                review_packet = (
+                    _top_report_markdown(
+                        report_df,
+                        cfg,
+                        latest_run,
+                        limit=25,
+                        title="LandInvest Investor Review Packet",
+                    )
+                    + "\n---\n\n"
+                    + _compare_set_markdown(report_df.head(5), cfg, latest_run)
+                )
+                st.download_button(
+                    "Review Packet",
+                    data=review_packet.encode("utf-8"),
+                    file_name="landinvest_investor_review_packet.md",
+                    mime="text/markdown",
+                    key="product_report_review_packet_md",
+                )
+
+            st.subheader("Shortlist Preview")
+            st.dataframe(_product_table(report_df, limit=25), width="stretch", hide_index=True, height=420)
+
+            st.subheader("Compare-Set Export")
+            compare_source = report_df.head(500).copy()
+            compare_labels = compare_source.apply(
+                lambda r: f"{r['county_name']}, {r['state']} (strategy #{int(r['sim_rank'])}, production #{int(r['overall_rank'])})",
+                axis=1,
+            ).tolist()
+            default_labels = compare_labels[: min(3, len(compare_labels))]
+            selected_labels = st.multiselect(
+                "Counties to compare",
+                compare_labels,
+                default=default_labels,
+                key="product_report_compare_set",
+            )
+            label_to_fips = dict(zip(compare_labels, compare_source["fips"].astype(str).str.zfill(5)))
+            selected_fips = {label_to_fips[label] for label in selected_labels if label in label_to_fips}
+            compare_df = report_df[report_df["fips"].astype(str).str.zfill(5).isin(selected_fips)].copy()
+            if compare_df.empty:
+                st.info("Choose at least one county to build a compare-set export.")
+            else:
+                compare_export = _compare_export_frame(compare_df)
+                st.dataframe(compare_export, width="stretch", hide_index=True, height=260)
+                e1, e2 = st.columns(2)
+                with e1:
+                    compare_md = _compare_set_markdown(compare_df, cfg, latest_run)
+                    st.download_button(
+                        "Compare Summary Markdown",
+                        data=compare_md.encode("utf-8"),
+                        file_name="landinvest_compare_set_summary.md",
+                        mime="text/markdown",
+                        key="product_report_compare_md",
+                    )
+                with e2:
+                    compare_payload = {
+                        "generated_at": datetime.now().isoformat(),
+                        "strategy": cfg,
+                        "ranking_run": latest_run or {},
+                        "counties": json.loads(compare_export.to_json(orient="records")),
+                    }
+                    st.download_button(
+                        "Compare Set JSON",
+                        data=json.dumps(compare_payload, indent=2).encode("utf-8"),
+                        file_name="landinvest_compare_set.json",
+                        mime="application/json",
+                        key="product_report_compare_json",
+                    )
+
+    with tab_preboom:
+        _render_pro_tab_guide("preboom")
+        _render_quiet_shortlist_tab(sim_df, recal_reads)
+        with st.expander("Legacy two-score pre-boom lane (May 2026 export; superseded by the classifier shortlist above)", expanded=False):
+            _render_preboom_review_tab(
+                surfaces=preboom_surfaces or {},
+                blend_report=preboom_blend_report,
+                analog_report=preboom_analog_report,
+                promotion_gate=preboom_promotion_gate,
+                p0_repeatable_residual_guardrail=p0_repeatable_residual_guardrail,
+                p0_repeatable_residual_candidates=p0_repeatable_residual_candidates,
+            )
+
+    with tab_play:
+        _render_pro_tab_guide("strategy")
+        st.header("Strategy Playground")
+        st.caption("This is a simulation layer only. Production ranks and scores are unchanged.")
+        strategy_table = _filter_product_table_rows(filtered, "product_strategy_table")
+        st.caption(f"Showing {len(strategy_table):,} of {len(filtered):,} strategy rows.")
+        st.dataframe(_product_table(strategy_table.sort_values("sim_rank"), limit=500), width="stretch", hide_index=True, height=520)
+        clean_view = filtered.sort_values("lens_confidence_rank").head(30).copy()
+        with st.expander("High-Conviction Lens", expanded=False):
+            st.caption("This optional lens pushes wide-uncertainty and lower-confidence counties down without changing production rank.")
+            clean_cols = [
+                "lens_confidence_rank", "sim_rank", "overall_rank", "county_name", "state",
+                "lens_confidence_weighted", "sim_score", "confidence", "quantile_interval_width_mean",
+            ]
+            clean = clean_view[[c for c in clean_cols if c in clean_view.columns]].copy()
+            clean = clean.rename(
+                columns={
+                    "lens_confidence_rank": "High-Conviction Rank",
+                    "sim_rank": "Strategy Rank",
+                    "overall_rank": "Production Rank",
+                    "county_name": "County",
+                    "state": "State",
+                    "lens_confidence_weighted": "High-Conviction Score",
+                    "sim_score": "Strategy Score",
+                    "confidence": "Confidence",
+                    "quantile_interval_width_mean": "Uncertainty Width",
+                }
+            )
+            for col in ["High-Conviction Rank", "Strategy Rank", "Production Rank"]:
+                if col in clean.columns:
+                    clean[col] = clean[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
+            for col in ["High-Conviction Score", "Strategy Score", "Uncertainty Width"]:
+                if col in clean.columns:
+                    clean[col] = clean[col].map(lambda x: f"{float(x):.3f}" if col == "Uncertainty Width" else _fmt_score(x))
+            st.dataframe(clean, width="stretch", hide_index=True, height=320)
+
+        p1, p2 = st.columns(2)
+        with p1:
+            if not filtered.empty:
+                fig = px.scatter(
+                    filtered.head(500),
+                    x="overall_rank",
+                    y="sim_rank",
+                    color="sim_score",
+                    hover_name="county_name",
+                    hover_data=["state", "composite_risk", "pred_avg_5yr", "pred_policy_3yr"],
+                    title="Production Rank vs Strategy Rank",
+                    labels={"overall_rank": "Production rank", "sim_rank": "Strategy rank"},
+                    color_continuous_scale="Viridis",
+                )
+                fig.add_shape(type="line", x0=1, y0=1, x1=500, y1=500, line=dict(color="gray", dash="dash"))
+                fig.update_yaxes(autorange="reversed")
+                fig.update_xaxes(autorange="reversed")
+                fig.update_layout(height=430, margin=dict(t=45, b=20))
+                st.plotly_chart(fig, width="stretch")
+        with p2:
+            risers = filtered.sort_values("sim_rank_delta").head(15).copy()
+            fig = px.bar(
+                risers,
+                x="sim_rank_delta",
+                y="county_name",
+                orientation="h",
+                color="sim_score",
+                title="Largest Strategy Risers",
+                labels={"sim_rank_delta": "Strategy rank minus production rank", "county_name": "County"},
+                color_continuous_scale="Teal",
+            )
+            fig.update_layout(height=430, margin=dict(t=45, b=20))
+            st.plotly_chart(fig, width="stretch")
+
+    with tab_screen:
+        _render_pro_tab_guide("screening")
+        st.header("Negative Screening")
+        st.caption("This view helps find counties to avoid, monitor only, or require a special thesis.")
+        if filtered.empty:
+            st.info("No counties match the active strategy filters.")
+        else:
+            screen_df = _negative_screen(filtered)
+            avoid_cols = [
+                "screen_read", "avoid_score", "county_name", "state", "sim_rank", "overall_rank",
+                "composite_risk", "confidence", "sim_uncertainty_score", "sim_structure_score",
+            ]
+            avoid = screen_df[[c for c in avoid_cols if c in screen_df.columns]].head(50).copy()
+            avoid = avoid.rename(
+                columns={
+                    "screen_read": "Screen Read",
+                    "avoid_score": "Avoid Score",
+                    "county_name": "County",
+                    "state": "State",
+                    "sim_rank": "Strategy Rank",
+                    "overall_rank": "Production Rank",
+                    "composite_risk": "Risk",
+                    "confidence": "Confidence",
+                    "sim_uncertainty_score": "Uncertainty",
+                    "sim_structure_score": "Thesis Fit",
+                }
+            )
+            for col in ["Avoid Score", "Risk", "Uncertainty", "Thesis Fit"]:
+                if col in avoid.columns:
+                    avoid[col] = avoid[col].map(_fmt_score)
+            for col in ["Strategy Rank", "Production Rank"]:
+                if col in avoid.columns:
+                    avoid[col] = avoid[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
+            st.dataframe(avoid, width="stretch", hide_index=True, height=520)
+
+    stress_df = None
+    with tab_stress:
+        _render_pro_tab_guide("stress")
+        st.header("Scenario Stress Tests")
+        st.caption("Stress tests are strategy overlays. They do not alter production ranks or saved artifacts.")
+        catalog = _scenario_catalog()
+        scenarios = st.multiselect(
+            "Stress scenarios",
+            list(catalog.keys()),
+            default=["Higher rates", "Climate-risk haircut"],
+            key="product_scenarios",
+        )
+        severity = st.slider("Stress severity", 0.25, 2.00, 1.00, step=0.25, key="product_stress_severity")
+        if scenarios and not filtered.empty:
+            stress_df = _apply_scenario_stress(filtered, scenarios, severity)
+            base_top = set(filtered.sort_values("sim_rank").head(25)["fips"].astype(str).str.zfill(5))
+            stress_top = set(stress_df.sort_values("stress_rank").head(25)["fips"].astype(str).str.zfill(5))
+            overlap = len(base_top & stress_top)
+            s1, s2, s3, s4 = st.columns(4)
+            s1.metric("Top-25 Survivors", f"{overlap}/25")
+            s2.metric("Top-25 Churn", f"{100 * (1 - overlap / 25):.0f}%")
+            s3.metric("Median Stress Score", _fmt_score(stress_df["stress_score"].median()))
+            s4.metric("Median Rank Move", f"{stress_df['stress_rank_delta'].abs().median():.0f}")
+
+            st.dataframe(_stress_table(stress_df, limit=40), width="stretch", hide_index=True, height=480)
+            c1, c2 = st.columns(2)
+            with c1:
+                fallers = stress_df.sort_values("stress_rank_delta", ascending=False).head(15)
+                fig_fall = px.bar(
+                    fallers,
+                    x="stress_rank_delta",
+                    y="county_name",
+                    orientation="h",
+                    title="Most Stress-Sensitive Counties",
+                    labels={"stress_rank_delta": "Stress rank move", "county_name": "County"},
+                    color="stress_rank_delta",
+                    color_continuous_scale="Reds",
+                )
+                fig_fall.update_layout(height=420, margin=dict(t=45, b=20))
+                st.plotly_chart(fig_fall, width="stretch")
+            with c2:
+                survivors = stress_df[stress_df["fips"].astype(str).str.zfill(5).isin(base_top & stress_top)]
+                fig_survive = px.scatter(
+                    survivors,
+                    x="composite_risk",
+                    y="stress_score",
+                    color="opportunity_archetype" if "opportunity_archetype" in survivors.columns else "state",
+                    hover_name="county_name",
+                    title="Top-25 Survivors",
+                    labels={"composite_risk": "Composite risk", "stress_score": "Stress score"},
+                )
+                fig_survive.update_layout(height=420, margin=dict(t=45, b=20))
+                st.plotly_chart(fig_survive, width="stretch")
+            for name in scenarios:
+                st.caption(f"{name}: {catalog[name]['description']}")
+        else:
+            st.info("Choose at least one scenario to stress the active strategy.")
+
+    with tab_map:
+        _render_pro_tab_guide("map")
+        st.header("Map")
+        metric = st.selectbox(
+            "Map layer",
+            [
+                "sim_score",
+                "lens_confidence_weighted",
+                "lens_upside_minus_risk",
+                "lens_structure_minus_fragility",
+                "lens_parcel_readiness",
+                "sim_rank_delta",
+                "opportunity_score",
+                "composite_risk",
+                "sim_structure_score",
+                "pred_avg_5yr",
+                "pred_policy_3yr",
+            ],
+            format_func=lambda x: x.replace("_", " ").title(),
+            key="product_map_metric",
+        )
+        map_df = filtered.dropna(subset=["fips", metric]).copy()
+        map_df["fips_str"] = map_df["fips"].astype(str).str.zfill(5)
+        color_scale = "RdYlGn_r" if "risk" in metric or metric == "sim_rank_delta" else "Viridis"
+        fig_map = px.choropleth(
+            map_df,
+            geojson=load_county_geojson(_mtime=_file_mtime(COUNTY_GEOJSON_PATH)),
+            locations="fips_str",
+            color=metric,
+            hover_name="county_name",
+            hover_data={"state": True, "sim_rank": True, "overall_rank": True, "fips_str": False},
+            color_continuous_scale=color_scale,
+            scope="usa",
+            title=f"{metric.replace('_', ' ').title()} by County",
+            custom_data=["fips_str"],
+        )
+        fig_map.update_layout(height=650, margin=dict(l=0, r=0, t=45, b=0), geo=dict(bgcolor="rgba(0,0,0,0)"))
+        selection = st.plotly_chart(fig_map, width="stretch", on_select="rerun", selection_mode=["points", "box", "lasso"], key="product_map")
+        selected_points = getattr(selection, "selection", {}).get("points", []) if selection is not None else []
+        if selected_points:
+            point = selected_points[0]
+            customdata = point.get("customdata") or []
+            if customdata:
+                st.session_state.product_selected_fips = str(customdata[0]).zfill(5)
+        st.caption("Select a county or region on the map, then open County Memo to inspect the current selection.")
+
+    with tab_memo:
+        _render_pro_tab_guide("memo")
+        st.header("County Memo")
+        if filtered.empty:
+            st.warning("No counties match the active strategy filters.")
+        else:
+            labels = filtered.sort_values("sim_rank").head(1000).apply(
+                lambda r: f"{r['county_name']}, {r['state']} (strategy #{int(r['sim_rank'])}, production #{int(r['overall_rank'])})",
+                axis=1,
+            ).tolist()
+            label_to_fips = dict(zip(labels, filtered.sort_values("sim_rank").head(1000)["fips"].astype(str).str.zfill(5)))
+            current_fips = st.session_state.get("product_selected_fips")
+            current_label = next((label for label, fips in label_to_fips.items() if fips == current_fips), labels[0])
+            chosen = st.selectbox("County", labels, index=labels.index(current_label) if current_label in labels else 0)
+            st.session_state.product_selected_fips = label_to_fips[chosen]
+            row = _selected_county_row(filtered, st.session_state.product_selected_fips)
+            history_row = None
+            if row is not None and run_history_summary_df is not None and not run_history_summary_df.empty:
+                match = run_history_summary_df[run_history_summary_df["fips"].astype(str).str.zfill(5) == str(row["fips"]).zfill(5)]
+                if not match.empty:
+                    history_row = match.iloc[0]
+            if row is not None:
+                _render_product_county_memo(
+                    row,
+                    history_row,
+                    wave3_status,
+                    cfg,
+                    preboom_surfaces=preboom_surfaces,
+                    analog_suite=known_analog_suite,
+                    xfactor_scoreboard=xfactor_scoreboard,
+                )
+
+    with tab_peers:
+        _render_pro_tab_guide("peers")
+        st.header("Peer Sets")
+        if filtered.empty:
+            st.warning("No counties match the active strategy filters.")
+        else:
+            row = _selected_county_row(filtered, st.session_state.get("product_selected_fips"))
+            if row is None:
+                row = filtered.sort_values("sim_rank").iloc[0]
+                st.session_state.product_selected_fips = str(row["fips"]).zfill(5)
+            st.caption(
+                f"Peer context for {row.get('county_name')}, {row.get('state')} "
+                f"(strategy #{int(row.get('sim_rank'))}, production #{int(row.get('overall_rank'))})."
+            )
+            peer_sets = _find_peer_sets(row, filtered)
+            if not peer_sets:
+                st.info("No peer sets available under the active filters.")
+            for label, peer_df in peer_sets.items():
+                st.subheader(label)
+                st.dataframe(_peer_table(peer_df), width="stretch", hide_index=True, height=300)
+            st.subheader("County Matchmaker")
+            match_goal = st.radio(
+                "Find alternatives with",
+                ["More upside", "Lower risk", "Same region", "Different region", "Stronger structural support", "Less rank volatility"],
+                horizontal=True,
+                key="product_match_goal",
+            )
+            base = filtered[filtered["fips"].astype(str).str.zfill(5) != str(row.get("fips")).zfill(5)].copy()
+            if match_goal == "More upside":
+                base = base[base["pred_avg_5yr"] >= _product_numeric(row, "pred_avg_5yr", 0.0)].sort_values(["pred_avg_5yr", "sim_rank"], ascending=[False, True])
+            elif match_goal == "Lower risk":
+                base = base[base["composite_risk"] <= _product_numeric(row, "composite_risk", 50.0)].sort_values(["composite_risk", "sim_rank"])
+            elif match_goal == "Same region":
+                base = base[base["state"] == row.get("state")].sort_values("sim_rank")
+            elif match_goal == "Different region":
+                base = base[base["state"] != row.get("state")].sort_values("sim_rank")
+            elif match_goal == "Stronger structural support":
+                base = base[base["sim_structure_score"] >= _product_numeric(row, "sim_structure_score", 50.0)].sort_values(["sim_structure_score", "sim_rank"], ascending=[False, True])
+            else:
+                base = base[base["rank_stability_spread"] <= _product_numeric(row, "rank_stability_spread", 0.25)].sort_values(["rank_stability_spread", "sim_rank"])
+            st.dataframe(_peer_table(base.head(12)), width="stretch", hide_index=True, height=320)
+            st.caption("Peer sets are heuristic comparisons for exploration, not replacement model outputs.")
+
+    with tab_disagree:
+        _render_pro_tab_guide("disagreement")
+        st.header("Model Disagreement Explorer")
+        st.caption("Counties here are thesis-dependent or less settled across models/horizons.")
+        if filtered.empty:
+            st.info("No counties match the active strategy filters.")
+        else:
+            disagree_df = _model_disagreement_surface(filtered)
+            cols = [
+                "county_name", "state", "sim_rank", "overall_rank", "model_disagreement_lens",
+                "model_disagreement", "horizon_disagreement", "sim_uncertainty_score",
+                "pred_avg_1yr", "pred_policy_3yr", "pred_avg_5yr", "confidence",
+            ]
+            view = disagree_df[[c for c in cols if c in disagree_df.columns]].head(50).copy()
+            view = view.rename(
+                columns={
+                    "county_name": "County",
+                    "state": "State",
+                    "sim_rank": "Strategy Rank",
+                    "overall_rank": "Production Rank",
+                    "model_disagreement_lens": "Disagreement Lens",
+                    "model_disagreement": "Model Disagreement",
+                    "horizon_disagreement": "Horizon Disagreement",
+                    "sim_uncertainty_score": "Uncertainty",
+                    "pred_avg_1yr": "1yr",
+                    "pred_policy_3yr": "3yr",
+                    "pred_avg_5yr": "5yr",
+                    "confidence": "Confidence",
+                }
+            )
+            for col in ["Strategy Rank", "Production Rank"]:
+                if col in view.columns:
+                    view[col] = view[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
+            for col in ["Disagreement Lens", "Model Disagreement", "Horizon Disagreement", "Uncertainty"]:
+                if col in view.columns:
+                    view[col] = view[col].map(lambda x: f"{float(x):.3f}" if pd.notna(x) else "—")
+            for col in ["1yr", "3yr", "5yr"]:
+                if col in view.columns:
+                    view[col] = view[col].map(_fmt_pct)
+            st.dataframe(view, width="stretch", hide_index=True, height=520)
+
+    with tab_region:
+        _render_pro_tab_guide("region")
+        st.header("Regional Strategy Builder")
+        region_states = st.multiselect("Region states", states, default=selected_states, key="product_region_states")
+        region_df = filtered[filtered["state"].isin(region_states)].copy() if region_states else filtered.copy()
+        state_roll, arch = _regional_summary(region_df)
+        if region_df.empty:
+            st.info("No counties match the regional selection.")
+        else:
+            r1, r2, r3, r4 = st.columns(4)
+            r1.metric("Counties", f"{len(region_df):,}")
+            r2.metric("Avg Strategy Score", _fmt_score(region_df["sim_score"].mean()))
+            r3.metric("Avg Risk", _fmt_score(region_df["composite_risk"].mean()))
+            r4.metric("Top Archetype", region_df["opportunity_archetype"].mode().iloc[0] if "opportunity_archetype" in region_df.columns else "n/a")
+            st.subheader("State Rollup")
+            roll = state_roll.copy()
+            for col in ["avg_strategy_score", "avg_risk"]:
+                if col in roll.columns:
+                    roll[col] = roll[col].map(_fmt_score)
+            if "avg_5yr" in roll.columns:
+                roll["avg_5yr"] = roll["avg_5yr"].map(_fmt_pct)
+            if "high_conf_share" in roll.columns:
+                roll["high_conf_share"] = roll["high_conf_share"].map(lambda x: f"{100 * float(x):.0f}%")
+            st.dataframe(roll, width="stretch", hide_index=True, height=300)
+            st.subheader("Regional Leaders")
+            regional_leaders = _filter_product_table_rows(region_df.sort_values("sim_rank"), "product_regional_leaders")
+            st.caption(f"Showing {len(regional_leaders):,} of {len(region_df):,} regional rows.")
+            st.dataframe(_product_table(regional_leaders.sort_values("sim_rank"), limit=500), width="stretch", hide_index=True, height=420)
+            if not arch.empty:
+                fig_region = px.bar(
+                    arch.head(40),
+                    x="count",
+                    y="state",
+                    color="opportunity_archetype",
+                    orientation="h",
+                    title="Regional Archetype Mix",
+                )
+                fig_region.update_layout(height=420, margin=dict(t=45, b=20))
+                st.plotly_chart(fig_region, width="stretch")
+
+    with tab_thesis:
+        _render_pro_tab_guide("thesis")
+        st.header("Thesis Builder")
+        watch_fips = {str(f).zfill(5) for f in st.session_state.watchlist_fips}
+        watch_df = filtered[filtered["fips"].astype(str).str.zfill(5).isin(watch_fips)].copy()
+        if watch_df.empty:
+            st.info("Add counties from County Memo to build a thesis memo.")
+        else:
+            t1, t2, t3, t4 = st.columns(4)
+            t1.metric("Shortlist Counties", len(watch_df))
+            t2.metric("Avg Strategy Score", _fmt_score(watch_df["sim_score"].mean()))
+            t3.metric("Avg Risk", _fmt_score(watch_df["composite_risk"].mean()))
+            t4.metric("Archetypes", watch_df["opportunity_archetype"].nunique() if "opportunity_archetype" in watch_df.columns else "n/a")
+
+            st.subheader("Shortlist Diligence Readiness")
+            readiness_rows = []
+            for _, rec in watch_df.sort_values("sim_rank").iterrows():
+                readiness, actions = _parcel_readiness(rec)
+                readiness_rows.append(
+                    {
+                        "County": rec.get("county_name"),
+                        "State": rec.get("state"),
+                        "Strategy Rank": f"#{int(rec.get('sim_rank'))}",
+                        "Archetype": rec.get("opportunity_archetype"),
+                        "Readiness": readiness,
+                        "Next Check": actions[0] if actions else "—",
+                    }
+                )
+            st.dataframe(pd.DataFrame(readiness_rows), width="stretch", hide_index=True, height=320)
+
+            memo = _build_deal_thesis_memo(watch_df, cfg, preset_name, stress_df=stress_df)
+            st.subheader("Generated Investment Memo")
+            st.text_area("Memo", value=memo, height=420)
+            st.download_button(
+                "Export thesis memo (Markdown)",
+                data=memo.encode("utf-8"),
+                file_name="landinvest_thesis_memo.md",
+                mime="text/markdown",
+            )
+            ic_packet = _ic_packet_markdown(watch_df, cfg, preset_name, stress_df)
+            with st.expander("Investment Committee Mode", expanded=False):
+                st.text_area("IC packet", value=ic_packet, height=420)
+                st.download_button(
+                    "Export IC packet (Markdown)",
+                    data=ic_packet.encode("utf-8"),
+                    file_name="landinvest_ic_packet.md",
+                    mime="text/markdown",
+                )
+
+    with tab_workflow:
+        _render_pro_tab_guide("funnel")
+        st.header("Opportunity Funnel")
+        funnel_rows = []
+        for fips, rec in st.session_state.county_funnel.items():
+            feedback = st.session_state.county_feedback.get(fips, {})
+            evidence = st.session_state.diligence_evidence.get(fips, {})
+            funnel_rows.append(
+                {
+                    "FIPS": fips,
+                    "County": rec.get("county_name"),
+                    "State": rec.get("state"),
+                    "Stage": rec.get("stage"),
+                    "Feedback": feedback.get("feedback", "Unreviewed"),
+                    "Evidence": "yes" if (evidence.get("evidence") or "").strip() else "no",
+                    "Updated": rec.get("updated_at"),
+                }
+            )
+        if funnel_rows:
+            funnel_df = pd.DataFrame(funnel_rows).sort_values(["Stage", "State", "County"])
+            st.dataframe(funnel_df, width="stretch", hide_index=True, height=420)
+            stage_counts = funnel_df["Stage"].value_counts().reset_index()
+            stage_counts.columns = ["Stage", "Count"]
+            fig_funnel = px.bar(stage_counts, x="Stage", y="Count", title="Funnel Stage Counts", color="Stage")
+            fig_funnel.update_layout(height=320, margin=dict(t=45, b=20))
+            st.plotly_chart(fig_funnel, width="stretch")
+        else:
+            st.info("Set a funnel stage in County Memo to start tracking opportunities.")
+
+        feedback_rows = []
+        for fips, rec in st.session_state.county_feedback.items():
+            feedback_rows.append({"FIPS": fips, **rec})
+        if feedback_rows:
+            st.subheader("Human Feedback Loop")
+            st.dataframe(pd.DataFrame(feedback_rows), width="stretch", hide_index=True, height=280)
+
+    with tab_watch:
+        _render_pro_tab_guide("watchlist")
+        st.header("Watchlist")
+        st.caption("Use Watchlist as the active review queue before generating Reports or an Investment Memo.")
+        watch_fips = {str(f).zfill(5) for f in st.session_state.watchlist_fips}
+        _render_watchlist_alerts(watchlist_alert_events, watch_fips)
+        watch_df = filtered[filtered["fips"].astype(str).str.zfill(5).isin(watch_fips)].copy()
+        summary = _watchlist_portfolio_summary(watch_df)
+        w1, w2, w3, w4, w5 = st.columns(5)
+        w1.metric("Counties", summary["count"])
+        w2.metric("Avg Strategy Score", summary["avg_score"])
+        w3.metric("Avg Risk", summary["avg_risk"])
+        w4.metric("High Confidence", summary["high_conf_share"])
+        w5.metric("Top States", summary["top_states"])
+        if watch_df.empty:
+            st.info("Add counties from County Memo to build a strategy watchlist.")
+        else:
+            st.dataframe(_product_table(watch_df.sort_values("sim_rank"), limit=100), width="stretch", hide_index=True, height=420)
+            flags = _watchlist_review_flags(watch_df)
+            recs = _recommend_watchlist_replacements(filtered, watch_df)
+            drift_alerts = _watchlist_drift_alerts(watch_df, latest_compare_rank_df)
+            r1, r2, r3 = st.columns(3)
+            with r1:
+                st.subheader("Review Candidates")
+                if flags.empty:
+                    st.caption("No watchlist counties are currently triggering review flags under this strategy.")
+                else:
+                    st.dataframe(flags, width="stretch", hide_index=True, height=260)
+            with r2:
+                st.subheader("Suggested Additions")
+                if recs.empty:
+                    st.caption("No replacement suggestions available under the active filters.")
+                else:
+                    st.dataframe(_product_table(recs, limit=8), width="stretch", hide_index=True, height=260)
+            with r3:
+                st.subheader("Drift Alerts")
+                if drift_alerts.empty:
+                    st.caption("No watchlist drift alerts are currently firing.")
+                else:
+                    st.dataframe(drift_alerts, width="stretch", hide_index=True, height=260)
+            if run_history_summary_df is not None and not run_history_summary_df.empty:
+                enriched = watch_df.merge(
+                    run_history_summary_df[[
+                        c for c in ["fips", "std_rank", "top25_presence_share", "rank_range"]
+                        if c in run_history_summary_df.columns
+                    ]],
+                    on="fips",
+                    how="left",
+                    suffixes=("", "_hist"),
+                )
+                fig = px.scatter(
+                    enriched,
+                    x="composite_risk",
+                    y="sim_score",
+                    size="top25_presence_share" if "top25_presence_share" in enriched.columns else None,
+                    color="state",
+                    hover_name="county_name",
+                    title="Watchlist Risk, Score, and Durability",
+                    labels={"composite_risk": "Composite risk", "sim_score": "Strategy score"},
+                )
+                fig.update_layout(height=420, margin=dict(t=45, b=20))
+                st.plotly_chart(fig, width="stretch")
+
+    with tab_evidence_center:
+        _render_pro_tab_guide("evidence_center")
+        _render_xfactor_evidence_center_tab(xfactor_evidence_center_df, xfactor_command_loop_df)
+
+    with tab_run:
+        _render_pro_tab_guide("run_review")
+        st.header("Run Review")
+        review = _run_review_summary(filtered, latest_compare_rank_df, latest_compare_boundary_df)
+        if not review:
+            st.info("No latest run-comparison artifact is available for this Product Mode summary.")
+        else:
+            if latest_compare_rank_df is not None and not latest_compare_rank_df.empty:
+                comp = latest_compare_rank_df.copy()
+                c1, c2, c3, c4 = st.columns(4)
+                c1.metric("Compared Counties", f"{len(comp):,}")
+                c2.metric("Mean |Rank Move|", f"{pd.to_numeric(comp.get('abs_rank_shift'), errors='coerce').mean():.1f}")
+                entrants = review.get("Top-25 entrants", pd.DataFrame())
+                exits = review.get("Top-25 exits", pd.DataFrame())
+                c3.metric("Top-25 Entrants", len(entrants))
+                c4.metric("Top-25 Exits", len(exits))
+                st.subheader("Narrative Brief")
+                for bullet in _run_review_narrative(latest_compare_rank_df):
+                    st.markdown(f"- {bullet}")
+            for label, frame in review.items():
+                st.subheader(label)
+                if frame.empty:
+                    st.caption("None in the latest comparison.")
+                else:
+                    st.dataframe(_run_review_table(frame), width="stretch", hide_index=True, height=300)
+
+    with tab_autopsy:
+        _render_pro_tab_guide("autopsy")
+        st.header("County Autopsy")
+        st.caption("A lightweight review queue for counties where the system may have been too optimistic or where the latest run changed the read.")
+        autopsy = _autopsy_candidates(filtered, latest_compare_rank_df)
+        if autopsy.empty:
+            st.info("No autopsy candidates found under the active strategy.")
+        else:
+            rows = []
+            for _, rec in autopsy.iterrows():
+                rows.append(
+                    {
+                        "County": rec.get("county_name"),
+                        "State": rec.get("state"),
+                        "Current Rank": f"#{int(rec.get('overall_rank'))}" if pd.notna(rec.get("overall_rank")) else "—",
+                        "Reason": rec.get("autopsy_reason"),
+                        "Risk": _fmt_score(rec.get("composite_risk")),
+                        "Confidence": rec.get("confidence"),
+                        "3yr Fallback": bool(rec.get("use_stable_3yr_fallback", False)),
+                        "What to review": "; ".join(_why_not_bullets(rec)[:2]),
+                    }
+                )
+            st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True, height=520)
+
+    with tab_promo:
+        _render_pro_tab_guide("promotion_gate")
+        st.header("Promotion-Readiness Console")
+        st.caption("This is a compact product gate for deciding whether candidate model/policy changes deserve promotion work.")
+        st.dataframe(_promotion_readiness_rows(status_bundle), width="stretch", hide_index=True, height=260)
+        gate = xfactor_promotion_gate or {}
+        if gate:
+            st.subheader("X-Factor Interaction Promotion Gate")
+            g1, g2, g3, g4 = st.columns(4)
+            g1.metric("Status", gate.get("production_promotion_status", "n/a"))
+            g2.metric("Ablation Ready", gate.get("ablation_ready_count", "n/a"))
+            g3.metric("Default Promotion", gate.get("default_promotion_count", "n/a"))
+            g4.metric("Report-Only", gate.get("report_only_count", "n/a"))
+            gate_rows = pd.DataFrame(gate.get("gates") or [])
+            if not gate_rows.empty:
+                view_cols = [
+                    "interaction",
+                    "label",
+                    "scoreboard_decision",
+                    "ablation_decision",
+                    "quiet_lift_gate",
+                    "already_hot_gate",
+                    "analog_gate",
+                    "ablation_gate",
+                    "final_decision",
+                ]
+                st.dataframe(gate_rows[[c for c in view_cols if c in gate_rows.columns]], width="stretch", hide_index=True, height=300)
+            notes = gate.get("notes") or []
+            for note in notes[:4]:
+                st.markdown(f"- {note}")
+        queue = xfactor_ablation_queue or {}
+        queue_rows = pd.DataFrame(queue.get("queue") or [])
+        if not queue_rows.empty:
+            st.subheader("Controlled Ablation Queue")
+            queue_cols = [
+                "interaction",
+                "label",
+                "status",
+                "scoreboard_decision",
+                "ablation_decision",
+                "recommended_action",
+            ]
+            st.dataframe(queue_rows[[c for c in queue_cols if c in queue_rows.columns]], width="stretch", hide_index=True, height=300)
+            st.download_button(
+                "Export Ablation Queue JSON",
+                data=json.dumps(queue, indent=2).encode("utf-8"),
+                file_name="xfactor_interaction_ablation_queue.json",
+                mime="application/json",
+                key="product_ablation_queue_json",
+            )
+        st.markdown(
+            "- Treat green-looking product lenses as exploration aids until they pass historical quality, churn, source-health, and model-health gates.\n"
+            "- Current Product Mode simulations are UI overlays only; `scoring_pipeline.py` production rankings remain unchanged.\n"
+            "- Use the Advanced -> Validation and System Status tabs for the full validation and run-comparison evidence before changing model artifacts."
+        )
+
+    with tab_health:
+        _render_pro_tab_guide("model_health")
+        st.header("Model Health")
+        model_health = (status_bundle or {}).get("model_health_3yr") or {}
+        wave3_closeout = (status_bundle or {}).get("wave3_closeout") or {}
+        h1c, h2c, h3c, h4c = st.columns(4)
+        assessment = model_health.get("assessment", {}) or {}
+        raw_health_status = assessment.get("health_status", "n/a")
+        h1c.metric("3yr Status", _humanize_status_label(raw_health_status))
+        fallback_share = (((model_health.get("live_rankings") or {}).get("fallback") or {}).get("fallback_share"))
+        h2c.metric("3yr Fallback", f"{100 * fallback_share:.1f}%" if fallback_share is not None else "n/a")
+        drift = model_health.get("target_drift_3yr", {}) or {}
+        drift_psi = drift.get("psi")
+        try:
+            drift_read = f"{float(drift_psi):.3f}" if drift_psi is not None else "n/a"
+        except (TypeError, ValueError):
+            drift_read = str(drift_psi)
+        h3c.metric("3yr Drift PSI", drift_read)
+        closeout_summary = wave3_closeout.get("summary", {}) or {}
+        wave3_status_label = wave3_closeout.get("status", closeout_summary.get("status", "n/a"))
+        h4c.metric("Wave 3 Posture", _humanize_status_label(wave3_status_label))
+        st.caption(f"Full 3yr status: `{raw_health_status}`")
+        warnings = assessment.get("blocking_reasons") or assessment.get("warnings") or assessment.get("notes") or []
+        if warnings:
+            st.caption("Current model-health read")
+            for item in warnings[:6]:
+                st.markdown(f"- {item}")
+        st.caption("See the Validation and System Status tabs for full walk-forward CV, source-health, drift, calibration, and run-comparison diagnostics.")
+
+    with tab_validation:
+        _render_pro_tab_guide("validation")
+        _render_validation_console()
+
+    with tab_system_status:
+        _render_pro_tab_guide("system_status")
+        _render_system_status_console()
+
+    with tab_tokenization:
+        _render_pro_tab_guide("tokenization")
+        _render_tokenization_readiness_tab(tokenization_readiness_packet)
+
+    with tab_parcels:
+        render_parcel_explorer_tab()
+
+    _render_demo_footer(latest_run, status_bundle, demo_readiness_report)
+
+
+# ---------------------------------------------------------------------------
+# Page config
+# ---------------------------------------------------------------------------
+
+st.set_page_config(
+    page_title="LandInvest — County Growth Dashboard",
+    page_icon="🏔️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+st.markdown(
+    """
+<style>
+    .skip-link {
+        position: absolute;
+        left: 0.75rem;
+        top: -4rem;
+        z-index: 10000;
+        background: #0f766e;
+        color: #ffffff !important;
+        border-radius: 8px;
+        padding: 0.62rem 0.82rem;
+        font-weight: 800;
+        text-decoration: none;
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.24);
+    }
+    .skip-link:focus,
+    .skip-link:focus-visible {
+        top: 0.75rem;
+        outline: 3px solid #fbbf24;
+        outline-offset: 3px;
+    }
+    .landinvest-main-anchor {
+        scroll-margin-top: 1rem;
+    }
+    .landinvest-theme-sentinel {
+        display: none;
+    }
+    .customer-theme-sentinel {
+        display: none;
+    }
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible,
+    [role="button"]:focus-visible,
+    [role="tab"]:focus-visible,
+    [role="slider"]:focus-visible,
+    div[data-testid="stDataFrame"] *:focus-visible,
+    div[data-testid="stPlotlyChart"] *:focus-visible {
+        outline: 3px solid #fbbf24 !important;
+        outline-offset: 3px !important;
+        box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.85) !important;
+    }
+    button,
+    [role="button"],
+    [role="tab"],
+    a,
+    input,
+    select,
+    textarea {
+        min-height: 2.5rem;
+    }
+    button[aria-label^="Help for"] {
+        min-width: 2rem !important;
+    }
+    div[data-testid="stDataFrame"],
+    div[data-testid="stDataFrameResizable"],
+    div[data-testid="stTable"] {
+        overflow-x: auto;
+    }
+    .landinvest-brand-header {
+        display: grid;
+        grid-template-columns: minmax(280px, 0.82fr) minmax(320px, 1.18fr);
+        align-items: center;
+        gap: 0.82rem;
+        border: 1px solid rgba(15, 118, 110, 0.22);
+        background: linear-gradient(135deg, #f8fafc 0%, #f0fdfa 58%, #fffbeb 100%);
+        color: #0f172a;
+        border-radius: 8px;
+        padding: 0.78rem 0.86rem;
+        margin: 0 0 0.85rem 0;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+    }
+    .landinvest-brand-main {
+        display: flex;
+        align-items: center;
+        gap: 0.68rem;
+        min-width: 0;
+    }
+    .landinvest-logo-wrap {
+        width: 2.85rem;
+        height: 2.85rem;
+        flex: 0 0 2.85rem;
+    }
+    .landinvest-logo-wrap svg,
+    .landinvest-sidebar-logo svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    .landinvest-brand-kicker {
+        color: #0f766e;
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        margin-bottom: 0.1rem;
+    }
+    .landinvest-brand-copy h1 {
+        color: #0f172a;
+        font-size: 1.42rem;
+        line-height: 1.06;
+        margin: 0;
+        letter-spacing: 0;
+    }
+    .landinvest-brand-copy p {
+        color: #475569;
+        font-size: 0.83rem;
+        line-height: 1.35;
+        margin: 0.22rem 0 0 0;
+        max-width: 44rem;
+    }
+    .landinvest-brand-meta {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0.45rem;
+        max-width: none;
+    }
+    .landinvest-brand-chip {
+        min-width: 5.95rem;
+        border: 1px solid rgba(15, 118, 110, 0.20);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.76);
+        padding: 0.35rem 0.5rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+    }
+    .landinvest-brand-chip b {
+        display: block;
+        color: #0f766e;
+        font-size: 0.62rem;
+        line-height: 1.1;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        margin-bottom: 0.12rem;
+    }
+    .landinvest-brand-chip span {
+        display: block;
+        color: #0f172a;
+        font-size: 0.76rem;
+        line-height: 1.15;
+        font-weight: 700;
+    }
+    .landinvest-sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.58rem;
+        margin: 0.15rem 0 0.85rem 0;
+        padding: 0.45rem 0.1rem;
+    }
+    .landinvest-sidebar-logo {
+        width: 2.25rem;
+        height: 2.25rem;
+        flex: 0 0 2.25rem;
+    }
+    .landinvest-sidebar-brand b {
+        display: block;
+        color: #0f172a;
+        font-size: 1rem;
+        line-height: 1.05;
+    }
+    .landinvest-sidebar-brand span {
+        display: block;
+        color: #64748b;
+        font-size: 0.76rem;
+        margin-top: 0.12rem;
+    }
+    .run-chip {
+        display: inline-block;
+        padding: 0.25rem 0.55rem;
+        border-radius: 999px;
+        background: #eef2f7;
+        border: 1px solid #cbd5e1;
+        color: #0f172a;
+        font-size: 0.8rem;
+        margin-right: 0.35rem;
+        margin-bottom: 0.35rem;
+    }
+    .onboard {
+        border: 1px solid #bfdbfe;
+        background: linear-gradient(90deg, #e0ecff 0%, #eef4ff 100%);
+        border-radius: 10px;
+        padding: 0.75rem 0.9rem;
+        margin-bottom: 0.8rem;
+        color: #0f172a;
+    }
+    .onboard b {
+        color: #0b3a7e;
+    }
+    .customer-sidebar-title {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #0f766e;
+        text-transform: uppercase;
+        letter-spacing: 0;
+        margin: 0.2rem 0 0.65rem 0;
+    }
+    .customer-command-header {
+        border: 1px solid rgba(20, 184, 166, 0.35);
+        background:
+            linear-gradient(135deg, rgba(204, 251, 241, 0.96) 0%, rgba(248, 250, 252, 0.98) 44%, rgba(254, 243, 199, 0.74) 100%);
+        color: #0f172a;
+        border-radius: 8px;
+        padding: 1.15rem 1.25rem;
+        margin: 0 0 0.85rem 0;
+        box-shadow: 0 18px 46px rgba(15, 23, 42, 0.10);
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.95fr);
+        gap: 1rem;
+        align-items: end;
+    }
+    .customer-command-header h1 {
+        color: #0f172a;
+        font-size: 2.1rem;
+        line-height: 1.08;
+        margin: 0 0 0.45rem 0;
+        letter-spacing: 0;
+    }
+    .customer-command-header p {
+        color: #334155;
+        margin: 0;
+        max-width: 76rem;
+    }
+    .customer-command-grid,
+    .customer-stat-strip,
+    .customer-map-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.48rem;
+    }
+    .customer-command-grid span,
+    .customer-stat-strip span,
+    .customer-map-stats span {
+        border: 1px solid rgba(15, 118, 110, 0.24);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.72);
+        padding: 0.52rem 0.64rem;
+        min-width: 7.2rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.80);
+    }
+    .customer-command-grid b,
+    .customer-stat-strip b,
+    .customer-map-stats b {
+        display: block;
+        color: #0f172a;
+        font-size: 0.95rem;
+        line-height: 1.15;
+    }
+    .customer-command-grid small,
+    .customer-stat-strip small,
+    .customer-map-stats small {
+        display: block;
+        color: #64748b;
+        font-size: 0.72rem;
+        margin-top: 0.18rem;
+    }
+    .customer-section-header {
+        margin: 0.65rem 0 0.75rem 0;
+        padding: 0.72rem 0.85rem;
+        border-left: 4px solid #14b8a6;
+        border-radius: 8px;
+        background: linear-gradient(90deg, rgba(240, 253, 250, 0.95), rgba(255, 251, 235, 0.55));
+    }
+    .customer-section-header p {
+        margin: 0.12rem 0 0 0;
+        color: #475569;
+    }
+    .customer-stat-strip {
+        margin: 0.3rem 0 0.85rem 0;
+    }
+    .customer-stat-strip span {
+        min-width: 10rem;
+    }
+    .customer-map-callout {
+        margin: 0.8rem 0 0.25rem 0;
+        border: 1px solid rgba(20, 184, 166, 0.34);
+        border-radius: 8px;
+        background: #f8fafc;
+        padding: 0.82rem 0.92rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.85rem;
+        align-items: center;
+    }
+    .customer-map-callout h3 {
+        margin: 0.08rem 0 0.22rem 0;
+        font-size: 1.05rem;
+        letter-spacing: 0;
+        color: #0f172a;
+    }
+    .customer-map-callout p {
+        margin: 0;
+        color: #475569;
+        font-size: 0.84rem;
+    }
+    .customer-empty-state {
+        border: 1px solid rgba(15, 118, 110, 0.28);
+        border-left: 5px solid #0f766e;
+        background: linear-gradient(135deg, rgba(240, 253, 250, 0.92), rgba(248, 250, 252, 0.98));
+        color: #0f172a;
+        border-radius: 8px;
+        padding: 0.95rem 1rem;
+        margin: 0.65rem 0 0.9rem 0;
+    }
+    .customer-empty-state h3 {
+        margin: 0.1rem 0 0.35rem 0;
+        font-size: 1.08rem;
+        color: #0f172a;
+        letter-spacing: 0;
+    }
+    .customer-empty-state p,
+    .customer-empty-state li {
+        color: #334155;
+        font-size: 0.9rem;
+    }
+    .customer-empty-state ul {
+        margin: 0.55rem 0 0 1.1rem;
+        padding: 0;
+    }
+    .customer-empty-search {
+        border-left-color: #0f766e;
+    }
+    .customer-empty-action {
+        border-left-color: #1d4ed8;
+    }
+    .customer-empty-review {
+        border-left-color: #92400e;
+    }
+    button[data-testid^="stBaseButton-segmented_control"] {
+        border-radius: 7px;
+        font-weight: 700;
+        border: 1px solid rgba(20, 184, 166, 0.22);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+        color: #0f172a;
+    }
+    button[data-testid="stBaseButton-segmented_controlActive"] {
+        border-color: rgba(15, 118, 110, 0.55);
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(251, 191, 36, 0.14));
+        color: #0f172a !important;
+    }
+    button[data-testid^="stBaseButton-segmented_control"] *,
+    button[kind^="segmented_control"] * {
+        color: inherit !important;
+    }
+    button[kind="primary"],
+    button[data-testid="stBaseButton-primary"] {
+        background: #0f766e !important;
+        border-color: #0f766e !important;
+        color: #ffffff !important;
+    }
+    button[kind="primary"] *,
+    button[data-testid="stBaseButton-primary"] * {
+        color: #ffffff !important;
+    }
+    div[role="slider"] [data-testid="stSliderThumbValue"],
+    div[data-testid="stSliderThumbValue"],
+    div[data-testid="stSliderThumbValue"] * {
+        color: #ffffff !important;
+    }
+    div[data-testid="stPlotlyChart"] {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .customer-hero {
+        border: 1px solid rgba(20, 184, 166, 0.38);
+        background: linear-gradient(135deg, #0b1115 0%, #10231f 58%, #312914 100%);
+        background-color: #0b1115;
+        color: #f8fafc;
+        border-radius: 8px;
+        padding: 1.1rem 1.25rem;
+        margin: 0.75rem 0 1rem 0;
+        box-shadow: 0 18px 45px rgba(2, 6, 23, 0.22);
+    }
+    .customer-kicker {
+        color: #0f766e;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.35rem;
+    }
+    .customer-hero h1 {
+        color: #f8fafc;
+        font-size: 2.1rem;
+        line-height: 1.15;
+        margin: 0 0 0.45rem 0;
+        letter-spacing: 0;
+    }
+    .customer-hero p {
+        color: #cbd5e1;
+        margin: 0;
+        max-width: 78rem;
+    }
+    .customer-hero-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin-top: 0.95rem;
+    }
+    .customer-hero-strip span {
+        border: 1px solid rgba(148, 163, 184, 0.45);
+        border-radius: 999px;
+        padding: 0.22rem 0.55rem;
+        color: #e2e8f0 !important;
+        font-size: 0.8rem;
+        background: rgba(15, 23, 42, 0.60);
+    }
+    .customer-card {
+        min-height: 332px;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #0f172a;
+        border-radius: 8px;
+        padding: 0.9rem;
+        margin: 0.35rem 0 0.6rem 0;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+        transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .customer-card:hover {
+        transform: translateY(-1px);
+        border-color: #14b8a6;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+    }
+    .customer-card-compact {
+        min-height: 238px;
+    }
+    .customer-card-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        align-items: center;
+        color: #64748b;
+        font-size: 0.78rem;
+        margin-bottom: 0.55rem;
+    }
+    .customer-tier {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid;
+        border-radius: 999px;
+        padding: 0.15rem 0.45rem;
+        font-weight: 700;
+        background: #f8fafc;
+    }
+    .customer-card h3 {
+        font-size: 1.03rem;
+        line-height: 1.25;
+        margin: 0 0 0.45rem 0;
+        letter-spacing: 0;
+    }
+    .customer-thesis {
+        min-height: 3.4rem;
+        color: #334155;
+        font-size: 0.87rem;
+        margin: 0 0 0.65rem 0;
+    }
+    .customer-next {
+        color: #475569;
+        font-size: 0.78rem;
+        margin: 0.75rem 0 0 0;
+    }
+    .customer-signal-row {
+        margin-top: 0.42rem;
+    }
+    .customer-signal-row div:first-child {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        color: #475569;
+        font-size: 0.75rem;
+        margin-bottom: 0.12rem;
+    }
+    .customer-meter {
+        width: 100%;
+        height: 7px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+    .customer-meter span {
+        display: block;
+        height: 100%;
+        border-radius: 999px;
+    }
+    @media (max-width: 720px) {
+        section.main > div,
+        div[data-testid="stAppViewContainer"] section.main > div {
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+        .landinvest-brand-header {
+            grid-template-columns: 1fr;
+            padding: 0.8rem;
+        }
+        .landinvest-brand-meta {
+            justify-content: flex-start;
+        }
+        .landinvest-brand-chip {
+            min-width: 7.3rem;
+        }
+        .landinvest-brand-copy h1 {
+            font-size: 1.35rem;
+        }
+        .landinvest-brand-copy p {
+            font-size: 0.84rem;
+        }
+        .customer-command-header,
+        .customer-map-callout {
+            grid-template-columns: 1fr;
+        }
+        .customer-command-grid span,
+        .customer-stat-strip span,
+        .customer-map-stats span,
+        .landinvest-brand-chip {
+            min-width: min(100%, 9rem);
+            flex: 1 1 8.5rem;
+        }
+        .customer-section-header,
+        .customer-empty-state {
+            padding: 0.72rem 0.78rem;
+        }
+        .customer-command-header h1 {
+            font-size: 1.55rem;
+        }
+        .customer-hero {
+            padding: 0.9rem;
+        }
+        .customer-hero h1 {
+            font-size: 1.45rem;
+        }
+        .customer-card,
+        .customer-card-compact {
+            min-height: auto;
+        }
+        .customer-thesis {
+            min-height: auto;
+        }
+        div[data-testid="stPlotlyChart"] {
+            min-height: 320px;
+        }
+        div[data-testid="stHorizontalBlock"] {
+            gap: 0.65rem;
+        }
+    }
+    @media (prefers-color-scheme: dark) {
+        .landinvest-brand-header {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(6, 78, 59, 0.60));
+            border-color: rgba(45, 212, 191, 0.40);
+            color: #f8fafc;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
+        }
+        .landinvest-brand-kicker,
+        .landinvest-brand-chip b {
+            color: #5eead4;
+        }
+        .landinvest-brand-copy h1,
+        .landinvest-brand-chip span,
+        .landinvest-sidebar-brand b {
+            color: #f8fafc;
+        }
+        .landinvest-brand-copy p,
+        .landinvest-sidebar-brand span {
+            color: #cbd5e1;
+        }
+        .landinvest-brand-chip {
+            background: rgba(15, 23, 42, 0.66);
+            border-color: rgba(148, 163, 184, 0.34);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .run-chip {
+            background: rgba(100, 116, 139, 0.25);
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            color: #e5e7eb;
+        }
+        .onboard {
+            border: 1px solid rgba(96, 165, 250, 0.45);
+            background: linear-gradient(90deg, rgba(30, 58, 138, 0.40) 0%, rgba(15, 23, 42, 0.30) 100%);
+            color: #e5e7eb;
+        }
+        .onboard b {
+            color: #bfdbfe;
+        }
+        .customer-sidebar-title {
+            color: #5eead4;
+        }
+        .customer-kicker {
+            color: #5eead4;
+        }
+        .customer-command-header {
+            background: linear-gradient(135deg, rgba(6, 78, 59, 0.62), rgba(15, 23, 42, 0.92));
+            color: #f8fafc;
+            border-color: rgba(45, 212, 191, 0.45);
+        }
+        .customer-command-header h1,
+        .customer-command-grid b,
+        .customer-stat-strip b,
+        .customer-map-stats b,
+        .customer-map-callout h3 {
+            color: #f8fafc;
+        }
+        .customer-command-header p,
+        .customer-section-header p,
+        .customer-map-callout p {
+            color: #cbd5e1;
+        }
+        .customer-command-grid span,
+        .customer-stat-strip span,
+        .customer-map-stats span,
+        .customer-map-callout,
+        .customer-section-header,
+        .customer-empty-state {
+            background: rgba(15, 23, 42, 0.66);
+            border-color: rgba(148, 163, 184, 0.36);
+        }
+        .customer-empty-state {
+            border-left-color: #5eead4;
+            color: #f8fafc;
+        }
+        .customer-empty-state h3 {
+            color: #f8fafc;
+        }
+        .customer-empty-state p,
+        .customer-empty-state li {
+            color: #cbd5e1;
+        }
+        button[data-testid^="stBaseButton-segmented_control"] {
+            border-color: rgba(148, 163, 184, 0.35);
+            color: #e5e7eb !important;
+        }
+        button[data-testid="stBaseButton-segmented_controlActive"] {
+            border-color: rgba(45, 212, 191, 0.55);
+            background: #0f766e !important;
+            color: #ffffff !important;
+        }
+        button[data-testid="stTab"] {
+            color: #e5e7eb !important;
+        }
+        button[data-testid="stTab"][aria-selected="true"] {
+            color: #5eead4 !important;
+        }
+        button[data-testid="stTab"] * {
+            color: inherit !important;
+        }
+        .customer-tier,
+        .customer-hero-strip span {
+            color: #f8fafc !important;
+            border-color: rgba(203, 213, 225, 0.70) !important;
+        }
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .bg {
+            fill: rgba(15, 23, 42, 0.94) !important;
+        }
+        div[data-testid="stPlotlyChart"] .js-plotly-plot svg text,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .legendtext,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .gtitle,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .xtitle,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .ytitle {
+            fill: #e5e7eb !important;
+            color: #e5e7eb !important;
+        }
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .gridlayer path,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .xgrid,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .ygrid,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .zerolinelayer path,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .xlines-above,
+        div[data-testid="stPlotlyChart"] .js-plotly-plot .ylines-above {
+            stroke: rgba(148, 163, 184, 0.38) !important;
+        }
+        .customer-command-grid small,
+        .customer-stat-strip small,
+        .customer-map-stats small {
+            color: #94a3b8;
+        }
+        .customer-card {
+            background: #0b1115;
+            border-color: rgba(148, 163, 184, 0.35);
+            color: #f8fafc;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+        }
+        .customer-tier {
+            background: rgba(15, 23, 42, 0.68);
+        }
+        .customer-card-top,
+        .customer-thesis,
+        .customer-next,
+        .customer-signal-row div:first-child {
+            color: #cbd5e1;
+        }
+        .customer-meter {
+            background: rgba(100, 116, 139, 0.35);
+        }
+    }
+    body:has(.landinvest-theme-light) .landinvest-brand-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #f0fdfa 58%, #fffbeb 100%);
+        border-color: rgba(15, 118, 110, 0.22);
+        color: #0f172a;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+    }
+    body:has(.landinvest-theme-light) .landinvest-brand-kicker,
+    body:has(.landinvest-theme-light) .landinvest-brand-chip b,
+    body:has(.landinvest-theme-light) .customer-sidebar-title,
+    body:has(.landinvest-theme-light) .customer-kicker {
+        color: #0f766e;
+    }
+    body:has(.landinvest-theme-light) .landinvest-brand-copy h1,
+    body:has(.landinvest-theme-light) .landinvest-brand-chip span,
+    body:has(.landinvest-theme-light) .landinvest-sidebar-brand b,
+    body:has(.landinvest-theme-light) .customer-command-header h1,
+    body:has(.landinvest-theme-light) .customer-command-grid b,
+    body:has(.landinvest-theme-light) .customer-stat-strip b,
+    body:has(.landinvest-theme-light) .customer-map-stats b,
+    body:has(.landinvest-theme-light) .customer-map-callout h3,
+    body:has(.landinvest-theme-light) .customer-empty-state h3 {
+        color: #0f172a;
+    }
+    body:has(.landinvest-theme-light) .landinvest-brand-copy p,
+    body:has(.landinvest-theme-light) .customer-command-header p,
+    body:has(.landinvest-theme-light) .customer-section-header p,
+    body:has(.landinvest-theme-light) .customer-map-callout p,
+    body:has(.landinvest-theme-light) .customer-empty-state p,
+    body:has(.landinvest-theme-light) .customer-empty-state li {
+        color: #334155;
+    }
+    body:has(.landinvest-theme-light) .landinvest-sidebar-brand span,
+    body:has(.landinvest-theme-light) .customer-command-grid small,
+    body:has(.landinvest-theme-light) .customer-stat-strip small,
+    body:has(.landinvest-theme-light) .customer-map-stats small {
+        color: #64748b;
+    }
+    body:has(.landinvest-theme-light) .landinvest-brand-chip,
+    body:has(.landinvest-theme-light) .run-chip,
+    body:has(.landinvest-theme-light) .customer-command-grid span,
+    body:has(.landinvest-theme-light) .customer-stat-strip span,
+    body:has(.landinvest-theme-light) .customer-map-stats span {
+        background: rgba(255, 255, 255, 0.72);
+        border-color: rgba(15, 118, 110, 0.24);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.80);
+    }
+    body:has(.landinvest-theme-light) .run-chip {
+        background: #eef2f7;
+        border-color: #cbd5e1;
+        color: #0f172a !important;
+    }
+    body:has(.landinvest-theme-light) .customer-command-header {
+        background: linear-gradient(135deg, rgba(204, 251, 241, 0.96) 0%, rgba(248, 250, 252, 0.98) 44%, rgba(254, 243, 199, 0.74) 100%);
+        color: #0f172a;
+        border-color: rgba(20, 184, 166, 0.35);
+    }
+    body:has(.landinvest-theme-light) .customer-section-header {
+        background: linear-gradient(90deg, rgba(240, 253, 250, 0.95), rgba(255, 251, 235, 0.55));
+        border-color: #14b8a6;
+    }
+    body:has(.landinvest-theme-light) .customer-map-callout,
+    body:has(.landinvest-theme-light) .customer-empty-state {
+        background: #f8fafc;
+        border-color: rgba(20, 184, 166, 0.34);
+        color: #0f172a;
+    }
+    body:has(.landinvest-theme-light) .customer-card {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        color: #0f172a;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    }
+    body:has(.landinvest-theme-light) .customer-card-top,
+    body:has(.landinvest-theme-light) .customer-next,
+    body:has(.landinvest-theme-light) .customer-signal-row div:first-child {
+        color: #475569;
+    }
+    body:has(.landinvest-theme-light) .customer-thesis {
+        color: #334155;
+    }
+    body:has(.landinvest-theme-light) .customer-tier {
+        background: #f8fafc;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+    }
+    body:has(.landinvest-theme-light) .customer-meter {
+        background: #e2e8f0;
+    }
+    body:has(.landinvest-theme-light) button[data-testid^="stBaseButton-segmented_control"] {
+        color: #0f172a !important;
+    }
+    body:has(.landinvest-theme-light) button[data-testid="stBaseButton-segmented_controlActive"] {
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(251, 191, 36, 0.14)) !important;
+        color: #0f172a !important;
+    }
+    body:has(.landinvest-theme-light) button[data-testid="stTab"] {
+        color: #0f172a !important;
+    }
+    body:has(.landinvest-theme-light) button[data-testid="stTab"][aria-selected="true"] {
+        color: #0f766e !important;
+    }
+    body:has(.landinvest-theme-light) div[data-testid="stPlotlyChart"] .js-plotly-plot .bg {
+        fill: rgba(255, 255, 255, 0) !important;
+    }
+    body:has(.landinvest-theme-light) div[data-testid="stPlotlyChart"] .js-plotly-plot svg text,
+    body:has(.landinvest-theme-light) div[data-testid="stPlotlyChart"] .js-plotly-plot .legendtext,
+    body:has(.landinvest-theme-light) div[data-testid="stPlotlyChart"] .js-plotly-plot .gtitle,
+    body:has(.landinvest-theme-light) div[data-testid="stPlotlyChart"] .js-plotly-plot .xtitle,
+    body:has(.landinvest-theme-light) div[data-testid="stPlotlyChart"] .js-plotly-plot .ytitle {
+        fill: #0f172a !important;
+        color: #0f172a !important;
+    }
+    body:has(.landinvest-theme-dark) .landinvest-brand-header {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(6, 78, 59, 0.60));
+        border-color: rgba(45, 212, 191, 0.40);
+        color: #f8fafc;
+    }
+    body:has(.landinvest-theme-dark) .customer-command-header {
+        background: linear-gradient(135deg, rgba(6, 78, 59, 0.62), rgba(15, 23, 42, 0.92));
+        color: #f8fafc;
+        border-color: rgba(45, 212, 191, 0.45);
+    }
+    body:has(.landinvest-theme-dark) .customer-card {
+        background: #0b1115;
+        border-color: rgba(148, 163, 184, 0.35);
+        color: #f8fafc;
+    }
+    body:has(.customer-theme-vaporwave) .stApp,
+    body:has(.customer-theme-vaporwave) div[data-testid="stAppViewContainer"] {
+        background:
+            linear-gradient(rgba(103, 232, 249, 0.07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(103, 232, 249, 0.06) 1px, transparent 1px),
+            linear-gradient(180deg, #10002b 0%, #16042f 48%, #2a064d 100%) !important;
+        background-size: 42px 42px, 42px 42px, auto !important;
+        color: #f8f7ff;
+    }
+    body:has(.customer-theme-vaporwave) section[data-testid="stSidebar"] {
+        background:
+            linear-gradient(rgba(244, 114, 182, 0.07) 1px, transparent 1px),
+            linear-gradient(180deg, #10002b 0%, #16042f 56%, #0b1230 100%) !important;
+        background-size: 36px 36px, auto !important;
+        border-right: 1px solid rgba(103, 232, 249, 0.32);
+    }
+    body:has(.customer-theme-vaporwave) h1,
+    body:has(.customer-theme-vaporwave) h2,
+    body:has(.customer-theme-vaporwave) h3,
+    body:has(.customer-theme-vaporwave) h4,
+    body:has(.customer-theme-vaporwave) h5,
+    body:has(.customer-theme-vaporwave) h6,
+    body:has(.customer-theme-vaporwave) .landinvest-brand-copy h1,
+    body:has(.customer-theme-vaporwave) .landinvest-sidebar-brand b,
+    body:has(.customer-theme-vaporwave) .customer-command-header h1,
+    body:has(.customer-theme-vaporwave) .customer-card h3,
+    body:has(.customer-theme-vaporwave) .customer-empty-state h3,
+    body:has(.customer-theme-vaporwave) .customer-map-callout h3 {
+        color: #f8f7ff !important;
+    }
+    body:has(.customer-theme-vaporwave) p,
+    body:has(.customer-theme-vaporwave) label,
+    body:has(.customer-theme-vaporwave) .stCaptionContainer,
+    body:has(.customer-theme-vaporwave) .landinvest-brand-copy p,
+    body:has(.customer-theme-vaporwave) .landinvest-sidebar-brand span,
+    body:has(.customer-theme-vaporwave) .customer-command-header p,
+    body:has(.customer-theme-vaporwave) .customer-section-header p,
+    body:has(.customer-theme-vaporwave) .customer-map-callout p,
+    body:has(.customer-theme-vaporwave) .customer-empty-state p,
+    body:has(.customer-theme-vaporwave) .customer-empty-state li,
+    body:has(.customer-theme-vaporwave) .customer-thesis,
+    body:has(.customer-theme-vaporwave) .customer-next,
+    body:has(.customer-theme-vaporwave) .customer-card-top,
+    body:has(.customer-theme-vaporwave) .customer-signal-row div:first-child {
+        color: #e9d5ff !important;
+    }
+    body:has(.customer-theme-vaporwave) .customer-kicker,
+    body:has(.customer-theme-vaporwave) .customer-sidebar-title,
+    body:has(.customer-theme-vaporwave) .landinvest-brand-kicker,
+    body:has(.customer-theme-vaporwave) .landinvest-brand-chip b,
+    body:has(.customer-theme-vaporwave) .customer-command-grid small,
+    body:has(.customer-theme-vaporwave) .customer-stat-strip small,
+    body:has(.customer-theme-vaporwave) .customer-map-stats small {
+        color: #67e8f9 !important;
+    }
+    body:has(.customer-theme-vaporwave) .landinvest-brand-header,
+    body:has(.customer-theme-vaporwave) .customer-command-header {
+        position: relative;
+        overflow: hidden;
+        background:
+            linear-gradient(rgba(103, 232, 249, 0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(244, 114, 182, 0.08) 1px, transparent 1px),
+            linear-gradient(135deg, rgba(42, 6, 77, 0.96) 0%, rgba(16, 0, 43, 0.96) 55%, rgba(11, 18, 48, 0.98) 100%) !important;
+        background-size: 34px 34px, 34px 34px, auto !important;
+        border-color: rgba(103, 232, 249, 0.56) !important;
+        color: #f8f7ff !important;
+        box-shadow:
+            0 24px 60px rgba(0, 0, 0, 0.36),
+            0 0 0 1px rgba(244, 114, 182, 0.20),
+            0 0 34px rgba(103, 232, 249, 0.16);
+    }
+    body:has(.customer-theme-vaporwave) .customer-command-header::after,
+    body:has(.customer-theme-vaporwave) .landinvest-brand-header::after {
+        content: "";
+        position: absolute;
+        left: 1rem;
+        right: 1rem;
+        bottom: 0.72rem;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #ff4fd8, #67e8f9, transparent);
+        pointer-events: none;
+    }
+    body:has(.customer-theme-vaporwave) .landinvest-logo-wrap,
+    body:has(.customer-theme-vaporwave) .landinvest-sidebar-logo {
+        filter: drop-shadow(0 0 12px rgba(103, 232, 249, 0.45));
+    }
+    body:has(.customer-theme-vaporwave) .landinvest-brand-chip,
+    body:has(.customer-theme-vaporwave) .run-chip,
+    body:has(.customer-theme-vaporwave) .customer-command-grid span,
+    body:has(.customer-theme-vaporwave) .customer-stat-strip span,
+    body:has(.customer-theme-vaporwave) .customer-map-stats span {
+        background: rgba(16, 0, 43, 0.74) !important;
+        border-color: rgba(249, 168, 212, 0.42) !important;
+        color: #f8f7ff !important;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.08),
+            0 0 18px rgba(124, 58, 237, 0.18) !important;
+    }
+    body:has(.customer-theme-vaporwave) .landinvest-brand-chip span,
+    body:has(.customer-theme-vaporwave) .run-chip,
+    body:has(.customer-theme-vaporwave) .customer-command-grid b,
+    body:has(.customer-theme-vaporwave) .customer-stat-strip b,
+    body:has(.customer-theme-vaporwave) .customer-map-stats b {
+        color: #f8f7ff !important;
+    }
+    body:has(.customer-theme-vaporwave) .customer-section-header,
+    body:has(.customer-theme-vaporwave) .customer-map-callout,
+    body:has(.customer-theme-vaporwave) .customer-empty-state,
+    body:has(.customer-theme-vaporwave) div[data-testid="stVerticalBlockBorderWrapper"],
+    body:has(.customer-theme-vaporwave) details[data-testid="stExpander"] {
+        background: rgba(16, 0, 43, 0.78) !important;
+        border-color: rgba(103, 232, 249, 0.36) !important;
+        color: #f8f7ff !important;
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+    }
+    body:has(.customer-theme-vaporwave) .customer-section-header {
+        border-left-color: #ff4fd8 !important;
+    }
+    body:has(.customer-theme-vaporwave) .customer-empty-state {
+        border-left-color: #67e8f9 !important;
+    }
+    body:has(.customer-theme-vaporwave) .customer-card {
+        background:
+            linear-gradient(180deg, rgba(42, 6, 77, 0.96) 0%, rgba(16, 0, 43, 0.98) 100%) !important;
+        border-color: rgba(192, 132, 252, 0.56) !important;
+        color: #f8f7ff !important;
+        box-shadow:
+            0 18px 42px rgba(0, 0, 0, 0.30),
+            0 0 24px rgba(244, 114, 182, 0.14) !important;
+    }
+    body:has(.customer-theme-vaporwave) .customer-card:hover {
+        border-color: #67e8f9 !important;
+        box-shadow:
+            0 22px 52px rgba(0, 0, 0, 0.34),
+            0 0 30px rgba(103, 232, 249, 0.24) !important;
+    }
+    body:has(.customer-theme-vaporwave) .customer-tier,
+    body:has(.customer-theme-vaporwave) .customer-hero-strip span {
+        background: rgba(42, 6, 77, 0.82) !important;
+        border-color: #ff4fd8 !important;
+        color: #f8f7ff !important;
+        box-shadow: 0 0 14px rgba(255, 79, 216, 0.20);
+    }
+    body:has(.customer-theme-vaporwave) .customer-meter {
+        background: #2a064d !important;
+        border: 1px solid rgba(103, 232, 249, 0.18);
+    }
+    body:has(.customer-theme-vaporwave) .customer-meter span {
+        box-shadow: 0 0 10px rgba(103, 232, 249, 0.35);
+    }
+    body:has(.customer-theme-vaporwave) .customer-hero {
+        background:
+            linear-gradient(rgba(103, 232, 249, 0.08) 1px, transparent 1px),
+            linear-gradient(135deg, #10002b 0%, #2a064d 58%, #0b1230 100%) !important;
+        background-size: 32px 32px, auto !important;
+        border-color: rgba(249, 168, 212, 0.54) !important;
+        box-shadow: 0 24px 58px rgba(0, 0, 0, 0.35), 0 0 30px rgba(255, 79, 216, 0.16);
+    }
+    body:has(.customer-theme-vaporwave) button[data-testid^="stBaseButton-segmented_control"] {
+        background: rgba(16, 0, 43, 0.84) !important;
+        border-color: rgba(192, 132, 252, 0.44) !important;
+        color: #f8f7ff !important;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.20);
+    }
+    body:has(.customer-theme-vaporwave) button[data-testid="stBaseButton-segmented_controlActive"] {
+        background: #67e8f9 !important;
+        border-color: #67e8f9 !important;
+        color: #10002b !important;
+        box-shadow: 0 0 22px rgba(103, 232, 249, 0.32);
+    }
+    body:has(.customer-theme-vaporwave) button[kind="primary"],
+    body:has(.customer-theme-vaporwave) button[data-testid="stBaseButton-primary"] {
+        background: #67e8f9 !important;
+        border-color: #67e8f9 !important;
+        color: #10002b !important;
+        box-shadow: 0 0 22px rgba(103, 232, 249, 0.34);
+    }
+    body:has(.customer-theme-vaporwave) button[kind="primary"] *,
+    body:has(.customer-theme-vaporwave) button[data-testid="stBaseButton-primary"] * {
+        color: #10002b !important;
+    }
+    body:has(.customer-theme-vaporwave) button[data-testid="stTab"] {
+        color: #e9d5ff !important;
+    }
+    body:has(.customer-theme-vaporwave) button[data-testid="stTab"][aria-selected="true"] {
+        color: #67e8f9 !important;
+    }
+    body:has(.customer-theme-vaporwave) input,
+    body:has(.customer-theme-vaporwave) textarea,
+    body:has(.customer-theme-vaporwave) div[data-baseweb="select"] > div,
+    body:has(.customer-theme-vaporwave) div[data-baseweb="base-input"] {
+        background: rgba(16, 0, 43, 0.86) !important;
+        border-color: rgba(103, 232, 249, 0.38) !important;
+        color: #f8f7ff !important;
+    }
+    body:has(.customer-theme-vaporwave) input::placeholder,
+    body:has(.customer-theme-vaporwave) textarea::placeholder {
+        color: #d8b4fe !important;
+        opacity: 1;
+    }
+    body:has(.customer-theme-vaporwave) div[data-testid="stDataFrame"],
+    body:has(.customer-theme-vaporwave) div[data-testid="stTable"],
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] {
+        background: rgba(16, 0, 43, 0.56) !important;
+        border: 1px solid rgba(103, 232, 249, 0.28);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+    }
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .bg {
+        fill: rgba(26, 6, 56, 0.96) !important;
+    }
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot svg text,
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .legendtext,
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .gtitle,
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .xtitle,
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .ytitle {
+        fill: #f8f7ff !important;
+        color: #f8f7ff !important;
+    }
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .gridlayer path,
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .xgrid,
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .ygrid,
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .zerolinelayer path,
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .xlines-above,
+    body:has(.customer-theme-vaporwave) div[data-testid="stPlotlyChart"] .js-plotly-plot .ylines-above {
+        stroke: rgba(103, 232, 249, 0.30) !important;
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+def _theme_hint_class() -> str:
+    embed_options = (_query_param_first("embed_options", "") or "").lower()
+    theme_query = (_query_param_first("theme", "") or "").lower()
+    if "light_theme" in embed_options or theme_query == "light":
+        return "landinvest-theme-light"
+    if "dark_theme" in embed_options or theme_query == "dark":
+        return "landinvest-theme-dark"
+    try:
+        theme = st.context.theme
+        theme_type = theme.get("type") if isinstance(theme, dict) else getattr(theme, "type", None)
+    except Exception:
+        theme_type = None
+    if theme_type == "light":
+        return "landinvest-theme-light"
+    if theme_type == "dark":
+        return "landinvest-theme-dark"
+    return "landinvest-theme-auto"
+
+
+st.markdown(f'<div class="landinvest-theme-sentinel {_theme_hint_class()}" aria-hidden="true"></div>', unsafe_allow_html=True)
+st.markdown('<a class="skip-link" href="#landinvest-main">Skip to main content</a>', unsafe_allow_html=True)
+
+df = load_data(_mtime=_file_mtime(DATA_PATH))
+if df.empty:
+    _render_missing_artifact_help()
+    st.stop()
+wave3_overlay_df = load_wave3_structural_overlay_df(_mtime=_file_mtime(WAVE3_STRUCTURAL_OVERLAY_CSV_PATH))
+wave3_overlay_summary = load_wave3_structural_overlay_summary(_mtime=_file_mtime(WAVE3_STRUCTURAL_OVERLAY_JSON_PATH))
+if wave3_overlay_df is not None and not wave3_overlay_df.empty:
+    overlay_cols = [
+        c for c in [
+            "fips",
+            "wave3_overlay_rank",
+            "wave3_overlay_score",
+            "wave3_overlay_adjustment",
+            "wave3_net_support",
+            "wave3_support_score",
+            "wave3_brake_score",
+            "wave3_supports",
+            "wave3_brakes",
+            "wave3_structural_summary",
+        ] if c in wave3_overlay_df.columns
+    ]
+    if len(overlay_cols) > 1:
+        df["fips"] = df["fips"].astype(str).str.zfill(5)
+        overlay_merge = wave3_overlay_df[overlay_cols].copy()
+        overlay_merge["fips"] = overlay_merge["fips"].astype(str).str.zfill(5)
+        df = df.drop(columns=[c for c in overlay_cols if c != "fips" and c in df.columns], errors="ignore")
+        df = df.merge(overlay_merge, on="fips", how="left")
+recal_briefs_df = load_recal_briefs(_mtime=_file_mtime(RECAL_BRIEFS_PATH))
+recal_reads = load_recal_reads(_mtime=_file_mtime(RECAL_READS_PATH))
+RECAL_ACTIVE = recal_briefs_df is not None and not recal_briefs_df.empty
+if RECAL_ACTIVE:
+    df["fips"] = df["fips"].astype(str).str.zfill(5)
+    _brief_cols = [c for c in RECAL_BRIEF_COLUMNS if c in recal_briefs_df.columns]
+    df = df.drop(columns=[c for c in _brief_cols if c != "fips" and c in df.columns], errors="ignore")
+    df = df.merge(recal_briefs_df[_brief_cols], on="fips", how="left")
+states = get_states(df)
+calibration_diag = compute_calibration_diagnostics(df)
+latest_run, latest_deltas = load_latest_run_snapshot(
+    _mtime=max(_file_mtime(DATA_PATH), _file_mtime(EVAL_PATH), _file_mtime(RUNS_PATH))
+)
+conformal_diag = load_conformal_diagnostics(_mtime=_file_mtime(CONFORMAL_DIAG_PATH))
+status_bundle = load_status_bundle(
+    _mtime=max(
+        _file_mtime(STATUS_BUNDLE_PATH),
+        _file_mtime(SOURCE_HEALTH_PATH),
+        _file_mtime(MISSINGNESS_PATH),
+        _file_mtime(GAP_TRIAGE_PATH),
+        _file_mtime(DRIFT_TRIAGE_PATH),
+        _file_mtime(WAVE2_REASSESSMENT_PATH),
+        _file_mtime(WAVE3_STRUCTURAL_OVERLAY_JSON_PATH),
+        _file_mtime(RUNS_PATH),
+    )
+)
+run_compare_files = list_run_compare_artifacts(_mtime=_file_mtime(OUTPUT_PATH))
+run_history_summary = load_run_history_summary(_mtime=_file_mtime(RUN_HISTORY_SUMMARY_JSON_PATH))
+run_history_summary_df = load_run_history_summary_df(_mtime=_file_mtime(RUN_HISTORY_SUMMARY_CSV_PATH))
+run_history_detail_df = load_run_history_detail_df(_mtime=_file_mtime(RUN_HISTORY_DETAIL_CSV_PATH))
+wave2_training_policy = load_wave2_training_policy(_mtime=_file_mtime(WAVE2_TRAINING_POLICY_PATH))
+fiveyr_policy_status = load_fiveyr_policy_status(_mtime=_file_mtime(FIVEYR_POLICY_STATUS_PATH))
+preboom_surfaces = {
+    "raw": load_preboom_surface_df(str(PREBOOM_RAW_EXPORT_PATH), _mtime=_file_mtime(PREBOOM_RAW_EXPORT_PATH)),
+    "balanced": load_preboom_surface_df(str(PREBOOM_BALANCED_EXPORT_PATH), _mtime=_file_mtime(PREBOOM_BALANCED_EXPORT_PATH)),
+    "unguarded_blend": load_preboom_surface_df(str(PREBOOM_BLEND_EXPORT_PATH), _mtime=_file_mtime(PREBOOM_BLEND_EXPORT_PATH)),
+    "guarded_blend": load_preboom_surface_df(str(PREBOOM_GUARDED_BLEND_EXPORT_PATH), _mtime=_file_mtime(PREBOOM_GUARDED_BLEND_EXPORT_PATH)),
+    "residual_guardrail": load_preboom_surface_df(
+        str(PREBOOM_RESIDUAL_DISPLAY_GUARDED_PATH),
+        _mtime=_file_mtime(PREBOOM_RESIDUAL_DISPLAY_GUARDED_PATH),
+    ),
+    "residual_audit": load_preboom_surface_df(
+        str(PREBOOM_RESIDUAL_AUDIT_PATH),
+        _mtime=_file_mtime(PREBOOM_RESIDUAL_AUDIT_PATH),
+    ),
+}
+preboom_blend_report = _safe_json_load(PREBOOM_BLEND_REPORT_PATH)
+preboom_analog_report = _safe_json_load(PREBOOM_ANALOG_REPORT_PATH)
+preboom_promotion_gate = _safe_json_load(PREBOOM_PROMOTION_GATE_PATH)
+p0_repeatable_residual_guardrail = _safe_json_load(P0_REPEATABLE_RESIDUAL_GUARDRAIL_PATH)
+p0_repeatable_residual_candidates = load_preboom_surface_df(
+    str(P0_REPEATABLE_RESIDUAL_GUARDRAIL_TOP_CANDIDATES_PATH),
+    _mtime=_file_mtime(P0_REPEATABLE_RESIDUAL_GUARDRAIL_TOP_CANDIDATES_PATH),
+)
+known_analog_suite = load_known_analog_suite(_mtime=_file_mtime(KNOWN_ANALOG_SUITE_PATH))
+xfactor_scoreboard = load_xfactor_interaction_scoreboard(_mtime=_file_mtime(XFACTOR_INTERACTION_SCOREBOARD_PATH))
+xfactor_ablation_queue = load_xfactor_interaction_ablation_queue(_mtime=_file_mtime(XFACTOR_INTERACTION_ABLATION_QUEUE_PATH))
+xfactor_promotion_gate = load_xfactor_interaction_promotion_gate(_mtime=_file_mtime(XFACTOR_INTERACTION_PROMOTION_GATE_PATH))
+xfactor_command_loop_df = load_compare_csv(str(XFACTOR_COMMAND_LOOP_CSV_PATH), _mtime=_file_mtime(XFACTOR_COMMAND_LOOP_CSV_PATH))
+xfactor_evidence_center_df = load_compare_csv(str(XFACTOR_EVIDENCE_CENTER_CSV_PATH), _mtime=_file_mtime(XFACTOR_EVIDENCE_CENTER_CSV_PATH))
+source_confidence_weighting_df = load_compare_csv(str(SOURCE_CONFIDENCE_WEIGHTING_CSV_PATH), _mtime=_file_mtime(SOURCE_CONFIDENCE_WEIGHTING_CSV_PATH))
+announcement_anchor_event_latest_df = load_compare_csv(str(ANNOUNCEMENT_ANCHOR_EVENT_LATEST_CSV_PATH), _mtime=_file_mtime(ANNOUNCEMENT_ANCHOR_EVENT_LATEST_CSV_PATH))
+fiveyr_boundary_review_df = load_compare_csv(str(FIVEYR_BOUNDARY_REVIEW_CSV_PATH), _mtime=_file_mtime(FIVEYR_BOUNDARY_REVIEW_CSV_PATH))
+boom_onset_archetype_lens_df = load_compare_csv(str(BOOM_ONSET_ARCHETYPE_LENS_CSV_PATH), _mtime=_file_mtime(BOOM_ONSET_ARCHETYPE_LENS_CSV_PATH))
+watchlist_alert_events = load_watchlist_alert_events(_mtime=_file_mtime(WATCHLIST_ALERT_EVENTS_PATH))
+demo_readiness_report = load_demo_readiness_report(_mtime=_file_mtime(DEMO_READINESS_REPORT_PATH))
+tokenization_readiness_packet = load_tokenization_readiness_packet(_mtime=_file_mtime(TOKENIZATION_READINESS_PACKET_PATH))
+latest_compare_json_path = ((status_bundle or {}).get("latest_run") or {}).get("run_compare_path")
+latest_compare_rank_df = None
+latest_compare_boundary_df = None
+if latest_compare_json_path:
+    latest_compare_rank_path = str(Path(latest_compare_json_path).with_name(Path(latest_compare_json_path).stem + "_rank_shifts.csv"))
+    latest_compare_boundary_path = str(Path(latest_compare_json_path).with_name(Path(latest_compare_json_path).stem + "_top25_boundary.csv"))
+    latest_compare_rank_df = load_compare_csv(latest_compare_rank_path, _mtime=_file_mtime(Path(latest_compare_rank_path)))
+    latest_compare_boundary_df = load_compare_csv(latest_compare_boundary_path, _mtime=_file_mtime(Path(latest_compare_boundary_path)))
+
+wave3_status = (status_bundle or {}).get("wave3_status") or {}
+
+with st.sidebar:
+    st.markdown(_sidebar_brand_html(), unsafe_allow_html=True)
+
+if "dashboard_user_id" not in st.session_state:
+    st.session_state.dashboard_user_id = "demo"
+with st.sidebar:
+    user_id_input = st.text_input(
+        "Demo user",
+        value=st.session_state.dashboard_user_id,
+        key="dashboard_user_id_input",
+        help="Separates saved watchlists, notes, and compare sets in a local SQLite store. This is not authentication.",
+    )
+resolved_user_id = _normalize_user_id(user_id_input)
+if resolved_user_id != st.session_state.dashboard_user_id:
+    st.session_state.dashboard_user_id = resolved_user_id
+    st.session_state.user_data_loaded = False
+with st.sidebar:
+    st.caption(_user_storage_status())
+
+if "watchlist_fips" not in st.session_state:
+    st.session_state.watchlist_fips = []
+if not st.session_state.get("user_data_loaded", False):
+    user_data = _load_user_data()
+    st.session_state.saved_watchlists = user_data.get("saved_watchlists", {})
+    st.session_state.county_notes = user_data.get("county_notes", {})
+    st.session_state.saved_compare_sets = user_data.get("saved_compare_sets", {})
+    st.session_state.saved_strategy_profiles = user_data.get("saved_strategy_profiles", {})
+    st.session_state.county_funnel = user_data.get("county_funnel", {})
+    st.session_state.county_feedback = user_data.get("county_feedback", {})
+    st.session_state.preboom_feedback = user_data.get("preboom_feedback", {})
+    st.session_state.diligence_evidence = user_data.get("diligence_evidence", {})
+    st.session_state.parcel_checklists = user_data.get("parcel_checklists", {})
+    st.session_state.watchlist_alert_state = user_data.get("watchlist_alert_state", {})
+    st.session_state.watchlist_settings = user_data.get("watchlist_settings", _default_user_data()["watchlist_settings"])
+    st.session_state.user_data_loaded = True
+if "saved_watchlists" not in st.session_state:
+    st.session_state.saved_watchlists = {}
+if "county_notes" not in st.session_state:
+    st.session_state.county_notes = {}
+if "saved_compare_sets" not in st.session_state:
+    st.session_state.saved_compare_sets = {}
+if "saved_strategy_profiles" not in st.session_state:
+    st.session_state.saved_strategy_profiles = {}
+if "county_funnel" not in st.session_state:
+    st.session_state.county_funnel = {}
+if "county_feedback" not in st.session_state:
+    st.session_state.county_feedback = {}
+if "preboom_feedback" not in st.session_state:
+    st.session_state.preboom_feedback = {}
+if "diligence_evidence" not in st.session_state:
+    st.session_state.diligence_evidence = {}
+if "parcel_checklists" not in st.session_state:
+    st.session_state.parcel_checklists = {}
+if "watchlist_alert_state" not in st.session_state:
+    st.session_state.watchlist_alert_state = _load_user_data().get("watchlist_alert_state", {})
+if "watchlist_settings" not in st.session_state:
+    st.session_state.watchlist_settings = _load_user_data().get("watchlist_settings", _default_user_data()["watchlist_settings"])
+if "customer_tour_dismissed" not in st.session_state:
+    st.session_state.customer_tour_dismissed = bool(_load_user_data().get("customer_tour_dismissed", False))
+
+# Guided-first progressive disclosure: everyone starts in the explained
+# Customer experience; Pro and the legacy console are deliberate opt-ins.
+# Internal mode values are unchanged so query params and session keys keep
+# working (see documentation/UX_INFORMATION_ARCHITECTURE_AUDIT.md).
+experience_options = ["Customer Mode", "Product Mode"]
+EXPERIENCE_LABELS = {
+    "Customer Mode": "Guided — start here",
+    "Product Mode": "Pro — strategy & screening tools",
+}
+requested_experience = (_query_param_first("experience", "") or "").strip().lower()
+experience_default_index = 1 if requested_experience in {"product", "product mode", "pro"} else 0
+experience_mode = st.sidebar.radio(
+    "Experience",
+    experience_options,
+    index=experience_default_index,
+    format_func=lambda mode: EXPERIENCE_LABELS.get(mode, mode),
+    horizontal=False,
+    help="Guided is the visual investor workflow with explanations on every screen. Pro adds strategy, screening, and reporting power tools.",
+)
+st.sidebar.caption(
+    "New here? Stay on **Guided**. Switch to **Pro** when you want to tune "
+    "strategy weights and run screens yourself. Analyst diagnostics "
+    "(walk-forward CV, source health, drift) live under Pro -> Advanced."
+)
+
+header_data_ts = datetime.fromtimestamp(_file_mtime(DATA_PATH)).strftime("%Y-%m-%d %H:%M")
+header_run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
+header_run_year = latest_run.get("year", "n/a") if latest_run else "n/a"
+header_churn = latest_deltas.get("top25_churn") if latest_deltas and latest_deltas.get("has_previous") else None
+header_churn_text = f"{100 * header_churn:.1f}%" if header_churn is not None else "n/a"
+header_health = ((status_bundle or {}).get("model_health_3yr") or {}).get("assessment", {}).get("health_status")
+header_health_text = _humanize_status_label(header_health) if header_health else None
+st.markdown(
+    _brand_header_html(
+        experience_mode=experience_mode,
+        run_id=header_run_id,
+        run_year=header_run_year,
+        data_ts=header_data_ts,
+        churn_text=header_churn_text,
+        health_text=header_health_text,
+    ),
+    unsafe_allow_html=True,
+)
+st.markdown('<div id="landinvest-main" class="landinvest-main-anchor" tabindex="-1"></div>', unsafe_allow_html=True)
+
+if experience_mode == "Customer Mode":
+    _render_customer_mode(
+        df=df,
+        states=states,
+        latest_run=latest_run,
+        latest_deltas=latest_deltas,
+        status_bundle=status_bundle,
+        run_history_summary_df=run_history_summary_df,
+        latest_compare_rank_df=latest_compare_rank_df,
+        wave3_status=wave3_status,
+        preboom_surfaces=preboom_surfaces,
+        known_analog_suite=known_analog_suite,
+        xfactor_scoreboard=xfactor_scoreboard,
+        xfactor_promotion_gate=xfactor_promotion_gate,
+        demo_readiness_report=demo_readiness_report,
+    )
+    st.stop()
+
+if experience_mode == "Product Mode":
+    _render_product_mode(
+        df=df,
+        states=states,
+        latest_run=latest_run,
+        latest_deltas=latest_deltas,
+        status_bundle=status_bundle,
+        run_history_summary_df=run_history_summary_df,
+        run_history_detail_df=run_history_detail_df,
+        latest_compare_rank_df=latest_compare_rank_df,
+        latest_compare_boundary_df=latest_compare_boundary_df,
+        wave3_status=wave3_status,
+        preboom_surfaces=preboom_surfaces,
+        preboom_blend_report=preboom_blend_report,
+        preboom_analog_report=preboom_analog_report,
+        preboom_promotion_gate=preboom_promotion_gate,
+        known_analog_suite=known_analog_suite,
+        xfactor_scoreboard=xfactor_scoreboard,
+        xfactor_ablation_queue=xfactor_ablation_queue,
+        xfactor_promotion_gate=xfactor_promotion_gate,
+        demo_readiness_report=demo_readiness_report,
+        p0_repeatable_residual_guardrail=p0_repeatable_residual_guardrail,
+        p0_repeatable_residual_candidates=p0_repeatable_residual_candidates,
+        tokenization_readiness_packet=tokenization_readiness_packet,
+    )
+    st.stop()

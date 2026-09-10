@@ -1,0 +1,11 @@
+archetype,target_review_slots,selected_review_slots,primary_pool_count,secondary_pool_count_score_floor,slot_gap,status,recommended_action
+affordability spillover,10,10,2,105,0,covered,review_selected_secondary_backfills
+amenity migration,10,29,1083,1029,0,covered,review_selected_secondary_backfills
+college/medical institutional anchor,10,10,0,448,0,covered,review_selected_secondary_backfills
+constrained-supply demand,10,10,5,92,0,covered,review_selected_secondary_backfills
+energy/commodity boom,10,0,0,0,10,source_or_classifier_gap,acquire_or_engineer cleaner evidence for this archetype before forcing review slots
+logistics/corporate anchor,10,1,0,1,9,source_or_classifier_gap,acquire_or_engineer cleaner evidence for this archetype before forcing review slots
+manufacturing reshoring,10,10,77,280,0,covered,review_selected_secondary_backfills
+recovery/rebound market,10,10,713,1392,0,covered,review_selected_secondary_backfills
+remote-work lifestyle market,10,10,434,1593,0,covered,review_selected_secondary_backfills
+retirement migration,10,10,0,2105,0,covered,review_selected_secondary_backfills

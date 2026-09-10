@@ -1,0 +1,153 @@
+{
+  "generated_at": "2026-06-02T20:12:04.400896+00:00",
+  "status": "controlled_report_only_ablation_sprint_complete",
+  "production_model_rank_or_dashboard_change": false,
+  "metrics": {
+    "surfaces_reviewed": 11,
+    "default_promotion_candidates": 0,
+    "no_default_promotion_rows": 11,
+    "command_loop_rows_loaded": 38
+  },
+  "default_promotion_recommendation": "do_not_promote_current_xfactor_surfaces",
+  "next_action": "Keep as contextual evidence; investigate capped overlay instead of raw feature promotion.",
+  "decision": "mixed_no_default_promotion",
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/controlled_xfactor_ablation_sprint.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/controlled_xfactor_ablation_sprint.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/controlled_xfactor_ablation_sprint.md"
+  },
+  "surfaces": [
+    {
+      "surface": "migration_affordability",
+      "family": "frontier_interaction",
+      "controlled_gate": "top_frontier_interaction_ablation",
+      "decision": "mixed_no_promotion",
+      "reason": "Helpful in conservative views, but weakens structural-plus or residual ranking.",
+      "mean_ap_delta": 0.00730108449367961,
+      "mean_ndcg25_delta": -0.0036160503968308277,
+      "mean_top100_churn": 0.1692857142857143,
+      "source_gate_status": "derived_existing_features",
+      "recommended_action": "Keep report-only unless a capped overlay gate beats churn/false-positive controls."
+    },
+    {
+      "surface": "anchor_halo_optionality",
+      "family": "frontier_interaction",
+      "controlled_gate": "top_frontier_interaction_ablation",
+      "decision": "reject_default_feature",
+      "reason": "Does not improve model-fold quality consistently enough for feature promotion.",
+      "mean_ap_delta": 0.0011774924831073896,
+      "mean_ndcg25_delta": -0.008206443826106885,
+      "mean_top100_churn": 0.16857142857142857,
+      "source_gate_status": "derived_existing_features",
+      "recommended_action": "Keep report-only unless a capped overlay gate beats churn/false-positive controls."
+    },
+    {
+      "surface": "anchor_halo_affordability",
+      "family": "frontier_interaction",
+      "controlled_gate": "top_frontier_interaction_ablation",
+      "decision": "reject_default_feature",
+      "reason": "Does not improve model-fold quality consistently enough for feature promotion.",
+      "mean_ap_delta": -0.0021690363507781557,
+      "mean_ndcg25_delta": -0.0015731436537606003,
+      "mean_top100_churn": 0.19166666666666665,
+      "source_gate_status": "derived_existing_features",
+      "recommended_action": "Keep report-only unless a capped overlay gate beats churn/false-positive controls."
+    },
+    {
+      "surface": "amenity_value",
+      "family": "frontier_interaction",
+      "controlled_gate": "top_frontier_interaction_ablation",
+      "decision": "mixed_no_promotion",
+      "reason": "Helpful in conservative views, but weakens structural-plus or residual ranking.",
+      "mean_ap_delta": 0.006342824774293737,
+      "mean_ndcg25_delta": -0.011995468345981253,
+      "mean_top100_churn": 0.1630952380952381,
+      "source_gate_status": "derived_existing_features",
+      "recommended_action": "Keep report-only unless a capped overlay gate beats churn/false-positive controls."
+    },
+    {
+      "surface": "scarcity_buildability",
+      "family": "frontier_interaction",
+      "controlled_gate": "top_frontier_interaction_ablation",
+      "decision": "reject_default_feature",
+      "reason": "Does not improve model-fold quality consistently enough for feature promotion.",
+      "mean_ap_delta": -0.00020402556806982386,
+      "mean_ndcg25_delta": -0.00738254411490788,
+      "mean_top100_churn": 0.16023809523809526,
+      "source_gate_status": "derived_existing_features",
+      "recommended_action": "Keep report-only unless a capped overlay gate beats churn/false-positive controls."
+    },
+    {
+      "surface": "population_supply_tightness",
+      "family": "preboom_interaction",
+      "controlled_gate": "preboom_interaction_model_ablation",
+      "decision": "mixed_no_promotion",
+      "reason": "Helpful in conservative views, but weakens structural-plus or residual ranking.",
+      "mean_ap_delta": 0.002666966775011756,
+      "mean_ndcg25_delta": -0.007046399874555048,
+      "mean_top100_churn": 0.15904761904761902,
+      "source_gate_status": "derived_existing_features",
+      "recommended_action": "Keep out of default features; use only as narrative context where component evidence is strong."
+    },
+    {
+      "surface": "ssurgo_scarcity",
+      "family": "preboom_interaction",
+      "controlled_gate": "preboom_interaction_model_ablation",
+      "decision": "mixed_no_promotion",
+      "reason": "Helpful in conservative views, but weakens structural-plus or residual ranking.",
+      "mean_ap_delta": 0.006155238936145169,
+      "mean_ndcg25_delta": -0.0033750163938648936,
+      "mean_top100_churn": 0.1678571428571429,
+      "source_gate_status": "derived_existing_features",
+      "recommended_action": "Keep out of default features; use only as narrative context where component evidence is strong."
+    },
+    {
+      "surface": "jobs_affordability",
+      "family": "preboom_interaction",
+      "controlled_gate": "preboom_interaction_model_ablation",
+      "decision": "reject_default_feature",
+      "reason": "Does not improve model-fold quality consistently enough for feature promotion.",
+      "mean_ap_delta": -0.002003938463912225,
+      "mean_ndcg25_delta": -0.00369488786484648,
+      "mean_top100_churn": 0.1580952380952381,
+      "source_gate_status": "derived_existing_features",
+      "recommended_action": "Keep out of default features; use only as narrative context where component evidence is strong."
+    },
+    {
+      "surface": "p0_repeatable_treatment",
+      "family": "repeatable_treatment",
+      "controlled_gate": "p0_repeatable_treatment_model_ablation",
+      "decision": "repeatable_treatment_not_model_ready",
+      "reason": "Do not promote this treatment into model training. Keep historical/repeatable P0 evidence in the review surface until a better controlled model shape improves P0 recall without fit drift.",
+      "mean_ap_delta": null,
+      "mean_ndcg25_delta": null,
+      "mean_top100_churn": null,
+      "source_gate_status": "report_only_source_policy_required",
+      "recommended_action": "Use P0 treatment diagnostics only after source-policy and model-health review."
+    },
+    {
+      "surface": "announcement_anchor_events",
+      "family": "corporate_anchor_event",
+      "controlled_gate": "announcement_anchor_event_model_impact_gate",
+      "decision": "announcement_anchor_event_model_impact_report_only_complete",
+      "reason": "Directionally useful but source/display gates remain binding.",
+      "mean_ap_delta": null,
+      "mean_ndcg25_delta": null,
+      "mean_top100_churn": null,
+      "source_gate_status": "source_display_gate_required",
+      "recommended_action": "Keep in opt-in evidence/memo context; do not add default rank influence."
+    },
+    {
+      "surface": "institutional_anchor_official_panel",
+      "family": "institutional_anchor",
+      "controlled_gate": "source_maturity_before_model_ablation",
+      "decision": "model_ablation_not_started_source_gate_open",
+      "reason": "source_maturity_match_gate_ready_provider_geocode_review_open",
+      "mean_ap_delta": null,
+      "mean_ndcg25_delta": null,
+      "mean_top100_churn": null,
+      "source_gate_status": "source_maturity_match_gate_ready_provider_geocode_review_open",
+      "recommended_action": "Run model-impact ablation only after provider geocode/leakage gates clear."
+    }
+  ]
+}

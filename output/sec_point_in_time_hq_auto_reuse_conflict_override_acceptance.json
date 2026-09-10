@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-06-03T20:50:47.658072+00:00",
+  "status": "conflict_overrides_accepted_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "closeout_acceptance_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_county_closeout_acceptance.csv",
+    "manual_overrides": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/data/raw/sec_edgar_hq/sec_point_in_time_hq_manual_geocode_overrides.csv",
+    "county_reference": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/county_rankings_2024.csv"
+  },
+  "metrics": {
+    "held_conflict_rows": 2,
+    "manual_override_rows_before": 77,
+    "accepted_conflict_override_rows": 0,
+    "covered_existing_conflict_override_rows": 2,
+    "covered_conflict_rows": 2,
+    "accepted_conflict_address_keys": 0,
+    "accepted_conflict_counties": 0,
+    "rejected_conflict_rows": 0,
+    "manual_override_rows_after": 77
+  },
+  "decision": "Accepted only held Census/snapshot conflicts where filing-street Census geographies support a valid county different from the reused current snapshot county.",
+  "next_action": "Rerun SEC point-in-time geocode review, review queues, auto-reuse acceptance/closeout, source maturity, scale-up gate, source registry, Evidence Center, and deploy bundle.",
+  "outputs": {
+    "csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_conflict_override_acceptance.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_conflict_override_acceptance.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_auto_reuse_conflict_override_acceptance.md"
+  }
+}

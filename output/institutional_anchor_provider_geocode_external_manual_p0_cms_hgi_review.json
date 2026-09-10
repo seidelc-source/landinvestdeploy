@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-06-05T21:01:43.827548+00:00",
+  "status": "cms_hgi_p0_review_has_accepted_rows",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "triage_external_followup": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_residual_triage_external_followup.csv",
+    "cms_hgi_dataset": "https://data.cms.gov/provider-data/dataset/xubh-q36u",
+    "cms_hgi_api": "https://data.cms.gov/provider-data/api/1/datastore/query/xubh-q36u/0"
+  },
+  "metrics": {
+    "target_priority": "P0",
+    "target_rows": 25,
+    "cms_hgi_found_rows": 24,
+    "cms_hgi_fips_mapped_rows": 24,
+    "reviewer_accept_rows": 24,
+    "held_rows": 1,
+    "accepted_candidate_counties": 23,
+    "production_model_rank_or_dashboard_change": false
+  },
+  "decision": "Prepared validator-ready reviewed results only for P0 rows where official CMS Hospital General Information returned a same-state Facility ID county/parish mapping.",
+  "next_action": "Dry-run `scripts/accept_institutional_anchor_provider_geocode_external_manual_results.py` against the CMS HGI reviewed-results file, apply only if accepted metrics and conflicts are clean, then rebuild institutional source-maturity artifacts.",
+  "outputs": {
+    "cms_hgi_rows": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_rows.csv",
+    "review_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_review.csv",
+    "validator_results_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_results.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_review.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_p0_cms_hgi_review.md"
+  }
+}

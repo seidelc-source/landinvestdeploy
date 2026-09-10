@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-06-04T04:06:18.819155+00:00",
+  "task": "XB-022-sec-point-in-time-geocode-review",
+  "status": "report_only_geocode_review_applied",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "raw_vintages": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_address_vintages.csv",
+    "manual_overrides": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/data/raw/sec_edgar_hq/sec_point_in_time_hq_manual_geocode_overrides.csv",
+    "county_reference": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/county_rankings_2024.csv"
+  },
+  "metrics": {
+    "raw_vintage_rows": 521,
+    "manual_override_rows": 83,
+    "applied_review_rows": 367,
+    "manual_applied_review_rows": 85,
+    "auto_snapshot_reuse_rows": 282,
+    "reviewed_geocode_ready_rows": 367,
+    "pending_geocode_rows": 154,
+    "pending_point_in_time_geocode_rows": 0,
+    "county_year_candidate_rows": 216,
+    "county_year_candidate_counties": 69,
+    "validation_issue_rows": 0
+  },
+  "validation_issues": [],
+  "decision": "point_in_time_address_geocode_review_applied_keep_report_only",
+  "next_action": "Rerun SEC source maturity and decide whether to extend the filing parse batch before any source-promotion review.",
+  "outputs": {
+    "reviewed_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_address_vintages_reviewed.csv",
+    "reviewed_parquet": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/data/processed/sec_point_in_time_hq_address_vintages_reviewed.parquet",
+    "county_year_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_county_year_candidates.csv",
+    "county_year_parquet": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/data/processed/sec_point_in_time_hq_county_year_candidates.parquet",
+    "applied_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_geocode_review_applied.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_geocode_review_applied.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/sec_point_in_time_hq_geocode_review_applied.md"
+  }
+}

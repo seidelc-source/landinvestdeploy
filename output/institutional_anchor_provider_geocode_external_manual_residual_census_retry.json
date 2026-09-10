@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-06-04T17:32:06.746249+00:00",
+  "status": "residual_census_retry_candidates_ready_report_only",
+  "production_model_rank_or_dashboard_change": false,
+  "inputs": {
+    "external_manual_packet": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_packet.csv",
+    "census_url": "https://geocoding.geo.census.gov/geocoder/geographies/addressbatch",
+    "benchmark": "Public_AR_Current",
+    "vintage": "Current_Current"
+  },
+  "metrics": {
+    "packet_rows": 128,
+    "attempt_rows": 193,
+    "census_submitted": true,
+    "raw_result_rows": 193,
+    "matched_result_rows": 42,
+    "candidate_rows": 128,
+    "reviewer_accept_rows": 4,
+    "same_city_exact_confirmed_rows": 0,
+    "same_city_exact_conflict_corrected_rows": 4,
+    "external_exact_candidate_ready_rows": 0,
+    "weak_context_exact_confirmed_rows": 0,
+    "held_result_rows": 124
+  },
+  "candidate_status_counts": {
+    "residual_census_context_only": 26,
+    "same_city_residual_census_exact_conflict_correction": 4,
+    "unresolved_after_residual_census_retry": 98
+  },
+  "submit_error": "",
+  "decision": "Residual Census retry candidates are staged as report-only source-review evidence.",
+  "next_action": "Dry-run the external/manual acceptance validator against the residual retry results, then apply only if accepted rows are conflict-free.",
+  "outputs": {
+    "census_input": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_input.csv",
+    "attempts_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_attempts.csv",
+    "raw_results_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_raw_results.csv",
+    "candidates_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_candidates.csv",
+    "reviewed_results_csv": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry_results.csv",
+    "json": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry.json",
+    "markdown": "/Users/coryseidel/PersonalProjects/IdeaTests/LandInvest/output/institutional_anchor_provider_geocode_external_manual_residual_census_retry.md"
+  }
+}
