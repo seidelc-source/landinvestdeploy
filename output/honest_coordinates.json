@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-09T19:01:38.436409+00:00",
+  "generated_at": "2026-09-11T01:11:10.022085+00:00",
   "boundary": "report-only; regenerate with scripts/build_honest_coordinates.py",
   "classifier": {
     "honest_held_out_capture_at_100": 0.1493,
@@ -40,45 +40,45 @@
     "as_of": "2026-09-02"
   },
   "operator_review": {
-    "operator_precision": 0.7692,
-    "accepted": 30,
-    "rejected": 9,
-    "held": 25,
+    "operator_precision": 0.8,
+    "accepted": 44,
+    "rejected": 11,
+    "held": 40,
     "caveat": "operator-JUDGED proxy, not realized-outcome precision",
     "sources": [
       "output/boom_onset_operator_precision_report.json"
     ],
-    "as_of": "2026-09-09"
+    "as_of": "2026-09-11"
   },
   "forward_validation": {
     "snapshots": [
       {
         "snapshot": "snapshot_20260716",
-        "days_elapsed": 55,
+        "days_elapsed": 56,
         "post_snapshot_sales_pick": 0,
         "post_snapshot_sales_control": 0,
-        "last_read": "2026-09-09"
+        "last_read": "2026-09-10"
       },
       {
         "snapshot": "snapshot_20260904",
-        "days_elapsed": 4,
+        "days_elapsed": 5,
         "post_snapshot_sales_pick": 0,
         "post_snapshot_sales_control": 0,
-        "last_read": "2026-09-09"
+        "last_read": "2026-09-10"
       },
       {
         "snapshot": "snapshot_20260908",
-        "days_elapsed": 0,
+        "days_elapsed": 1,
         "post_snapshot_sales_pick": 0,
         "post_snapshot_sales_control": 0,
-        "last_read": "2026-09-09"
+        "last_read": "2026-09-10"
       },
       {
         "snapshot": "snapshot_20260909",
         "days_elapsed": 0,
         "post_snapshot_sales_pick": 0,
         "post_snapshot_sales_control": 0,
-        "last_read": "2026-09-09"
+        "last_read": "2026-09-10"
       }
     ],
     "note": "realized validation clock \u2014 sparse by design early; no realized outcome has graded the shortlist yet"
