@@ -2,7 +2,10 @@
 .venv/
 __pycache__/
 .DS_Store
-data/
+data/*
+!data/reference/
+data/reference/*
+!data/reference/zcta_county_crosswalk.parquet
 notebooks/
 *.duckdb
 dashboard_user_data.json

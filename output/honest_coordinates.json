@@ -1,19 +1,319 @@
 {
-  "generated_at": "2026-09-11T01:11:10.022085+00:00",
+  "schema_version": 2,
+  "generated_at": "2026-09-16T11:33:51.496606+00:00",
   "boundary": "report-only; regenerate with scripts/build_honest_coordinates.py",
+  "nulls_source": "data/reference/metric_nulls.json",
   "classifier": {
-    "honest_held_out_capture_at_100": 0.1493,
-    "vs_random_multiple": 4.69,
-    "naive_argmax": 0.1753,
-    "class_median": 0.1678,
-    "vs_best_baseline_ratio": 1.74,
-    "claim": "Ensemble-class recall of curated narrative-boom counties; selection-bias-corrected held-out figure; never a named lane.",
-    "measured_on": "2025-vintage clean panel + audited (D2) labels, full config; vintage-stable (honest 0.149-0.157 across four surfaces)",
+    "honest_held_out_capture_at_100": 0.0581,
+    "vs_random_multiple": 1.12,
+    "naive_argmax": 0.0752,
+    "class_median": 0.041,
+    "vs_best_baseline_ratio": 2.43,
+    "vs_random_null_name": "random_quiet_county",
+    "vs_random_null_value": 0.0518,
+    "vs_uniform_multiple": 1.94,
+    "headline_condition": "pit_embargoed",
+    "ci90": [
+      0.0069,
+      0.0983
+    ],
+    "ci90_includes_null": true,
+    "verdict": "WEAK \u2014 1.12x a random quiet county, and the 90% interval includes the null; the ensemble-class median (0.041) is below it",
+    "claim": "Ensemble-class recall of curated narrative-boom counties, measured under the condition a live model faces. Selection-bias corrected. Never a named lane.",
+    "measured_on": "point-in-time + training-label embargo",
+    "conditions": {
+      "clean_contemporaneous": {
+        "metric": "quiet_capture_at_100",
+        "value": 0.1493,
+        "n": 34,
+        "n_label": "families",
+        "ci90": [
+          0.0814,
+          0.2198
+        ],
+        "geometry": {
+          "kind": "gated",
+          "rank_scope": "national_within_year",
+          "K": 100,
+          "quiet_rule": "preboom_prior_momentum_rank_pct <= 0.666667",
+          "universe": null,
+          "population": "quiet rows of the held-out analog families"
+        },
+        "nulls": [
+          {
+            "name": "random_quiet_county",
+            "value": 0.0518,
+            "kind": "random_quiet_county",
+            "source": "data/reference/metric_nulls.json",
+            "preferred": true,
+            "multiple": 2.88,
+            "note": "the fair null: the metric counts only quiet rows"
+          },
+          {
+            "name": "uniform_top_k",
+            "value": 0.03,
+            "kind": "uniform_top_k",
+            "source": "data/reference/metric_nulls.json",
+            "preferred": false,
+            "multiple": 4.98,
+            "note": "the legacy denominator; inflates the multiple ~1.7x for a gated metric"
+          },
+          {
+            "name": "best_naive_lane",
+            "value": 0.0858,
+            "kind": "best_naive_rule",
+            "source": "output/champion_selection_bias.json",
+            "preferred": false,
+            "multiple": 1.74,
+            "ci90": [
+              1.14,
+              2.73
+            ]
+          }
+        ],
+        "source": "output/champion_selection_bias.json",
+        "as_of": "2026-09-08",
+        "ci_method": "split-family selection-bias correction, 2000 splits",
+        "selection": {
+          "n_candidates": 39,
+          "naive_argmax": 0.1753,
+          "oracle_held_out": 0.1811,
+          "optimism_vs_naive": 0.026,
+          "correction": "split-family held-out"
+        },
+        "conditions": {
+          "panel": "clean_2025",
+          "train_embargo_years": 0,
+          "label_set": "adopted_d2",
+          "note": "not point-in-time: features merged contemporaneously despite 3-24 month publication lags"
+        }
+      },
+      "pit": {
+        "metric": "quiet_capture_at_100",
+        "value": 0.1053,
+        "n": 34,
+        "n_label": "families",
+        "ci90": [
+          0.0506,
+          0.1627
+        ],
+        "geometry": {
+          "kind": "gated",
+          "rank_scope": "national_within_year",
+          "K": 100,
+          "quiet_rule": "preboom_prior_momentum_rank_pct <= 0.666667",
+          "universe": null,
+          "population": "quiet rows of the held-out analog families"
+        },
+        "nulls": [
+          {
+            "name": "random_quiet_county",
+            "value": 0.0518,
+            "kind": "random_quiet_county",
+            "source": "data/reference/metric_nulls.json",
+            "preferred": true,
+            "multiple": 2.03,
+            "note": "the fair null: the metric counts only quiet rows"
+          },
+          {
+            "name": "uniform_top_k",
+            "value": 0.03,
+            "kind": "uniform_top_k",
+            "source": "data/reference/metric_nulls.json",
+            "preferred": false,
+            "multiple": 3.51,
+            "note": "the legacy denominator; inflates the multiple ~1.7x for a gated metric"
+          },
+          {
+            "name": "best_naive_lane",
+            "value": 0.0752,
+            "kind": "best_naive_rule",
+            "source": "output/cls_pit_1/selection_bias/champion_selection_bias.json",
+            "preferred": false,
+            "multiple": 1.4,
+            "ci90": [
+              0.94,
+              1.99
+            ]
+          }
+        ],
+        "source": "output/cls_pit_1/selection_bias/champion_selection_bias.json",
+        "as_of": "2026-09-11",
+        "ci_method": "split-family selection-bias correction, 2000 splits",
+        "selection": {
+          "n_candidates": 39,
+          "naive_argmax": 0.1386,
+          "oracle_held_out": 0.1541,
+          "optimism_vs_naive": 0.0332,
+          "correction": "split-family held-out"
+        },
+        "conditions": {
+          "panel": "pit_selective_v2025",
+          "train_embargo_years": 0,
+          "label_set": "adopted_d2",
+          "note": "inputs restricted to what had been published; side-table x-factors at lag-1 (PIT-FULL-1 showed that carried no measurable look-ahead)"
+        }
+      },
+      "pit_full": {
+        "metric": "quiet_capture_at_100",
+        "value": 0.1123,
+        "n": 34,
+        "n_label": "families",
+        "ci90": [
+          0.0551,
+          0.1753
+        ],
+        "geometry": {
+          "kind": "gated",
+          "rank_scope": "national_within_year",
+          "K": 100,
+          "quiet_rule": "preboom_prior_momentum_rank_pct <= 0.666667",
+          "universe": null,
+          "population": "quiet rows of the held-out analog families"
+        },
+        "nulls": [
+          {
+            "name": "random_quiet_county",
+            "value": 0.0518,
+            "kind": "random_quiet_county",
+            "source": "data/reference/metric_nulls.json",
+            "preferred": true,
+            "multiple": 2.17,
+            "note": "the fair null: the metric counts only quiet rows"
+          },
+          {
+            "name": "uniform_top_k",
+            "value": 0.03,
+            "kind": "uniform_top_k",
+            "source": "data/reference/metric_nulls.json",
+            "preferred": false,
+            "multiple": 3.74,
+            "note": "the legacy denominator; inflates the multiple ~1.7x for a gated metric"
+          },
+          {
+            "name": "best_naive_lane",
+            "value": 0.0759,
+            "kind": "best_naive_rule",
+            "source": "output/pit_full/selection_bias/champion_selection_bias.json",
+            "preferred": false,
+            "multiple": 1.48,
+            "ci90": [
+              1.01,
+              2.06
+            ]
+          }
+        ],
+        "source": "output/pit_full/selection_bias/champion_selection_bias.json",
+        "as_of": "2026-09-16",
+        "ci_method": "split-family selection-bias correction, 2000 splits",
+        "selection": {
+          "n_candidates": 39,
+          "naive_argmax": 0.1455,
+          "oracle_held_out": 0.1601,
+          "optimism_vs_naive": 0.0332,
+          "correction": "split-family held-out"
+        },
+        "conditions": {
+          "panel": "pit_selective_v2025",
+          "train_embargo_years": 0,
+          "label_set": "adopted_d2",
+          "note": "A2 / PIT-FULL-1 (2026-09-16): CBP, BDS and IRS side tables lagged two years to their publication dates; within seed noise of the pit condition"
+        }
+      },
+      "pit_embargoed": {
+        "metric": "quiet_capture_at_100",
+        "value": 0.0581,
+        "n": 34,
+        "n_label": "families",
+        "ci90": [
+          0.0069,
+          0.0983
+        ],
+        "geometry": {
+          "kind": "gated",
+          "rank_scope": "national_within_year",
+          "K": 100,
+          "quiet_rule": "preboom_prior_momentum_rank_pct <= 0.666667",
+          "universe": null,
+          "population": "quiet rows of the held-out analog families"
+        },
+        "nulls": [
+          {
+            "name": "random_quiet_county",
+            "value": 0.0518,
+            "kind": "random_quiet_county",
+            "source": "data/reference/metric_nulls.json",
+            "preferred": true,
+            "multiple": 1.12,
+            "note": "the fair null: the metric counts only quiet rows"
+          },
+          {
+            "name": "uniform_top_k",
+            "value": 0.03,
+            "kind": "uniform_top_k",
+            "source": "data/reference/metric_nulls.json",
+            "preferred": false,
+            "multiple": 1.94,
+            "note": "the legacy denominator; inflates the multiple ~1.7x for a gated metric"
+          },
+          {
+            "name": "best_naive_lane",
+            "value": 0.0239,
+            "kind": "best_naive_rule",
+            "source": "output/cls_emb_1/selection_bias/champion_selection_bias.json",
+            "preferred": false,
+            "multiple": 2.43,
+            "ci90": [
+              1.05,
+              7.27
+            ]
+          }
+        ],
+        "source": "output/cls_emb_1/selection_bias/champion_selection_bias.json",
+        "as_of": "2026-09-11",
+        "ci_method": "split-family selection-bias correction, 2000 splits",
+        "selection": {
+          "n_candidates": 39,
+          "naive_argmax": 0.0752,
+          "oracle_held_out": 0.0773,
+          "optimism_vs_naive": 0.0171,
+          "correction": "split-family held-out"
+        },
+        "conditions": {
+          "panel": "pit_selective_v2025",
+          "train_embargo_years": 7,
+          "label_set": "adopted_d2",
+          "note": "the live condition: a model trained today only knows booms that already happened"
+        }
+      }
+    },
+    "class_median_by_condition": {
+      "clean_contemporaneous": 0.1678,
+      "pit": 0.1343,
+      "pit_full": 0.1344,
+      "pit_embargoed": 0.041
+    },
+    "legacy_clean_panel": {
+      "honest_held_out_capture_at_100": 0.1493,
+      "vs_random_multiple_as_published": 4.69,
+      "vs_random_multiple_uniform_recomputed": 4.98,
+      "withdrawn_on": "2026-09-15",
+      "why_withdrawn": "not point-in-time: features merged contemporaneously despite 3-24 month publication lags; and divided by the uniform null while the metric counts only quiet rows (DEEP_DIVE_AUDIT_2026-09-11 \u00a71)"
+    },
+    "shortlist_number_mismatch": {
+      "number_condition": "pit_embargoed",
+      "shortlist_condition": "clean_contemporaneous",
+      "mismatch": true,
+      "top50_jaccard": 0.22,
+      "note": "the displayed shortlist is still the clean-panel model's; swapping it to the point-in-time model is an operator decision (D-PIT) and has not been applied"
+    },
     "sources": [
       "output/champion_selection_bias.json",
-      "output/v6_2025_remeasure/v6_2025_full.json"
+      "output/cls_pit_1/selection_bias/champion_selection_bias.json",
+      "output/pit_full/selection_bias/champion_selection_bias.json",
+      "output/cls_emb_1/selection_bias/champion_selection_bias.json"
     ],
-    "as_of": "2026-09-08"
+    "as_of": "2026-09-11"
   },
   "regression": {
     "horizons": {
@@ -44,6 +344,15 @@
     "accepted": 44,
     "rejected": 11,
     "held": 40,
+    "n": 55,
+    "n_label": "decided reviews (holds excluded)",
+    "ci90": [
+      0.6982,
+      0.8737
+    ],
+    "ci_method": "Wilson score interval, 90%",
+    "nulls": [],
+    "no_null_reason": "non-blind, founder-only, no control set was reviewed, so there is no rate to beat; this is a plausibility read, not predictive evidence",
     "caveat": "operator-JUDGED proxy, not realized-outcome precision",
     "sources": [
       "output/boom_onset_operator_precision_report.json"
@@ -82,5 +391,677 @@
       }
     ],
     "note": "realized validation clock \u2014 sparse by design early; no realized outcome has graded the shortlist yet"
+  },
+  "regional_screen": {
+    "screen": "S2",
+    "components": [
+      "state",
+      "mom"
+    ],
+    "definition": "quiet-gated (own 3-yr momentum rank <= 2/3) mean of two within-year percentile ranks: the state's lagged home-price growth and the county's own prior 3-yr momentum; top-100 per anchor",
+    "status": "candidate default timing order (D-RULE, an open operator decision); served report-only via scripts/serve_regional_screen.py",
+    "claim": "a regional screen with a modest, out-of-era-replicated edge over a random quiet county \u2014 not a county-level oracle: most of the edge is which state it picks, the within-state edge is ~0, and it is a backtest on home values (no land-value edge, C4)",
+    "headline": {
+      "national_3yr_excess_pp": 3.867,
+      "ci90": [
+        2.433,
+        5.369
+      ],
+      "ci90_moving_block": [
+        2.641,
+        5.613
+      ],
+      "n_anchors": 15,
+      "vs_null_name": "random_quiet_county",
+      "net_of_cost_3yr_pct": 6.01,
+      "random_quiet_net_of_cost_3yr_pct": 2.14
+    },
+    "eras": {
+      "zhvi": {
+        "label": "ZHVI 2008-2022, decide end-Feb t+1, buy Feb t+1, sell Feb t+4; universe-B quiet pool; median of picks",
+        "national_3yr_excess_pp": {
+          "metric": "S2: national 3-yr excess return vs a random quiet county (pp)",
+          "value": 3.867,
+          "n": 15,
+          "n_label": "anchors",
+          "ci90": [
+            2.433,
+            5.369
+          ],
+          "geometry": {
+            "kind": "gated",
+            "rank_scope": "within_universe_within_year",
+            "K": 100,
+            "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+            "universe": "universe B quiet, Feb buy price",
+            "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+          },
+          "nulls": [
+            {
+              "name": "random_quiet_county",
+              "value": 0.0,
+              "kind": "random_quiet_county",
+              "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+              "preferred": true,
+              "note": "the excess is measured against this null per anchor (mean over 1,000 random draws of 100 from the same quiet pool); its value on the excess scale is 0; its absolute 3-yr return is 13.14%"
+            }
+          ],
+          "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+          "as_of": "2026-09-16",
+          "ci_method": "circular block bootstrap over anchors (block 3, 20,000 draws), 90%",
+          "conditions": {
+            "era": "zhvi",
+            "timing": "decide end-Feb t+1 on data published by then; buy the Feb t+1 price; sell Feb t+4 / t+6",
+            "aggregation": "median",
+            "pool": "universe B quiet, Feb buy price",
+            "engine_parity": {
+              "required": {
+                "screen": "state+mom+nbr",
+                "metric": "nat3_vs_qr",
+                "value": 0.0381,
+                "tol": 0.006,
+                "source": "RF-1 (output/deep_dive_20260910/tests/RF1), S0 national 3-yr edge"
+              },
+              "skipped": false,
+              "observed": 0.03809,
+              "drift": 1e-05,
+              "pass": true
+            }
+          },
+          "ci90_moving_block": [
+            2.641,
+            5.613
+          ],
+          "ci90_moving_block_note": "the interval as quoted in RF-1 / SCR-B1; the circular scheme weights every anchor equally"
+        },
+        "national_5yr_excess_pp": {
+          "metric": "S2: national 5-yr excess return vs a random quiet county (pp)",
+          "value": 6.943,
+          "n": 13,
+          "n_label": "anchors",
+          "ci90": [
+            3.498,
+            10.428
+          ],
+          "geometry": {
+            "kind": "gated",
+            "rank_scope": "within_universe_within_year",
+            "K": 100,
+            "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+            "universe": "universe B quiet, Feb buy price",
+            "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+          },
+          "nulls": [
+            {
+              "name": "random_quiet_county",
+              "value": 0.0,
+              "kind": "random_quiet_county",
+              "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+              "preferred": true,
+              "note": "the excess is measured against this null per anchor (mean over 1,000 random draws of 100 from the same quiet pool); its value on the excess scale is 0; its absolute 3-yr return is 13.14%"
+            }
+          ],
+          "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+          "as_of": "2026-09-16",
+          "ci_method": "circular block bootstrap over anchors (block 3, 20,000 draws), 90%",
+          "conditions": {
+            "era": "zhvi",
+            "timing": "decide end-Feb t+1 on data published by then; buy the Feb t+1 price; sell Feb t+4 / t+6",
+            "aggregation": "median",
+            "pool": "universe B quiet, Feb buy price",
+            "engine_parity": {
+              "required": {
+                "screen": "state+mom+nbr",
+                "metric": "nat3_vs_qr",
+                "value": 0.0381,
+                "tol": 0.006,
+                "source": "RF-1 (output/deep_dive_20260910/tests/RF1), S0 national 3-yr edge"
+              },
+              "skipped": false,
+              "observed": 0.03809,
+              "drift": 1e-05,
+              "pass": true
+            }
+          },
+          "ci90_moving_block": [
+            3.545,
+            10.902
+          ],
+          "ci90_moving_block_note": "the interval as quoted in RF-1 / SCR-B1; the circular scheme weights every anchor equally"
+        },
+        "within_state_3yr_excess_pp": {
+          "metric": "S2: within-state 3-yr excess return vs a state-matched random quiet county (pp)",
+          "value": 0.34,
+          "n": 15,
+          "n_label": "anchors",
+          "ci90": [
+            -0.036,
+            0.712
+          ],
+          "geometry": {
+            "kind": "gated",
+            "rank_scope": "within_universe_within_year",
+            "K": 100,
+            "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+            "universe": "universe B quiet, Feb buy price",
+            "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+          },
+          "nulls": [
+            {
+              "name": "state_matched_random_quiet_county",
+              "value": 0.0,
+              "kind": "matched_control",
+              "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+              "preferred": true,
+              "note": "a random quiet county drawn from the SAME states the screen picked; 0 on the excess scale"
+            }
+          ],
+          "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+          "as_of": "2026-09-16",
+          "ci_method": "circular block bootstrap over anchors (block 3, 20,000 draws), 90%",
+          "conditions": {
+            "era": "zhvi",
+            "note": "the deep dive's finding: most of the edge is which STATE the screen picks"
+          }
+        },
+        "net_of_cost_3yr_pct": {
+          "metric": "S2: 3-yr return net of an 8% round trip and 1%/yr carry (%)",
+          "value": 6.01,
+          "n": 15,
+          "n_label": "anchors",
+          "ci90": null,
+          "geometry": {
+            "kind": "gated",
+            "rank_scope": "within_universe_within_year",
+            "K": 100,
+            "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+            "universe": "universe B quiet, Feb buy price",
+            "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+          },
+          "nulls": [
+            {
+              "name": "random_quiet_county",
+              "value": 2.14,
+              "kind": "random_quiet_county",
+              "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+              "preferred": true,
+              "note": "a random quiet county under the same costs"
+            }
+          ],
+          "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+          "as_of": "2026-09-16",
+          "conditions": {
+            "era": "zhvi",
+            "absolute_3yr_pct": 17.01,
+            "costs": "8% round trip + 3 x 1%/yr carry",
+            "note": "point estimate; the interval lives on the 3-yr excess stamp"
+          }
+        },
+        "drawdown_share": {
+          "metric": "S2: share of picks with a >10% drawdown from the buy price within 5 years",
+          "value": 0.0423,
+          "n": 13,
+          "n_label": "anchors",
+          "ci90": null,
+          "geometry": {
+            "kind": "gated",
+            "rank_scope": "within_universe_within_year",
+            "K": 100,
+            "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+            "universe": "universe B quiet, Feb buy price",
+            "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+          },
+          "nulls": [
+            {
+              "name": "random_quiet_county",
+              "value": 0.0809,
+              "kind": "random_quiet_county",
+              "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+              "preferred": true,
+              "multiple": 0.52
+            }
+          ],
+          "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+          "as_of": "2026-09-16",
+          "conditions": {
+            "era": "zhvi",
+            "note": "point estimate; anchors without a 5-yr window are excluded"
+          }
+        },
+        "engine_parity": {
+          "required": {
+            "screen": "state+mom+nbr",
+            "metric": "nat3_vs_qr",
+            "value": 0.0381,
+            "tol": 0.006,
+            "source": "RF-1 (output/deep_dive_20260910/tests/RF1), S0 national 3-yr edge"
+          },
+          "skipped": false,
+          "observed": 0.03809,
+          "drift": 1e-05,
+          "pass": true
+        },
+        "source": "output/screen_returns/b2_zhvi/screen_returns.json",
+        "as_of": "2026-09-16"
+      },
+      "fhfa": {
+        "label": "FHFA 1990-2006, signal year t, buy H[t+1], sell H[t+4] (buy after the decision); all FHFA quiet counties; mean of picks",
+        "national_3yr_excess_pp": {
+          "metric": "S2: national 3-yr excess return vs a random quiet county (pp)",
+          "value": 3.055,
+          "n": 17,
+          "n_label": "anchors",
+          "ci90": [
+            1.136,
+            5.272
+          ],
+          "geometry": {
+            "kind": "gated",
+            "rank_scope": "national_within_year",
+            "K": 100,
+            "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+            "universe": "all FHFA counties, quiet",
+            "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+          },
+          "nulls": [
+            {
+              "name": "random_quiet_county",
+              "value": 0.0,
+              "kind": "random_quiet_county",
+              "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+              "preferred": true,
+              "note": "the excess is measured against this null per anchor (mean over 1,000 random draws of 100 from the same quiet pool); its value on the excess scale is 0; its absolute 3-yr return is 12.08%"
+            }
+          ],
+          "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+          "as_of": "2026-09-16",
+          "ci_method": "circular block bootstrap over anchors (block 3, 20,000 draws), 90%",
+          "conditions": {
+            "era": "fhfa",
+            "timing": "annual FHFA county HPI; signal from year t; buy at H[t+1], sell at H[t+4] / H[t+6] (buy after the decision, RF-1 review F1)",
+            "aggregation": "mean",
+            "pool": "all FHFA counties, quiet",
+            "engine_parity": {
+              "required": {
+                "screen": "state+mom+nbr",
+                "metric": "nat3_vs_qr",
+                "value": 0.01127,
+                "tol": 0.0005,
+                "source": "RF-1 review, buy-after-decision E1 (output/deep_dive_20260910/tests/RF1/review_repro/buylag/rf1_results.json), S0 national 3-yr edge"
+              },
+              "skipped": false,
+              "observed": 0.01127,
+              "drift": 0.0,
+              "pass": true
+            }
+          },
+          "ci90_moving_block": [
+            1.341,
+            5.621
+          ],
+          "ci90_moving_block_note": "the interval as quoted in RF-1 / SCR-B1; the circular scheme weights every anchor equally"
+        },
+        "national_5yr_excess_pp": {
+          "metric": "S2: national 5-yr excess return vs a random quiet county (pp)",
+          "value": 1.408,
+          "n": 17,
+          "n_label": "anchors",
+          "ci90": [
+            -1.256,
+            3.99
+          ],
+          "geometry": {
+            "kind": "gated",
+            "rank_scope": "national_within_year",
+            "K": 100,
+            "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+            "universe": "all FHFA counties, quiet",
+            "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+          },
+          "nulls": [
+            {
+              "name": "random_quiet_county",
+              "value": 0.0,
+              "kind": "random_quiet_county",
+              "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+              "preferred": true,
+              "note": "the excess is measured against this null per anchor (mean over 1,000 random draws of 100 from the same quiet pool); its value on the excess scale is 0; its absolute 3-yr return is 12.08%"
+            }
+          ],
+          "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+          "as_of": "2026-09-16",
+          "ci_method": "circular block bootstrap over anchors (block 3, 20,000 draws), 90%",
+          "conditions": {
+            "era": "fhfa",
+            "timing": "annual FHFA county HPI; signal from year t; buy at H[t+1], sell at H[t+4] / H[t+6] (buy after the decision, RF-1 review F1)",
+            "aggregation": "mean",
+            "pool": "all FHFA counties, quiet",
+            "engine_parity": {
+              "required": {
+                "screen": "state+mom+nbr",
+                "metric": "nat3_vs_qr",
+                "value": 0.01127,
+                "tol": 0.0005,
+                "source": "RF-1 review, buy-after-decision E1 (output/deep_dive_20260910/tests/RF1/review_repro/buylag/rf1_results.json), S0 national 3-yr edge"
+              },
+              "skipped": false,
+              "observed": 0.01127,
+              "drift": 0.0,
+              "pass": true
+            }
+          },
+          "ci90_moving_block": [
+            -1.369,
+            4.129
+          ],
+          "ci90_moving_block_note": "the interval as quoted in RF-1 / SCR-B1; the circular scheme weights every anchor equally"
+        },
+        "within_state_3yr_excess_pp": {
+          "metric": "S2: within-state 3-yr excess return vs a state-matched random quiet county (pp)",
+          "value": 0.458,
+          "n": 17,
+          "n_label": "anchors",
+          "ci90": [
+            0.211,
+            0.708
+          ],
+          "geometry": {
+            "kind": "gated",
+            "rank_scope": "national_within_year",
+            "K": 100,
+            "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+            "universe": "all FHFA counties, quiet",
+            "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+          },
+          "nulls": [
+            {
+              "name": "state_matched_random_quiet_county",
+              "value": 0.0,
+              "kind": "matched_control",
+              "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+              "preferred": true,
+              "note": "a random quiet county drawn from the SAME states the screen picked; 0 on the excess scale"
+            }
+          ],
+          "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+          "as_of": "2026-09-16",
+          "ci_method": "circular block bootstrap over anchors (block 3, 20,000 draws), 90%",
+          "conditions": {
+            "era": "fhfa",
+            "note": "the deep dive's finding: most of the edge is which STATE the screen picks"
+          }
+        },
+        "net_of_cost_3yr_pct": {
+          "metric": "S2: 3-yr return net of an 8% round trip and 1%/yr carry (%)",
+          "value": 4.13,
+          "n": 17,
+          "n_label": "anchors",
+          "ci90": null,
+          "geometry": {
+            "kind": "gated",
+            "rank_scope": "national_within_year",
+            "K": 100,
+            "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+            "universe": "all FHFA counties, quiet",
+            "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+          },
+          "nulls": [
+            {
+              "name": "random_quiet_county",
+              "value": 1.08,
+              "kind": "random_quiet_county",
+              "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+              "preferred": true,
+              "note": "a random quiet county under the same costs"
+            }
+          ],
+          "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+          "as_of": "2026-09-16",
+          "conditions": {
+            "era": "fhfa",
+            "absolute_3yr_pct": 15.13,
+            "costs": "8% round trip + 3 x 1%/yr carry",
+            "note": "point estimate; the interval lives on the 3-yr excess stamp"
+          }
+        },
+        "drawdown_share": {
+          "metric": "S2: share of picks with a >10% drawdown from the buy price within 5 years",
+          "value": 0.0159,
+          "n": 17,
+          "n_label": "anchors",
+          "ci90": null,
+          "geometry": {
+            "kind": "gated",
+            "rank_scope": "national_within_year",
+            "K": 100,
+            "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+            "universe": "all FHFA counties, quiet",
+            "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+          },
+          "nulls": [
+            {
+              "name": "random_quiet_county",
+              "value": 0.0202,
+              "kind": "random_quiet_county",
+              "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+              "preferred": true,
+              "multiple": 0.79
+            }
+          ],
+          "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+          "as_of": "2026-09-16",
+          "conditions": {
+            "era": "fhfa",
+            "note": "point estimate; anchors without a 5-yr window are excluded"
+          }
+        },
+        "engine_parity": {
+          "required": {
+            "screen": "state+mom+nbr",
+            "metric": "nat3_vs_qr",
+            "value": 0.01127,
+            "tol": 0.0005,
+            "source": "RF-1 review, buy-after-decision E1 (output/deep_dive_20260910/tests/RF1/review_repro/buylag/rf1_results.json), S0 national 3-yr edge"
+          },
+          "skipped": false,
+          "observed": 0.01127,
+          "drift": 0.0,
+          "pass": true
+        },
+        "source": "output/screen_returns/b2_fhfa/screen_returns.json",
+        "as_of": "2026-09-16"
+      }
+    },
+    "out_of_era": {
+      "out_of_era_2008_2014": {
+        "metric": "S2 (out_of_era_2008_2014): national 3-yr excess return vs a random quiet county (pp)",
+        "value": 2.373,
+        "n": 7,
+        "n_label": "anchors",
+        "ci90": [
+          1.296,
+          3.31
+        ],
+        "geometry": {
+          "kind": "gated",
+          "rank_scope": "within_universe_within_year",
+          "K": 100,
+          "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+          "universe": "universe B quiet, Feb buy price",
+          "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+        },
+        "nulls": [
+          {
+            "name": "random_quiet_county",
+            "value": 0.0,
+            "kind": "random_quiet_county",
+            "source": "output/screen_returns/b2_zhvi_2008_2014/screen_returns.json",
+            "preferred": true,
+            "note": "the excess is measured against this null per anchor (mean over 1,000 random draws of 100 from the same quiet pool); its value on the excess scale is 0; its absolute 3-yr return is 5.42%"
+          }
+        ],
+        "source": "output/screen_returns/b2_zhvi_2008_2014/screen_returns.json",
+        "as_of": "2026-09-16",
+        "ci_method": "circular block bootstrap over anchors (block 3, 20,000 draws), 90%",
+        "conditions": {
+          "era": "zhvi",
+          "timing": "decide end-Feb t+1 on data published by then; buy the Feb t+1 price; sell Feb t+4 / t+6",
+          "aggregation": "median",
+          "pool": "universe B quiet, Feb buy price",
+          "engine_parity": {
+            "required": {
+              "screen": "state+mom+nbr",
+              "metric": "nat3_vs_qr",
+              "value": 0.0381,
+              "tol": 0.006,
+              "source": "RF-1 (output/deep_dive_20260910/tests/RF1), S0 national 3-yr edge"
+            },
+            "skipped": true
+          },
+          "anchors": [
+            2008,
+            2009,
+            2010,
+            2011,
+            2012,
+            2013,
+            2014
+          ],
+          "experiment": "SCR-B3 (winner's curse): 2008-2014 is the half the screens were not chosen on"
+        },
+        "ci90_moving_block": [
+          1.006,
+          2.701
+        ],
+        "ci90_moving_block_note": "the interval as quoted in RF-1 / SCR-B1; the circular scheme weights every anchor equally",
+        "sources": [
+          "output/screen_returns/b2_zhvi_2008_2014/screen_returns.json",
+          "output/screen_returns/era_2008_2014/screen_returns.json"
+        ]
+      },
+      "selection_era_2015_2022": {
+        "metric": "S2 (selection_era_2015_2022): national 3-yr excess return vs a random quiet county (pp)",
+        "value": 5.189,
+        "n": 8,
+        "n_label": "anchors",
+        "ci90": [
+          3.718,
+          6.714
+        ],
+        "geometry": {
+          "kind": "gated",
+          "rank_scope": "within_universe_within_year",
+          "K": 100,
+          "quiet_rule": "own 3-yr momentum pct rank <= 0.666667",
+          "universe": "universe B quiet, Feb buy price",
+          "population": "top-100 S2 picks per anchor vs 1,000 random draws of 100 from the same quiet pool"
+        },
+        "nulls": [
+          {
+            "name": "random_quiet_county",
+            "value": 0.0,
+            "kind": "random_quiet_county",
+            "source": "output/screen_returns/b2_zhvi_2015_2022/screen_returns.json",
+            "preferred": true,
+            "note": "the excess is measured against this null per anchor (mean over 1,000 random draws of 100 from the same quiet pool); its value on the excess scale is 0; its absolute 3-yr return is 19.89%"
+          }
+        ],
+        "source": "output/screen_returns/b2_zhvi_2015_2022/screen_returns.json",
+        "as_of": "2026-09-16",
+        "ci_method": "circular block bootstrap over anchors (block 3, 20,000 draws), 90%",
+        "conditions": {
+          "era": "zhvi",
+          "timing": "decide end-Feb t+1 on data published by then; buy the Feb t+1 price; sell Feb t+4 / t+6",
+          "aggregation": "median",
+          "pool": "universe B quiet, Feb buy price",
+          "engine_parity": {
+            "required": {
+              "screen": "state+mom+nbr",
+              "metric": "nat3_vs_qr",
+              "value": 0.0381,
+              "tol": 0.006,
+              "source": "RF-1 (output/deep_dive_20260910/tests/RF1), S0 national 3-yr edge"
+            },
+            "skipped": true
+          },
+          "anchors": [
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022
+          ],
+          "experiment": "SCR-B3 (winner's curse): 2008-2014 is the half the screens were not chosen on"
+        },
+        "ci90_moving_block": [
+          4.524,
+          7.051
+        ],
+        "ci90_moving_block_note": "the interval as quoted in RF-1 / SCR-B1; the circular scheme weights every anchor equally",
+        "sources": [
+          "output/screen_returns/b2_zhvi_2015_2022/screen_returns.json",
+          "output/screen_returns/era_2015_2022/screen_returns.json"
+        ]
+      },
+      "retention_of_full_sample_edge": 0.614,
+      "retention_bar": 0.6,
+      "passes_bar": true,
+      "full_sample_edge_pp": 3.867,
+      "note": "SCR-B3 bar: keep >= 60% of the full-sample national edge in the era the screen was not selected on. S2 keeps about 61%; R7 kept 48% and was retired. The selection half inflates every screen."
+    },
+    "band_table": {
+      "path": "output/recal/s2_band_table.json",
+      "generated_at": "2026-09-16T03:14:18.621520+00:00",
+      "stamp_validation": "pass",
+      "top_band_excess_3yr_pp": {
+        "zhvi": 2.473,
+        "fhfa": 1.771
+      },
+      "consistency_check": {
+        "zhvi": {
+          "top_band_excess_pp": 2.473,
+          "engine_top100_excess_pp": 3.867,
+          "top_band_share_of_top100_edge": 0.64,
+          "excess_by_band_pp": [
+            2.473,
+            1.531,
+            -0.169,
+            -1.439,
+            -2.874
+          ],
+          "bands_monotone_decreasing": true,
+          "expectation": "a quintile is 3-4x wider than the top 100, so somewhat less than the engine's top-100 figure",
+          "same_neighbourhood": true
+        },
+        "fhfa": {
+          "top_band_excess_pp": 1.771,
+          "engine_top100_excess_pp": 3.055,
+          "top_band_share_of_top100_edge": 0.58,
+          "excess_by_band_pp": [
+            1.771,
+            0.21,
+            -0.341,
+            -0.473,
+            -1.149
+          ],
+          "bands_monotone_decreasing": true,
+          "expectation": "a quintile is 3-4x wider than the top 100, so somewhat less than the engine's top-100 figure",
+          "same_neighbourhood": true
+        }
+      }
+    },
+    "sources": [
+      "output/screen_returns/b2_fhfa/screen_returns.json",
+      "output/screen_returns/b2_zhvi/screen_returns.json"
+    ],
+    "as_of": "2026-09-16"
+  },
+  "stamp_validation": {
+    "status": "pass",
+    "problems": [],
+    "n_stamped": 16
   }
 }

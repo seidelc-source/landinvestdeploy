@@ -2,7 +2,7 @@
 
 This folder is a compact, read-only Streamlit deployment bundle for remote testers.
 
-The dashboard includes Product Mode, Customer Mode, and Legacy Mode. Customer Mode is the cleaner customer-facing workflow with radar, opportunity cards, county story, compare, watchlist, and packet exports; it defaults to the Product Mode-aligned General Opportunity view and is still a presentation layer over the included ranking artifacts.
+The dashboard has two experiences: **Guided** (the default; radar, opportunity cards, county story, compare, watchlist, packet exports) and **Pro** (strategy and screening tools; `?experience=pro`). Both are presentation layers over the included ranking artifacts. No 3yr/5yr appreciation forecast is shown anywhere (those horizons were falsified under honest validation); the timing engine's honest coordinates are read from `output/honest_coordinates.json` and shown in both experiences.
 
 It intentionally includes only:
 
@@ -10,7 +10,7 @@ It intentionally includes only:
 - minimal `requirements.txt`
 - bundled map asset at `assets/geojson-counties-fips.json`
 - bundled brand asset at `assets/landinvest-logo.svg`
-- `output/county_rankings_2024.parquet`
+- `output/county_rankings_2025.parquet` (the served vintage; `county_rankings_2024.parquet` is included only for run-to-run churn)
 - latest run metadata under `output/runs/<latest_run>/run_summary.json` and `run_deltas.json`
 - `output/evaluation_report.json`
 - small optional `output/*.csv` / `output/*.json` dashboard context files

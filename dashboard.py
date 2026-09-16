@@ -6,6 +6,7 @@ Launch:  streamlit run dashboard.py
 
 import html
 import json
+import os
 import re
 import sqlite3
 import sys
@@ -25,6 +26,9 @@ if str(APP_ROOT) not in sys.path:
 
 from dashboard_modules.evidence_panel import render_county_evidence_panel
 from dashboard_modules.county_memo import render_county_memo_markdown
+from dashboard_modules.county_narrative import build_county_narrative
+from dashboard_modules.investment_numbers import investment_number_items, investment_numbers_markdown
+from dashboard_modules.property_analyzer import load_band_table, render_property_analyzer
 from dashboard_modules.customer_story import customer_signal_radar_figure, customer_signal_table, customer_story_hero_html
 from dashboard_modules.parcel_explorer import render_parcel_explorer_tab
 
@@ -32,7 +36,8 @@ from dashboard_modules.parcel_explorer import render_parcel_explorer_tab
 # Config
 # ---------------------------------------------------------------------------
 
-DATA_PATH = APP_ROOT / "output" / "county_rankings_2025.parquet"  # 2025 vintage refresh 2026-09-04
+DATA_PATH = Path(os.environ.get("LANDINVEST_RANKINGS_PATH",
+                                str(APP_ROOT / "output" / "county_rankings_2025.parquet")))  # 2025 vintage; env override for UI contract tests
 ASSETS_PATH = APP_ROOT / "assets"
 BRAND_LOGO_PATH = ASSETS_PATH / "landinvest-logo.svg"
 COUNTY_GEOJSON_PATH = ASSETS_PATH / "geojson-counties-fips.json"
@@ -83,6 +88,11 @@ USER_DATA_PATH = OUTPUT_PATH / "dashboard_user_data.json"
 RECAL_BRIEFS_PATH = OUTPUT_PATH / "recal" / "county_briefs.parquet"
 RECAL_READS_PATH = OUTPUT_PATH / "recal" / "reads.json"
 RECAL_SHORTLIST_PATH = OUTPUT_PATH / "recal" / "universe_b_shortlist.csv"
+S2_BAND_TABLE_PATH = OUTPUT_PATH / "recal" / "s2_band_table.json"
+REGIONAL_SCREEN_PATH = OUTPUT_PATH / "recal" / "regional_screen_2025.csv"
+REGIONAL_SCREEN_COLUMNS = ["fips", "s2_state_rank_pct", "s2_mom_rank_pct", "s2_score", "s2_eligible",
+                           "s2_rank_quiet_B", "s2_quintile_quiet_B", "s2_pct_quiet_B", "s2_as_of"]
+ZCTA_CROSSWALK_PATH = APP_ROOT / "data" / "reference" / "zcta_county_crosswalk.parquet"
 RECAL_BRIEF_COLUMNS = [
     "fips", "universe_A", "universe_B", "universe_C", "density_pct", "rucc_code", "population",
     "zhvi_end", "home_value_pct", "price_to_income", "fmr_2br", "fmr_fiscal_year", "fmr_gross_yield", "rent_yield_pct",
@@ -102,6 +112,7 @@ RECAL_BRIEF_COLUMNS = [
     "timing_class_median_rank_pct", "timing_champion_lane", "timing_rank_in_universe_B", "archetype_lens_best",
     "operator_review_2024", "operator_review_2025", "forward_snapshot_20260908_role", "forward_snapshot_20260909_role", "badge_urban_core",
     "badge_tiny_market", "badge_already_hot", "badge_declining", "badge_commodity_cycle", "badge_no_demand_signal",
+    "serve_year_coverage_status",
 ]
 USER_DATA_DB_PATH = OUTPUT_PATH / "dashboard_user_data.sqlite3"
 HORIZONS = [1, 3, 5]
@@ -120,7 +131,11 @@ def _timing_chip_text(honest: dict | None) -> str:
     mult = next((h[k] for k in ("vs_random_multiple", "multiple_vs_random", "x_random") if isinstance(h.get(k), (int, float))), None)
     if cap is None:
         return "ensemble class (report-only)"
-    return f"capture {cap:.3f}" + (f" ≈ {mult:.1f}× random" if mult else "")
+    # A1: a multiple means nothing without its denominator. v1 artifacts divided by a
+    # uniform 100/3144 null while the metric counts only quiet rows, which inflated it ~1.7x.
+    null_label = {"random_quiet_county": "random quiet county", "uniform_top_k": "random county"}.get(
+        h.get("vs_random_null_name"), "random")
+    return f"capture {cap:.3f}" + (f" ≈ {mult:.1f}× {null_label}" if mult else "")
 
 
 def _fmt_timing(value) -> str:
@@ -137,6 +152,38 @@ def _fmt_pct(x) -> str:
 
 def _fmt_score(x) -> str:
     return f"{x:.1f}" if pd.notna(x) else "—"
+
+
+def _fmt_ordinal_value(p) -> str:
+    """A within-year percentile (0–1, higher = better) as an ordinal position, never a magnitude."""
+    return f"top {100 * (1 - float(p)):.0f}% (ordinal)" if pd.notna(p) else "—"
+
+
+def _fmt_ordinal_pct(row) -> str:
+    """The 1yr model is ordinal context only (embargoed median Spearman +0.35; top-K precision ≈ random).
+    Reads the within-year percentile added at load time; the raw prediction is never shown as a %."""
+    getter = row.get if hasattr(row, "get") else (lambda k, d=None: d)
+    return _fmt_ordinal_value(getter("pred_1yr_pct"))
+
+
+# Observed facts whose non-null share is the app's notion of confidence (P0.6). The retired
+# regression's confidence bucket and interval width are no longer used anywhere in the UI.
+FACTS_COVERAGE_COLUMNS = (
+    "fmr_gross_yield", "nass_land_value_per_acre", "aei_land_value_per_acre", "nass_cash_rent_cropland_nonirr",
+    "farm_cap_rate_proxy", "tourism_intensity_index", "gdp_per_capita", "nri_risk_score", "zhvi_end",
+    "price_to_income", "seasonal_home_share", "usda_natural_amenity_scale",
+)
+RETIRED_DIAGNOSTICS_NOTE = (
+    "Retired regression diagnostics — the 3yr/5yr models were falsified under honest validation "
+    "(embargoed Spearman ≤ 0) and none of these numbers is a forecast or a ranking input."
+)
+
+
+def _facts_coverage(df: pd.DataFrame) -> pd.Series:
+    cols = [c for c in FACTS_COVERAGE_COLUMNS if c in df.columns]
+    if not cols:
+        return pd.Series(0.0, index=df.index)
+    return df[cols].notna().mean(axis=1).astype(float)
 
 
 STATUS_LABELS = {
@@ -190,82 +237,10 @@ def _county_label_from_row(row: pd.Series) -> str:
     return f"{county}, {state} [FIPS {fips}]"
 
 
-def _extract_driver_impacts(row: pd.Series, horizon: int = 5) -> tuple[list[tuple[str, float]], list[tuple[str, float]]]:
-    driver_col = f"drivers_xgboost_{horizon}yr"
-    drivers = _parse_drivers(row.get(driver_col))
-    numeric = [(k, float(v)) for k, v in drivers.items() if isinstance(v, (int, float))]
-    positives = sorted([kv for kv in numeric if kv[1] > 0], key=lambda x: x[1], reverse=True)[:3]
-    negatives = sorted([kv for kv in numeric if kv[1] < 0], key=lambda x: x[1])[:3]
-    return positives, negatives
-
-
 def _build_county_narrative(row: pd.Series, history_row: pd.Series | None = None) -> dict[str, list[str] | str]:
-    positives_5, negatives_5 = _extract_driver_impacts(row, horizon=5)
-    positives_3, negatives_3 = _extract_driver_impacts(row, horizon=3)
-
-    bullets_good: list[str] = []
-    bullets_caution: list[str] = []
-
-    risk = row.get("composite_risk")
-    conf = row.get("confidence", "unknown")
-    fallback = bool(row.get("use_stable_3yr_fallback", False))
-    interval = row.get("quantile_interval_width_mean", row.get("pred_std"))
-
-    pred1 = row.get("pred_avg_1yr")
-    if pd.notna(pred1):
-        bullets_good.append(
-            f"1yr relative-appreciation signal is {_fmt_pct(pred1)} — an ordering read against other counties, "
-            "not a forecast (top-of-list precision is unproven)."
-        )
-    bos = row.get("boom_onset_score")
-    if pd.notna(bos):
-        rank_b = row.get("timing_rank_in_universe_B")
-        rank_txt = f" — #{int(rank_b)} in the investable universe" if pd.notna(rank_b) else ""
-        bullets_good.append(f"Boom-onset timing score is {float(bos):.2f}{rank_txt} — resemblance to the quiet years before past booms (report-only, not a forecast).")
-    for feat, val in positives_5[:2]:
-        bullets_good.append(f"`{feat}` is one of the strongest positive model drivers ({val:+.3f} SHAP — attribution, not causation).")
-    for feat, val in positives_3[:1]:
-        if feat not in [x[0] for x in positives_5[:2]]:
-            bullets_good.append(f"`{feat}` also supports the 3-year view ({val:+.3f} SHAP).")
-
-    if pd.notna(risk):
-        if risk >= 60:
-            bullets_caution.append(f"Composite risk is elevated at {_fmt_score(risk)}, so upside comes with more downside baggage.")
-        elif risk >= 45:
-            bullets_caution.append(f"Composite risk is middling at {_fmt_score(risk)}, so this is not a clean low-risk setup.")
-    if fallback:
-        bullets_caution.append("The effective 3-year signal is currently using the stable fallback path, so medium-term confidence is more conditional.")
-    if pd.notna(interval) and float(interval) > 0.20:
-        bullets_caution.append(f"Prediction uncertainty is relatively wide ({float(interval):.3f}), so ranking confidence should be treated cautiously.")
-    for feat, val in negatives_5[:2]:
-        bullets_caution.append(f"`{feat}` is a notable negative model driver ({val:+.3f} SHAP — attribution, not causation).")
-    if history_row is not None and not history_row.empty:
-        std_rank = history_row.get("std_rank")
-        top25_share = history_row.get("top25_presence_share")
-        latest_rank = history_row.get("latest_rank")
-        if pd.notna(top25_share) and float(top25_share) >= 0.75:
-            bullets_good.append(
-                f"This county has stayed in the top 25 for {100 * float(top25_share):.0f}% of recent runs, which supports shortlist durability."
-            )
-        if pd.notna(std_rank) and float(std_rank) >= 20:
-            bullets_caution.append(
-                f"Run-to-run rank volatility is still meaningful (rank std {float(std_rank):.1f}), so placement is not fully settled."
-            )
-        if pd.notna(latest_rank):
-            bullets_good.append(f"Current live rank is #{int(latest_rank)}.")
-
-    summary = (
-        f"{row.get('county_name', 'This county')} is currently a `{conf}`-confidence entry on the strategy list. "
-        f"The main case is a strong relative model signal with supportive structural drivers (context, not a "
-        f"multi-year forecast), while the main question is "
-        f"{'medium-term fallback reliance' if fallback else 'whether the current rank remains stable across runs'}."
-    )
-
-    return {
-        "summary": summary,
-        "positives": bullets_good[:5],
-        "cautions": bullets_caution[:5],
-    }
+    """Facts-based narrative (P0.2): observed facts and labelled research reads, never SHAP attributions
+    or a multi-year horizon. See dashboard_modules/county_narrative.py."""
+    return build_county_narrative(row, history_row)
 
 
 def _wave3_value_label(value, invert: bool = False) -> str:
@@ -835,7 +810,7 @@ def _build_watchlist_markdown(
             f"- `{row.get('county_name')}, {row.get('state')}` [FIPS {fips}]"
             f": rank `#{int(row.get('overall_rank'))}`"
             f", opportunity `{_fmt_score(row.get('opportunity_score'))}`"
-            f", 1yr (ordinal) `{_fmt_pct(row.get('pred_avg_1yr'))}`"
+            f", 1yr `{_fmt_ordinal_pct(row)}`"
             f", timing `{_fmt_timing(row.get('boom_onset_score'))}`"
             f", risk `{_fmt_score(row.get('composite_risk'))}`"
             f", confidence `{row.get('confidence', '—')}`"
@@ -873,9 +848,7 @@ def _build_latest_run_delta_bullets(shift_row: pd.Series) -> list[str]:
         bullets.append(f"Latest run rank moved from `#{int(old_rank)}` to `#{int(new_rank)}`.")
     for label, col in [
         ("opportunity score", "opportunity_score_delta"),
-        ("3yr policy signal", "pred_policy_3yr_delta"),
-        ("XGBoost 5yr", "pred_xgboost_5yr_delta"),
-        ("LightGBM 5yr", "pred_lightgbm_5yr_delta"),
+        ("risk score", "composite_risk_delta"),
     ]:
         val = shift_row.get(col)
         if pd.notna(val):
@@ -1015,7 +988,7 @@ def _build_watchlist_share_payload(
         cols = [
             c for c in [
                 "fips", "county_name", "state", "overall_rank", "opportunity_score",
-                "pred_policy_3yr", "pred_avg_5yr", "composite_risk",
+                "pred_1yr_pct", "fmr_gross_yield", "composite_risk",
                 "site_thesis_support_index", "land_developability_index",
                 "land_constraint_pressure", "land_fragility_pressure",
                 "wave3_overlay_rank", "wave3_overlay_adjustment", "wave3_net_support",
@@ -1032,8 +1005,9 @@ def _build_watchlist_share_payload(
                     "state": row.get("state"),
                     "overall_rank": int(row.get("overall_rank")) if pd.notna(row.get("overall_rank")) else None,
                     "opportunity_score": float(row.get("opportunity_score")) if pd.notna(row.get("opportunity_score")) else None,
-                    "pred_policy_3yr": float(row.get("pred_policy_3yr")) if pd.notna(row.get("pred_policy_3yr")) else None,
-                    "pred_avg_5yr": float(row.get("pred_avg_5yr")) if pd.notna(row.get("pred_avg_5yr")) else None,
+                    "pred_1yr_pct": float(row.get("pred_1yr_pct")) if pd.notna(row.get("pred_1yr_pct")) else None,
+
+                    "fmr_gross_yield": float(row.get("fmr_gross_yield")) if pd.notna(row.get("fmr_gross_yield")) else None,
                     "composite_risk": float(row.get("composite_risk")) if pd.notna(row.get("composite_risk")) else None,
                     "site_thesis_support_index": float(row.get("site_thesis_support_index")) if pd.notna(row.get("site_thesis_support_index")) else None,
                     "land_developability_index": float(row.get("land_developability_index")) if pd.notna(row.get("land_developability_index")) else None,
@@ -1115,9 +1089,7 @@ def _build_watchlist_latest_run_summary(
         explanation_parts = []
         for label, key in [
             ("opportunity", "opportunity_score_delta"),
-            ("3yr policy", "pred_policy_3yr_delta"),
-            ("XGB 5yr", "pred_xgboost_5yr_delta"),
-            ("LGB 5yr", "pred_lightgbm_5yr_delta"),
+            ("risk", "composite_risk_delta"),
         ]:
             val = shift.get(key)
             if pd.notna(val):
@@ -1137,8 +1109,9 @@ def _build_watchlist_latest_run_summary(
                 "rank_shift": float(rank_shift) if pd.notna(rank_shift) else None,
                 "movement": movement,
                 "opportunity_score": float(row.get("opportunity_score")) if pd.notna(row.get("opportunity_score")) else None,
-                "pred_policy_3yr": float(row.get("pred_policy_3yr")) if pd.notna(row.get("pred_policy_3yr")) else None,
-                "pred_avg_5yr": float(row.get("pred_avg_5yr")) if pd.notna(row.get("pred_avg_5yr")) else None,
+                "pred_1yr_pct": float(row.get("pred_1yr_pct")) if pd.notna(row.get("pred_1yr_pct")) else None,
+
+                "fmr_gross_yield": float(row.get("fmr_gross_yield")) if pd.notna(row.get("fmr_gross_yield")) else None,
                 "site_thesis_support_index": float(row.get("site_thesis_support_index")) if pd.notna(row.get("site_thesis_support_index")) else None,
                 "land_developability_index": float(row.get("land_developability_index")) if pd.notna(row.get("land_developability_index")) else None,
                 "land_constraint_pressure": float(row.get("land_constraint_pressure")) if pd.notna(row.get("land_constraint_pressure")) else None,
@@ -1179,7 +1152,7 @@ def _build_watchlist_latest_run_summary(
             lines.append(
                 f"- `{rec['county_name']}, {rec['state']}` [FIPS {rec['fips']}]"
                 f": {rank_part}"
-                f" | 1yr (ordinal) `{_fmt_pct(rec.get('pred_avg_1yr'))}`"
+                f" | 1yr `{_fmt_ordinal_pct(rec)}`"
                 f" | timing `{_fmt_timing(rec.get('boom_onset_score'))}`"
                 f" | opp `{_fmt_score(rec.get('opportunity_score'))}`"
             )
@@ -1231,7 +1204,7 @@ def _build_watchlist_share_template(
             decision = _build_wave3_decision_narrative(row)
             lines.append(
                 f"- `{row['county_name']}, {row['state']}`: rank `#{int(row['overall_rank'])}`, "
-                f"1yr (ordinal) `{_fmt_pct(row.get('pred_avg_1yr'))}`, timing `{_fmt_timing(row.get('boom_onset_score'))}`, "
+                f"1yr `{_fmt_ordinal_pct(row)}`, timing `{_fmt_timing(row.get('boom_onset_score'))}`, "
                 f"risk `{_fmt_score(row.get('composite_risk'))}`"
             )
             lines.append(f"  - Structural read: {wave3_note['summary']}")
@@ -1279,7 +1252,7 @@ def _build_watchlist_share_template(
                     f"rank `#{int(rec['current_rank'])}`"
                     f", movement `{rec['movement']}`"
                     f", timing `{_fmt_timing(rec.get('boom_onset_score'))}`"
-                    f", 3yr `{_fmt_pct(rec.get('pred_policy_3yr'))}`"
+                    f", 1yr `{_fmt_ordinal_pct(rec)}`, rent yield `{_fmt_pct(rec.get('fmr_gross_yield'))}`"
                 )
                 if rec.get("explanation"):
                     lines.append(f"  - Latest deltas: {rec['explanation']}")
@@ -1889,6 +1862,9 @@ def load_data(_mtime: float) -> pd.DataFrame:
     for col in df.columns:
         if "drivers" in col:
             df[col] = df[col].apply(_parse_drivers)
+    # The 1yr model is ordinal-only: the UI shows its within-year percentile, never the raw prediction.
+    if "pred_avg_1yr" in df.columns:
+        df["pred_1yr_pct"] = pd.to_numeric(df["pred_avg_1yr"], errors="coerce").rank(pct=True)
     return df
 
 
@@ -2207,11 +2183,14 @@ def _simulate_strategy_rankings(df: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     out["sim_value_score"] = _recal_value_score(out, str(cfg.get("value_focus", "Balanced")))
     out["sim_risk_fit"] = (100.0 - pd.to_numeric(out.get("composite_risk", 50.0), errors="coerce").fillna(50.0)).clip(0, 100)
     out["sim_structure_score"] = _product_structural_score(out, str(cfg.get("structural_focus", "Overall land thesis")))
-    out["sim_confidence_score"] = _confidence_numeric(out.get("confidence", pd.Series("MEDIUM", index=out.index)))
-    if "quantile_interval_width_mean" in out.columns:
-        out["sim_uncertainty_score"] = _scale_0_100(out["quantile_interval_width_mean"])
-    else:
-        out["sim_uncertainty_score"] = 0.0
+    # Confidence = observed data coverage (share of populated facts columns), never the retired
+    # regression's confidence bucket or interval width. The label column keeps its name so the
+    # "Minimum confidence" filter and every table column continue to work.
+    coverage = _facts_coverage(out)
+    out["facts_coverage"] = coverage
+    out["sim_confidence_score"] = (100.0 * coverage).clip(0, 100)
+    out["sim_uncertainty_score"] = (100.0 * (1.0 - coverage)).clip(0, 100)
+    out["confidence"] = pd.cut(coverage, [-0.01, 0.6, 0.85, 1.01], labels=["LOW", "MEDIUM", "HIGH"]).astype(str)
 
     component_weights = {
         "sim_timing_score": float(cfg.get("growth", 60)),
@@ -2410,13 +2389,8 @@ def _filter_product_table_rows(df: pd.DataFrame, key_prefix: str, *, expanded: b
                 out, source, "opportunity_score", "Production score", f"{key_prefix}_prod_score", step=0.5, fmt="%.1f"
             )
             out = _numeric_slider_filter(
-                out, source, "pred_avg_1yr", "1yr signal (ordinal)", f"{key_prefix}_pred_1yr", step=0.01, fmt="%.2f"
+                out, source, "pred_1yr_pct", "1yr rank percentile (ordinal)", f"{key_prefix}_pred_1yr", step=0.01, fmt="%.2f"
             )
-
-        if "use_stable_3yr_fallback" in source.columns:
-            hide_fallback = st.checkbox("Hide rows using the stable 3yr fallback", key=f"{key_prefix}_hide_3yr_fallback")
-            if hide_fallback:
-                out = out[~out["use_stable_3yr_fallback"].astype(bool)]
     return out
 
 
@@ -2505,21 +2479,11 @@ def _data_confidence_badges(row: pd.Series, wave3_status: dict | None = None) ->
     badges: list[dict[str, str]] = []
     conf = str(row.get("confidence", "UNKNOWN")).upper()
     if conf == "HIGH":
-        badges.append({"badge": "Model confidence", "status": "good", "detail": "High model-confidence bucket."})
+        badges.append({"badge": "Data coverage", "status": "good", "detail": "Most facts columns are populated for this county."})
     elif conf == "MEDIUM":
-        badges.append({"badge": "Model confidence", "status": "watch", "detail": "Medium confidence; confirm with peer and run-history checks."})
+        badges.append({"badge": "Data coverage", "status": "watch", "detail": "Some facts are missing; check the County Memo facts card."})
     else:
-        badges.append({"badge": "Model confidence", "status": "caution", "detail": "Low confidence; use as a lead, not a conclusion."})
-
-    if bool(row.get("use_stable_3yr_fallback", False)):
-        badges.append({"badge": "3yr fallback", "status": "watch", "detail": "Medium-term signal uses the stabilized fallback path."})
-    else:
-        badges.append({"badge": "3yr signal", "status": "good", "detail": "3yr model policy did not require fallback for this row."})
-
-    interval = row.get("quantile_interval_width_mean", row.get("pred_std"))
-    if pd.notna(interval):
-        status = "caution" if float(interval) >= 0.53 else "watch" if float(interval) >= 0.46 else "good"
-        badges.append({"badge": "Prediction interval", "status": status, "detail": f"Mean uncertainty width is {float(interval):.3f}."})
+        badges.append({"badge": "Data coverage", "status": "caution", "detail": "Thin facts coverage; use as a lead, not a conclusion."})
 
     stability = row.get("rank_stability_spread")
     if pd.notna(stability):
@@ -2609,7 +2573,7 @@ def _parcel_readiness(row: pd.Series) -> tuple[str, list[str]]:
     constraint = _product_numeric(row, "land_constraint_pressure", 0.5)
     fragility = _product_numeric(row, "land_fragility_pressure", 0.5)
     coastal = _product_numeric(row, "coastal_flood_pressure", 0.0)
-    interval = _product_numeric(row, "quantile_interval_width_mean", 0.0)
+    coverage = _product_numeric(row, "facts_coverage", 1.0)
 
     actions.append("Map candidate parcels against wetlands, flood, slope, protected-land, and road-access layers.")
     if developability < 0.45 or constraint >= 0.55:
@@ -2618,8 +2582,8 @@ def _parcel_readiness(row: pd.Series) -> tuple[str, list[str]]:
         actions.append("Add insurance, flood, wildfire, and climate-fragility diligence before underwriting.")
     if risk >= 55:
         actions.append("Review liquidity, regulation, and local market depth before sizing exposure.")
-    if bool(row.get("use_stable_3yr_fallback", False)) or interval >= 0.50:
-        actions.append("Validate the medium-term thesis with listings, permit activity, and local broker checks.")
+    if coverage < 0.6:
+        actions.append("Facts coverage is thin here; validate with listings, permit activity, and local broker checks.")
     if len(actions) <= 2 and risk <= 45 and developability >= 0.55:
         status = "Parcel screen ready"
     elif risk >= 60 or constraint >= 0.70 or fragility >= 0.70:
@@ -2672,7 +2636,7 @@ def _find_peer_sets(row: pd.Series, df: pd.DataFrame) -> dict[str, pd.DataFrame]
 def _peer_table(df: pd.DataFrame) -> pd.DataFrame:
     cols = [
         "county_name", "state", "sim_rank", "overall_rank", "sim_score",
-        "pred_avg_5yr", "pred_policy_3yr", "composite_risk", "confidence",
+        "fmr_gross_yield", "pred_1yr_pct", "composite_risk", "confidence",
     ]
     out = df[[c for c in cols if c in df.columns]].copy()
     out = out.rename(
@@ -2682,18 +2646,19 @@ def _peer_table(df: pd.DataFrame) -> pd.DataFrame:
             "sim_rank": "Strategy Rank",
             "overall_rank": "Production Rank",
             "sim_score": "Strategy Score",
-            "pred_avg_5yr": "5yr",
-            "pred_policy_3yr": "3yr",
+            "fmr_gross_yield": "Rent yield",
+            "pred_1yr_pct": "1yr (ordinal)",
             "composite_risk": "Risk",
-            "confidence": "Confidence",
+            "confidence": "Data coverage",
         }
     )
     for col in ["Strategy Score", "Risk"]:
         if col in out.columns:
             out[col] = out[col].map(_fmt_score)
-    for col in ["5yr", "3yr"]:
-        if col in out.columns:
-            out[col] = out[col].map(_fmt_pct)
+    if "Rent yield" in out.columns:
+        out["Rent yield"] = out["Rent yield"].map(_fmt_pct)
+    if "1yr (ordinal)" in out.columns:
+        out["1yr (ordinal)"] = out["1yr (ordinal)"].map(_fmt_ordinal_value)
     for col in ["Strategy Rank", "Production Rank"]:
         if col in out.columns:
             out[col] = out[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
@@ -2755,7 +2720,7 @@ def _apply_scenario_stress(df: pd.DataFrame, scenarios: list[str], severity: flo
 def _stress_table(df: pd.DataFrame, limit: int = 30) -> pd.DataFrame:
     cols = [
         "stress_rank", "sim_rank", "stress_rank_delta", "county_name", "state",
-        "stress_score", "sim_score", "composite_risk", "pred_avg_5yr", "confidence",
+        "stress_score", "sim_score", "composite_risk", "fmr_gross_yield", "confidence",
     ]
     out = df[[c for c in cols if c in df.columns]].head(limit).copy()
     out = out.rename(
@@ -2768,15 +2733,15 @@ def _stress_table(df: pd.DataFrame, limit: int = 30) -> pd.DataFrame:
             "stress_score": "Stress Score",
             "sim_score": "Base Score",
             "composite_risk": "Risk",
-            "pred_avg_5yr": "5yr",
-            "confidence": "Confidence",
+            "fmr_gross_yield": "Rent yield",
+            "confidence": "Data coverage",
         }
     )
     for col in ["Stress Score", "Base Score", "Risk"]:
         if col in out.columns:
             out[col] = out[col].map(_fmt_score)
-    if "5yr" in out.columns:
-        out["5yr"] = out["5yr"].map(_fmt_pct)
+    if "Rent yield" in out.columns:
+        out["Rent yield"] = out["Rent yield"].map(_fmt_pct)
     for col in ["Stress Rank", "Base Rank"]:
         if col in out.columns:
             out[col] = out[col].map(lambda x: f"#{int(x)}" if pd.notna(x) else "—")
@@ -2817,8 +2782,6 @@ def _watchlist_review_flags(watch_df: pd.DataFrame) -> pd.DataFrame:
             reasons.append("elevated risk")
         if pd.notna(row.get("rank_stability_spread")) and float(row["rank_stability_spread"]) >= 0.50:
             reasons.append("weak horizon stability")
-        if bool(row.get("use_stable_3yr_fallback", False)):
-            reasons.append("3yr fallback active")
         if reasons:
             rows.append(
                 {
@@ -2845,7 +2808,7 @@ def _build_deal_thesis_memo(
         f"growth `{cfg.get('growth')}`, risk `{cfg.get('risk')}`, "
         f"land thesis `{cfg.get('structure')}`, confidence `{cfg.get('confidence')}`"
     )
-    lines.append(f"- Horizon mix: 1yr `{cfg.get('h1')}`, 3yr `{cfg.get('h3')}`, 5yr `{cfg.get('h5')}`")
+    lines.append(f"- 1yr ordinal context weight: `{cfg.get('h1')}` (3yr/5yr are never used — falsified)")
     lines.append("")
     if watch_df.empty:
         lines.append("No counties are currently in the watchlist.")
@@ -2858,7 +2821,7 @@ def _build_deal_thesis_memo(
         lines.append(
             f"- `{row.get('county_name')}, {row.get('state')}` [FIPS {str(row.get('fips')).zfill(5)}]: "
             f"strategy rank `#{int(row.get('sim_rank'))}`, production rank `#{int(row.get('overall_rank'))}`, "
-            f"5yr `{_fmt_pct(row.get('pred_avg_5yr'))}`, risk `{_fmt_score(row.get('composite_risk'))}`, "
+            f"rent yield `{_fmt_pct(row.get('fmr_gross_yield'))}`, risk `{_fmt_score(row.get('composite_risk'))}`, "
             f"archetype `{row.get('opportunity_archetype', 'n/a')}`"
         )
         lines.append(f"  - Thesis: {decision['thesis']}")
@@ -3025,16 +2988,13 @@ def _apply_natural_language_query(df: pd.DataFrame, query: str) -> tuple[pd.Data
     if "high risk" in q:
         out = out[out["composite_risk"] >= 55]
         notes.append("Applied high-risk filter.")
-    if ("strong 5" in q or "5yr upside" in q or "5 year upside" in q or "5-year upside" in q
-            or "high upside" in q or "growth signal" in q or "1yr signal" in q or "strong growth" in q):
-        out = out[out["pred_avg_1yr"] >= out["pred_avg_1yr"].quantile(0.75)]
-        notes.append("Kept upper-quartile 1yr relative signal (growth intent maps to the validated 1yr ordering read).")
+    if "high upside" in q or "growth signal" in q or "1yr signal" in q or "strong growth" in q:
+        out = out[out["pred_1yr_pct"] >= 0.75]
+        notes.append("Kept upper-quartile 1yr ordinal rank (growth intent maps to the validated 1yr ordering read; "
+                     "no multi-year forecast exists).")
     if "confidence" in q or "high conviction" in q:
         out = out[out["confidence"].astype(str).str.upper().eq("HIGH")]
         notes.append("Kept high-confidence counties.")
-    if "fallback" in q:
-        out = out[out.get("use_stable_3yr_fallback", False).astype(bool)]
-        notes.append("Kept counties with 3yr fallback active.")
     if "disagree" in q or "model disagreement" in q:
         sort_col = "model_disagreement"
         if sort_col in out.columns:
@@ -3070,21 +3030,21 @@ def _apply_natural_language_query(df: pd.DataFrame, query: str) -> tuple[pd.Data
 
 
 def _thesis_scorecard(row: pd.Series, preset_name: str) -> tuple[str, pd.DataFrame]:
-    pred5 = _product_numeric(row, "pred_avg_5yr", 0.0)
+    yield_band = _product_numeric(row, "rent_yield_pct_in_rucc_band", 0.5)
+    cheap_land = _product_numeric(row, "land_cheapness_pct", 0.5)
     risk = _product_numeric(row, "composite_risk", 50.0)
-    confidence = str(row.get("confidence", "MEDIUM")).upper()
+    coverage = _product_numeric(row, "facts_coverage", 0.5)
     structure = _product_numeric(row, "sim_structure_score", 50.0)
     stability = _product_numeric(row, "rank_stability_spread", 0.25)
-    fallback = bool(row.get("use_stable_3yr_fallback", False))
     fragility = _product_numeric(row, "land_fragility_pressure", 0.5)
 
     rows = [
-        {"Rule": "Long-horizon upside", "Score": np.clip(100 * pred5 / 0.18, 0, 100), "Read": _fmt_pct(pred5)},
+        {"Rule": "Rent yield in band", "Score": np.clip(100 * yield_band, 0, 100), "Read": _fmt_pct(row.get("fmr_gross_yield"))},
+        {"Rule": "Land cheapness", "Score": np.clip(100 * cheap_land, 0, 100), "Read": f"{cheap_land:.0%} pct"},
         {"Rule": "Risk control", "Score": np.clip(100 - risk, 0, 100), "Read": _fmt_score(risk)},
         {"Rule": "Structural fit", "Score": np.clip(structure, 0, 100), "Read": _fmt_score(structure)},
-        {"Rule": "Confidence", "Score": {"HIGH": 90, "MEDIUM": 65, "LOW": 35}.get(confidence, 50), "Read": confidence},
+        {"Rule": "Data coverage", "Score": np.clip(100 * coverage, 0, 100), "Read": f"{coverage:.0%}"},
         {"Rule": "Rank stability", "Score": np.clip(100 - 120 * stability, 0, 100), "Read": f"{stability:.3f}"},
-        {"Rule": "3yr fallback", "Score": 45 if fallback else 85, "Read": "active" if fallback else "clear"},
     ]
     if "Climate" in preset_name:
         rows.append({"Rule": "Fragility pressure", "Score": np.clip(100 - 100 * fragility, 0, 100), "Read": f"{fragility:.3f}"})
@@ -3101,10 +3061,8 @@ def _why_not_bullets(row: pd.Series) -> list[str]:
         bullets.append("Composite risk is taking meaningful points away from the rank.")
     if _product_numeric(row, "sim_structure_score", 50.0) < 50:
         bullets.append("Structural land-thesis fit is only middling.")
-    if _product_numeric(row, "sim_uncertainty_score", 0.0) > 65:
-        bullets.append("Prediction uncertainty is wide relative to other counties.")
-    if bool(row.get("use_stable_3yr_fallback", False)):
-        bullets.append("The 3yr policy falls back to the stabilized path, which makes the medium-term read more conditional.")
+    if _product_numeric(row, "facts_coverage", 1.0) < 0.6:
+        bullets.append("Facts coverage is thin, so the value and risk reads rest on fewer observed numbers.")
     return bullets or ["No obvious single blocker; this county is mostly being ranked by relative tradeoffs against stronger peers."]
 
 
@@ -3140,7 +3098,7 @@ def _regional_summary(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
             counties=("fips", "count"),
             avg_strategy_score=("sim_score", "mean"),
             avg_risk=("composite_risk", "mean"),
-            avg_5yr=("pred_avg_5yr", "mean"),
+            avg_rent_yield=("fmr_gross_yield", "mean"),
             high_conf_share=("confidence", lambda s: float((s.astype(str).str.upper() == "HIGH").mean())),
         )
         .reset_index()
@@ -3197,8 +3155,6 @@ def _watchlist_drift_alerts(watch_df: pd.DataFrame, latest_compare_rank_df: pd.D
             alerts.append("risk above 55")
         if str(row.get("confidence", "")).upper() == "LOW":
             alerts.append("low confidence")
-        if bool(row.get("use_stable_3yr_fallback", False)):
-            alerts.append("3yr fallback active")
         if alerts:
             rows.append({"County": row.get("county_name"), "State": row.get("state"), "Alerts": "; ".join(alerts)})
     return pd.DataFrame(rows)
@@ -3217,7 +3173,6 @@ def _autopsy_candidates(current_df: pd.DataFrame, latest_compare_rank_df: pd.Dat
         & (
             (pd.to_numeric(current_df.get("composite_risk"), errors="coerce") >= 55)
             | (current_df.get("confidence", pd.Series("", index=current_df.index)).astype(str).str.upper() == "LOW")
-            | (current_df.get("use_stable_3yr_fallback", pd.Series(False, index=current_df.index)).astype(bool))
         )
     ].copy()
     weak["autopsy_reason"] = "High rank with current caution flag"
@@ -3440,33 +3395,28 @@ def _rank_text(value) -> str:
 
 
 def _confidence_read(row: pd.Series) -> tuple[str, list[str]]:
-    conf = str(row.get("confidence", "UNKNOWN")).upper()
-    model_disagreement = _product_numeric(row, "model_disagreement", 0.0)
-    horizon_spread = _product_numeric(row, "rank_stability_spread", 0.0)
-    interval = _product_numeric(row, "quantile_interval_width_mean", np.nan)
-    pred5 = _product_numeric(row, "pred_avg_5yr", 0.0)
-    fallback = bool(row.get("use_stable_3yr_fallback", False))
-
-    if conf == "HIGH" and model_disagreement <= 0.035 and horizon_spread <= 0.25 and pd.notna(interval) and interval <= 0.48:
-        label = "High Consensus"
-    elif pred5 >= 0.12 and (model_disagreement >= 0.055 or horizon_spread >= 0.45 or pd.notna(interval) and interval >= 0.52):
-        label = "High Upside / High Uncertainty"
-    elif fallback or horizon_spread >= 0.45 or model_disagreement >= 0.06:
-        label = "Mixed Signal"
-    elif conf == "LOW" or pd.notna(interval) and interval >= 0.54:
-        label = "Data Fragile"
+    """Confidence = how much observed data stands behind the reads (P0.6) — never a model's self-assessment."""
+    coverage = _product_numeric(row, "facts_coverage", np.nan)
+    stability = _product_numeric(row, "rank_stability_spread", np.nan)
+    if pd.notna(coverage) and coverage >= 0.85:
+        label = "Well covered"
+    elif pd.notna(coverage) and coverage >= 0.6:
+        label = "Partly covered"
+    elif pd.notna(coverage):
+        label = "Thin data"
     else:
-        label = "Moderate Consensus"
+        label = "Coverage unknown"
 
+    n_cols = len(FACTS_COVERAGE_COLUMNS)
     bullets = [
-        f"Model-confidence bucket is `{conf}`.",
-        f"XGBoost/LightGBM disagreement is `{model_disagreement:.3f}`.",
-        f"Cross-horizon rank spread is `{horizon_spread:.3f}`.",
+        (f"{coverage:.0%} of the {n_cols} facts columns (HUD FMR, NASS, AEI, BEA, ACS, NRI) are populated."
+         if pd.notna(coverage) else "Facts coverage could not be computed for this row."),
+        "Every value shown is an observed, vintage-stamped fact or a labelled research read; no model confidence is quoted.",
     ]
-    if pd.notna(interval):
-        bullets.append(f"Mean prediction interval width is `{interval:.3f}`.")
-    if fallback:
-        bullets.append("3yr policy uses the stabilized fallback path.")
+    if pd.notna(stability):
+        bullets.append(f"Run-to-run rank spread is `{stability:.3f}` (production rank stability, ordinal context).")
+    if not bool(row.get("universe_B", False)):
+        bullets.append("Outside the investable universe B (density > 95th percentile or population ≥ 1M).")
     return label, bullets
 
 
@@ -3553,14 +3503,13 @@ def _analog_rows_for_county(row: pd.Series, analog_suite: dict | None, limit: in
     recreation = _product_numeric(row, "recreation_access_score", 0.0)
     structure = _product_numeric(row, "sim_structure_score", 50.0)
     risk = _product_numeric(row, "composite_risk", 50.0)
-    pred5 = _product_numeric(row, "pred_avg_5yr", 0.0)
 
     preferred: list[str] = []
     if "amenity" in archetype or recreation >= 0.66:
         preferred.extend(["boise_treasure_valley", "colorado_front_range", "utah_wasatch_spillover"])
     if "buildable" in archetype or "scarcity" in archetype or structure >= 70:
         preferred.extend(["boise_treasure_valley", "colorado_front_range", "austin_hill_country"])
-    if "low-risk" in archetype or pred5 >= 0.12 and risk <= 45:
+    if "low-risk" in archetype or risk <= 45:
         preferred.extend(["nashville_middle_tennessee", "raleigh_triangle_spillover", "charlotte_piedmont_spillover"])
     if "fragile" in archetype or risk >= 55:
         preferred.extend(["phoenix_sun_corridor", "florida_space_gulf_growth"])
@@ -3698,8 +3647,8 @@ def _format_export_frame(df: pd.DataFrame, limit: int) -> pd.DataFrame:
         "state",
         "sim_score",
         "opportunity_score",
-        "pred_avg_5yr",
-        "pred_policy_3yr",
+        "fmr_gross_yield",
+        "pred_1yr_pct",
         "composite_risk",
         "confidence",
         "opportunity_archetype",
@@ -3723,8 +3672,8 @@ def _compare_export_frame(compare_df: pd.DataFrame) -> pd.DataFrame:
         "state",
         "sim_score",
         "opportunity_score",
-        "pred_avg_5yr",
-        "pred_policy_3yr",
+        "fmr_gross_yield",
+        "pred_1yr_pct",
         "composite_risk",
         "confidence",
         "opportunity_archetype",
@@ -3991,11 +3940,17 @@ def _render_start_here_tab(
         if hc_path.exists():
             hc = json.loads(hc_path.read_text())
             c, o = hc["classifier"], hc["operator_review"]
+            _null = {"random_quiet_county": "a random quiet county",
+                     "uniform_top_k": "a random county"}.get(c.get("vs_random_null_name"), "random")
+            _withdrawn = (c.get("legacy_clean_panel") or {}).get("honest_held_out_capture_at_100")
             st.caption(
                 f"Honest skill coordinates ({hc['generated_at'][:10]}): shortlist capture "
-                f"{c['honest_held_out_capture_at_100']:.3f} ≈ {c['vs_random_multiple']}× random "
-                f"(held-out, selection-corrected); operator precision {o['operator_precision']:.2f} "
-                "(judged proxy). Full detail: Pro → Advanced → Validation."
+                f"{c['honest_held_out_capture_at_100']:.3f} ≈ {c['vs_random_multiple']}× {_null} "
+                f"({c.get('measured_on', 'held-out, selection-corrected')})"
+                + (f"; the earlier {_withdrawn:.3f} ≈ 4.7× figure is withdrawn"
+                   if _withdrawn and _withdrawn != c['honest_held_out_capture_at_100'] else "")
+                + f". Operator precision {o['operator_precision']:.2f} (judged proxy, non-blind). "
+                "Full detail: Pro → Advanced → Validation."
             )
     with g2:
         st.subheader("Current Research Gate")
@@ -4045,11 +4000,12 @@ def _build_county_memo_markdown(
     preboom_rows = _preboom_signal_rows_for_county(row, preboom_surfaces)
     analog_rows = _analog_rows_for_county(row, analog_suite)
     readiness, actions = _parcel_readiness(row)
-    score_snapshot_lines = [
+    score_snapshot_lines = investment_numbers_markdown(investment_number_items(row, globals().get("s2_band_table"))) + [
         f"- Strategy rank: `{_rank_text(row.get('sim_rank'))}`",
         f"- Production rank: `{_rank_text(row.get('overall_rank'))}`",
         f"- Strategy score: `{_fmt_score(row.get('sim_score'))}`",
-        f"- 5yr signal: `{_fmt_pct(row.get('pred_avg_5yr'))}`",
+        f"- 1yr rank (ordinal context): `{_fmt_ordinal_pct(row)}`",
+        f"- Gross rent yield (HUD FMR): `{_fmt_pct(row.get('fmr_gross_yield'))}`",
         f"- Risk: `{_fmt_score(row.get('composite_risk'))}`",
         f"- Confidence read: `{confidence_label}`",
     ]
@@ -4119,8 +4075,13 @@ def _recal_fact_rows(row: pd.Series) -> dict[str, list[tuple[str, str]]]:
     scope.append(("Badges", _recal_badges(row)))
     return {
         "Scope & timing": scope + [
-            ("Timing (class rank)", _fmt_score(row.get("sim_timing_score"))),
-            ("Boom-onset score", num(row.get("boom_onset_score"), 3)),
+            ("Regional tide: S2 quintile among quiet universe B (1 = strongest)",
+             f"{int(row.get('s2_quintile_quiet_B'))} of 5 (rank {int(row.get('s2_rank_quiet_B'))} of 1,949)"
+             if pd.notna(row.get("s2_quintile_quiet_B")) and pd.notna(row.get("s2_rank_quiet_B")) else "not in the quiet pool"),
+            ("S2 inputs: state momentum rank / own momentum rank",
+             f"{num(row.get('s2_state_rank_pct'))} / {num(row.get('s2_mom_rank_pct'))}"),
+            ("Timing (classifier class rank — research column)", _fmt_score(row.get("sim_timing_score"))),
+            ("Boom-onset score (research column)", num(row.get("boom_onset_score"), 3)),
             ("Rank in universe B (quiet)", num(row.get("timing_rank_in_universe_B"), 0)),
             ("Archetype lens", str(row.get("archetype_lens_best") or "—")),
             ("Operator review 2024 / 2025", f"{row.get('operator_review_2024') or '—'} / {row.get('operator_review_2025') or '—'}"),
@@ -4233,7 +4194,7 @@ def _render_product_county_memo(
     with st.expander("How To Read This County Memo", expanded=True):
         st.markdown(
             "- `Strategy Rank` is the active Product Mode simulation under the sidebar settings; `Production Rank` is the unchanged scoring artifact.\n"
-            "- `Upside` and `Cautions` summarize model drivers, risk, uncertainty, and run-history clues.\n"
+            "- `Upside` and `Cautions` summarize observed facts (HUD, NASS, AEI, BEA, NRI), risk, data coverage, and run-history clues — never model attributions or a multi-year forecast.\n"
             "- `X-Factor / Pre-Boom` entries are report-only discovery surfaces unless explicitly labeled as production.\n"
             "- `What Would Break The Thesis` is the first diligence queue, not a final rejection."
         )
@@ -5426,6 +5387,10 @@ def _render_customer_workspace_help(workspace: str) -> None:
             "Export the current review packet, watchlist CSV, or print-ready HTML for handoff.",
             "The packet reflects current Customer Mode artifacts and local profile state.",
         ],
+        "Property": [
+            "Describe one property (county or ZIP, acres, land use, asking price, hold) and read the big numbers: value anchors, income capacity, breakeven growth, the regional tide, risk facts.",
+            "Every number is an observed county fact times your acreage or arithmetic on stated cost assumptions. There is no parcel-level appreciation estimate (the parcel test was null).",
+        ],
     }.get(workspace, [])
     with st.popover("How This Workspace Works", help="Short operating guide for the current Customer workspace."):
         for item in help_text:
@@ -5435,10 +5400,9 @@ def _render_customer_workspace_help(workspace: str) -> None:
 # Pro-tier score and policy terms; shown alongside CUSTOMER_TERM_DEFINITIONS
 # in the Pro term guide so every score visible in Product Mode is defined.
 PRO_TERM_DEFINITIONS = {
-    "Model Disagreement": "Gap between the XGBoost and LightGBM predictions for the same county. A larger gap means a less trustworthy point estimate.",
-    "Horizon Spread": "How much the 1yr/3yr/5yr predictions disagree after scaling. Big spreads signal timing uncertainty.",
-    "Prediction Interval": "Conformal range around the point prediction. Wider intervals mean less certainty.",
-    "Fallback": "The 3yr model policy substituted a guarded baseline because the specialist signal failed its checks for this county.",
+    "Model Disagreement": "Retired regression diagnostic (Advanced only): gap between the XGBoost and LightGBM predictions. Not a forecast or a ranking input.",
+    "1yr rank (ordinal)": "Where the 1yr model places the county among all counties (top X%). Ordinal context only — top-of-list precision is unproven and no return is implied.",
+    "Data coverage": "Share of populated facts columns (HUD FMR, NASS, AEI, BEA, ACS, NRI). This is what 'confidence' means in the app; no model self-assessment is used.",
     "Top-25 Churn": "Share of the national top-25 that changed since the previous run. High churn means an unstable regime or a data shift worth investigating.",
     "Guarded Blend": "The default pre-boom ranking: momentum-safe signals with brakes applied.",
     "Residual Upside": "Model upside left after removing what momentum already explains. Display-guarded and report-only; never a rank.",
@@ -5618,7 +5582,7 @@ def _customer_watchlist_command_rows(
                 "Alerts": int(alert_counts.get(fips, 0)),
                 "Strategy Rank": _rank_text(row.get("sim_rank")),
                 "Customer Signal": _fmt_score(row.get("customer_signal_score")),
-                "1yr Signal": _fmt_pct(row.get("pred_avg_1yr")),
+                "1yr (ordinal)": _fmt_ordinal_pct(row),
                 "Risk": _fmt_score(row.get("composite_risk")),
                 "Next Action": _customer_next_step(row),
                 "_strategy_rank": _product_numeric(row, "sim_rank", 99999.0),
@@ -5745,7 +5709,7 @@ def _customer_map_selection_html(row: pd.Series) -> str:
     <span><b>{_rank_text(row.get('sim_rank'))}</b><small>Strategy</small></span>
     <span><b>{_fmt_score(row.get('sim_score'))}</b><small>Strategy score</small></span>
     <span><b>{_fmt_score(row.get('composite_risk'))}</b><small>Risk</small></span>
-    <span><b>{_fmt_pct(row.get('pred_avg_5yr'))}</b><small>5yr</small></span>
+    <span><b>{_fmt_pct(row.get('fmr_gross_yield'))}</b><small>Rent yield</small></span>
   </div>
 </div>
 """
@@ -5862,11 +5826,11 @@ def _customer_card_html(row: pd.Series, *, compact: bool = False) -> str:
     bars = "".join(
         [
             _customer_signal_bar_html("Signal", signal, color),
-            _customer_signal_bar_html("Timing", timing, "#38bdf8"),
+            _customer_signal_bar_html("Timing (research)", timing, "#38bdf8"),
             _customer_signal_bar_html("Value", value, "#14b8a6"),
             _customer_signal_bar_html("Risk Control", risk_fit, "#22c55e"),
             _customer_signal_bar_html("Land Fit", land_fit, "#a78bfa"),
-            _customer_signal_bar_html("Confidence", confidence, "#f59e0b"),
+            _customer_signal_bar_html("Data coverage", confidence, "#f59e0b"),
         ][:3 if compact else 6]
     )
     compact_class = " customer-card-compact" if compact else ""
@@ -5916,7 +5880,7 @@ def _customer_brief_table(df: pd.DataFrame, limit: int = 20) -> pd.DataFrame:
                 "Value": _fmt_score(row.get("sim_value_score")),
                 "Gross Rent Yield": _fmt_pct(row.get("fmr_gross_yield")),
                 "Risk Band": row.get("customer_risk_band", _customer_risk_band(row)),
-                "Confidence": row.get("confidence", "n/a"),
+                "Data coverage": row.get("confidence", "n/a"),
                 "Thesis": _customer_thesis_read(row),
                 "Next Check": _customer_next_step(row),
             }
@@ -5927,11 +5891,11 @@ def _customer_brief_table(df: pd.DataFrame, limit: int = 20) -> pd.DataFrame:
 def _customer_signal_rows(row: pd.Series) -> pd.DataFrame:
     return pd.DataFrame(
         [
-            {"Signal": "Timing", "Score": _customer_signal_value(row, "sim_timing_score"), "Read": f"class rank {_fmt_score(row.get('sim_timing_score'))}"},
+            {"Signal": "Timing (research)", "Score": _customer_signal_value(row, "sim_timing_score"), "Read": f"classifier resemblance {_fmt_score(row.get('sim_timing_score'))} — no live skill"},
             {"Signal": "Value", "Score": _customer_signal_value(row, "sim_value_score"), "Read": f"gross yield {_fmt_pct(row.get('fmr_gross_yield'))}"},
             {"Signal": "Risk Control", "Score": _customer_signal_value(row, "sim_risk_fit"), "Read": _fmt_score(row.get("composite_risk"))},
             {"Signal": "Land Fit", "Score": _customer_signal_value(row, "sim_structure_score"), "Read": row.get("opportunity_archetype", "n/a")},
-            {"Signal": "Confidence", "Score": _customer_signal_value(row, "sim_confidence_score"), "Read": row.get("confidence", "n/a")},
+            {"Signal": "Data coverage", "Score": _customer_signal_value(row, "sim_confidence_score"), "Read": row.get("confidence", "n/a")},
             {"Signal": "Parcel Ready", "Score": _customer_signal_value(row, "lens_parcel_readiness"), "Read": _parcel_readiness(row)[0]},
         ]
     )
@@ -5976,7 +5940,7 @@ def _customer_packet_markdown(
     if top_row is not None:
         lines.append(
             f"- Lead active-filter county: `{_customer_county_display(top_row)}` at strategy `{_rank_text(top_row.get('sim_rank'))}`, "
-            f"5yr `{_fmt_pct(top_row.get('pred_avg_5yr'))}`, risk `{_fmt_score(top_row.get('composite_risk'))}`."
+            f"rent yield `{_fmt_pct(top_row.get('fmr_gross_yield'))}`, risk `{_fmt_score(top_row.get('composite_risk'))}`."
         )
     if selected_row is not None:
         lines.append(
@@ -6008,7 +5972,7 @@ def _customer_packet_markdown(
         lines.append(
             f"- `{_customer_county_display(row)}`: "
             f"{row.get('customer_tier', _customer_tier_label(row))} signal, strategy rank `{_rank_text(row.get('sim_rank'))}`, "
-            f"5yr `{_fmt_pct(row.get('pred_avg_5yr'))}`, risk `{_fmt_score(row.get('composite_risk'))}`. "
+            f"rent yield `{_fmt_pct(row.get('fmr_gross_yield'))}`, risk `{_fmt_score(row.get('composite_risk'))}`. "
             f"{_customer_thesis_read(row)}"
         )
         lines.append(f"  - Next check: {_customer_next_step(row)}")
@@ -6176,9 +6140,6 @@ def _customer_change_table(row: pd.Series, latest_compare_rank_df: pd.DataFrame 
     for label, old_col, new_col, delta_col, fmt in [
         ("Rank", "overall_rank_old", "overall_rank_new", "rank_shift", "rank"),
         ("Opportunity score", None, None, "opportunity_score_delta", "score"),
-        ("3yr policy", None, None, "pred_policy_3yr_delta", "pct_delta"),
-        ("XGB 5yr", None, None, "pred_xgboost_5yr_delta", "pct_delta"),
-        ("LGB 5yr", None, None, "pred_lightgbm_5yr_delta", "pct_delta"),
         ("Risk", None, None, "composite_risk_delta", "score"),
     ]:
         if delta_col not in rec.index or pd.isna(rec.get(delta_col)):
@@ -6219,7 +6180,7 @@ def _customer_similar_counties(row: pd.Series, df: pd.DataFrame, limit: int = 6)
                 "County": _customer_county_display(rec),
                 "Tier": rec.get("customer_tier", _customer_tier_label(rec)),
                 "Strategy Rank": _rank_text(rec.get("sim_rank")),
-                "5yr": _fmt_pct(rec.get("pred_avg_5yr")),
+                "Rent yield": _fmt_pct(rec.get("fmr_gross_yield")),
                 "Risk": _fmt_score(rec.get("composite_risk")),
                 "Why Compare": _customer_thesis_read(rec),
             }
@@ -6309,7 +6270,7 @@ def _customer_watchlist_health(
         "land_developability_index",
         "land_constraint_pressure",
         "land_fragility_pressure",
-        "pred_avg_5yr",
+        "fmr_gross_yield",
     ]:
         if col in watch_df.columns:
             health_eval[col] = watch_lookup[col].reindex(health_eval["fips"].astype(str).str.zfill(5)).values
@@ -6328,18 +6289,12 @@ def _customer_watchlist_health(
 
 
 def _customer_backlog_table(status_bundle: dict | None) -> pd.DataFrame:
-    model_health = ((status_bundle or {}).get("model_health_3yr") or {}).get("assessment", {})
     return pd.DataFrame(
         [
             {
                 "Lane": "Cloud accounts",
                 "Status": "Not implemented",
                 "Next Step": "Add hosted auth, user database, and server-side share tokens outside the local Streamlit demo store.",
-            },
-            {
-                "Lane": "3yr model stabilization",
-                "Status": _humanize_status_label(model_health.get("health_status", "unknown")),
-                "Next Step": "Keep 3yr diagnostic until controlled specialist gate passes.",
             },
             {
                 "Lane": "Announcement-event promotion",
@@ -6469,12 +6424,29 @@ def _render_customer_story(
         unsafe_allow_html=True,
     )
 
+    # P1.1: the seven numbers that make or break the county, each with its vintage and what it beats.
+    _stack = investment_number_items(row, s2_band_table)
+    st.markdown(
+        '<div class="customer-stat-strip">' + "".join(
+            f"<span><b>{_customer_escape(str(it['value']))}</b><small>{_customer_escape(str(it['label']))}</small></span>"
+            for it in _stack) + "</div>",
+        unsafe_allow_html=True,
+    )
+    with st.expander("What each number means and what it beats", expanded=False):
+        for it in _stack:
+            st.markdown(f"- **{it['label']}** `{it['value']}` — {it['note']}")
+
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("Customer Signal", _fmt_score(row.get("customer_signal_score")))
-    c2.metric("1yr Signal", _fmt_pct(row.get("pred_avg_1yr")))
+    c2.metric("1yr rank (ordinal)", _fmt_ordinal_pct(row))
     c3.metric("Risk Band", row.get("customer_risk_band", _customer_risk_band(row)))
-    c4.metric("Confidence", row.get("confidence", "n/a"))
+    c4.metric("Data coverage", row.get("confidence", "n/a"))
     c5.metric("Parcel Read", _parcel_readiness(row)[0])
+
+    # P0.3: the same observed facts and the same honest coordinates the Pro memo shows.
+    _render_recal_facts_card(row)
+    with st.expander("How much to trust the timing number (honest coordinates)", expanded=False):
+        _render_honest_coordinates()
 
     archetype_read = _customer_archetype_read(fips, boom_onset_archetype_lens_df)
     if archetype_read is not None:
@@ -6570,6 +6542,7 @@ def _render_customer_story(
             analog_suite=known_analog_suite,
             xfactor_scoreboard=xfactor_scoreboard,
         )
+        memo_md = memo_md.rstrip() + "\n\n" + _recal_facts_markdown(row)
         st.download_button(
             "Download Story Memo",
             data=memo_md.encode("utf-8"),
@@ -6636,7 +6609,7 @@ def _render_customer_mode(
     if requested_customer_preset not in CUSTOMER_PRESET_CATALOG:
         requested_customer_preset = "Quiet Pre-Boom"
     requested_workspace = _query_param_first("workspace", "Radar")
-    workspace_options = ["Radar", "Opportunities", "County Story", "Compare", "Watchlist", "Packet"]
+    workspace_options = ["Radar", "Opportunities", "County Story", "Property", "Compare", "Watchlist", "Packet"]
     if requested_workspace not in workspace_options:
         requested_workspace = "Radar"
     requested_visual_theme = _normalize_customer_visual_theme(_query_param_first("customer_theme", "Investor"))
@@ -6797,7 +6770,7 @@ def _render_customer_mode(
 
     run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
     churn = latest_deltas.get("top25_churn") if latest_deltas and latest_deltas.get("has_previous") else None
-    health = ((status_bundle or {}).get("model_health_3yr") or {}).get("assessment", {}).get("health_status")
+    health = None  # the retired 3yr model-health chip is no longer shown; the Timing engine chip carries the honest coordinates
     top_row = filtered.sort_values("sim_rank").iloc[0]
     prime_count = int(filtered["customer_tier"].eq("Prime").sum()) if "customer_tier" in filtered.columns else 0
     st.markdown(
@@ -7035,7 +7008,7 @@ def _render_customer_mode(
             "fmr_gross_yield": "Gross Rent Yield",
             "tourism_intensity_index": "Tourism Intensity",
             "nass_land_value_per_acre": "Farm Land $/ac",
-            "pred_avg_1yr": "1yr Signal (context)",
+            "pred_1yr_pct": "1yr rank percentile (ordinal)",
             "composite_risk": "Risk",
             "lens_parcel_readiness": "Parcel Readiness",
             "sim_structure_score": "Land Fit",
@@ -7045,7 +7018,7 @@ def _render_customer_mode(
             map_layer_kwargs["index"] = 0
         map_layer = st.selectbox(
             "Map signal layer",
-            ["sim_score", "customer_signal_score", "pred_avg_1yr", "composite_risk", "lens_parcel_readiness", "sim_structure_score"],
+            ["sim_score", "customer_signal_score", "fmr_gross_yield", "pred_1yr_pct", "composite_risk", "lens_parcel_readiness", "sim_structure_score"],
             format_func=lambda x: map_layer_labels.get(x, x.replace("_", " ").title()),
             key="customer_radar_layer",
             help="Choose the score used to color the county map. Click a county to load it into the selected-county action panel.",
@@ -7502,7 +7475,7 @@ def _render_customer_mode(
                     plot_df = plot_df.merge(health_eval[health_cols], on="fips", how="left")
                 plot_df["County"] = plot_df.apply(_customer_county_display, axis=1)
                 plot_df["plot_upside_size"] = pd.to_numeric(
-                    plot_df.get("pred_avg_5yr", pd.Series(0.01, index=plot_df.index)),
+                    plot_df.get("fmr_gross_yield", pd.Series(0.01, index=plot_df.index)),
                     errors="coerce",
                 ).fillna(0.01).clip(lower=0.01)
                 fig_watch = px.scatter(
@@ -7512,7 +7485,7 @@ def _render_customer_mode(
                     size="plot_upside_size",
                     color="health_status" if "health_status" in plot_df.columns else "customer_tier",
                     hover_name="County",
-                    hover_data={"sim_rank": True, "pred_avg_5yr": True, "confidence": True, "plot_upside_size": False},
+                    hover_data={"sim_rank": True, "fmr_gross_yield": True, "confidence": True, "plot_upside_size": False},
                     title="Watchlist Signal vs Risk",
                     color_discrete_sequence=_customer_plot_theme_tokens(customer_visual_theme)["sequence"],
                 )
@@ -7691,6 +7664,10 @@ def _render_customer_mode(
         st.text_area("Packet Preview", value=packet, height=520)
         with st.expander("Platform Readiness", expanded=False):
             st.dataframe(_customer_backlog_table(status_bundle), width="stretch", hide_index=True, height=260)
+    elif workspace == "Property":
+        _render_customer_workspace_help("Property")
+        render_property_analyzer(sim_df, key_prefix="customer_property", crosswalk_path=ZCTA_CROSSWALK_PATH,
+                                 band_table_path=S2_BAND_TABLE_PATH)
 
     _render_demo_footer(latest_run, status_bundle, demo_readiness_report)
 
@@ -7710,22 +7687,69 @@ def _render_honest_coordinates() -> None:
     st.caption(f"Generated {hc['generated_at'][:10]} from the measurement artifacts — "
                "these are the ONLY model-skill numbers this product claims.")
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Shortlist capture (honest)", f"{c['honest_held_out_capture_at_100']:.3f}",
-              f"{c['vs_random_multiple']}× random", delta_color="off")
+    _null_label = {"random_quiet_county": "random quiet county",
+                   "uniform_top_k": "random county"}.get(c.get("vs_random_null_name"), "random")
+    m1.metric(f"Shortlist capture ({c.get('measured_on', 'honest')})",
+              f"{c['honest_held_out_capture_at_100']:.3f}",
+              f"{c['vs_random_multiple']}× {_null_label}", delta_color="off")
     m2.metric("Operator precision (proxy)", f"{o['operator_precision']:.2f}",
               f"{o['accepted']}✓ / {o['rejected']}✗ / {o['held']} hold", delta_color="off")
     m3.metric("1yr rank signal (ordinal)", f"{r1['embargoed_median_spearman']:+.2f}",
               "top-K unproven", delta_color="off")
     m4.metric("Realized outcomes graded", "0 so far",
               f"clock running {max(s['days_elapsed'] for s in fv['snapshots'])}d", delta_color="off")
+    _cond = c.get("conditions") or {}
+    if _cond:
+        st.caption("**How the number moves as the measurement gets honest** — "
+                   + " → ".join(f"{k.replace('_', ' ')} {v['value']:.3f}" for k, v in _cond.items())
+                   + f" (null: a {_null_label} scores {c.get('vs_random_null_value', 0):.4f}).")
+    _verdict = c.get("verdict")
+    if _verdict:
+        st.warning(f"**{_verdict}.** " + (c.get("shortlist_number_mismatch") or {}).get("note", ""))
     st.caption(
         f"Shortlist figure: {c['claim']} Measured on {c['measured_on']} "
-        f"(naive argmax {c['naive_argmax']:.3f}; {c['vs_best_baseline_ratio']}× best baseline). "
+        f"(naive argmax {c['naive_argmax']:.3f}; {c['vs_best_baseline_ratio']}× best naive lane"
+        + (f"; 90% CI {c['ci90']}" if c.get("ci90") else "") + "). "
         "3yr/5yr appreciation forecasts are falsified and never presented. "
-        "Operator precision is judged, not realized; the forward-validation clock is the "
-        "realized read and is sparse by design early."
+        "Operator precision is judged, not realized, and was not blind; the forward-validation "
+        "clock is the realized read and is sparse by design early."
     )
     _render_recal_reads_block()
+    _render_forward_disclosure()
+
+
+def _render_forward_disclosure() -> None:
+    """P3.5: the pre-registered forward clock as a DISCLOSURE read — never a verdict, never a track record.
+    Reads the latest grade_forward_arms disclosure JSON; silent when the artifact is not present (deploy bundle)."""
+    folder = OUTPUT_PATH / "unattended" / "forward"
+    files = sorted(folder.glob("grade_disclosure_*.json")) if folder.exists() else []
+    if not files:
+        return
+    try:
+        payload = json.loads(files[-1].read_text())
+    except (OSError, ValueError):
+        return
+    read = payload.get("read") or {}
+    if read.get("verdict_permitted", False):
+        return  # a decisive read is a different surface; this block only ever shows disclosures
+    rows = []
+    for arm, rec in (payload.get("arms") or {}).items():
+        prim = rec.get("rank_test_primary") or {}
+        ci = prim.get("ci90") or [None, None]
+        rows.append({
+            "Arm": arm, "Rank test ρ": f"{prim['value']:+.3f}" if prim.get("value") is not None else "—",
+            "90% CI": f"[{ci[0]:+.3f}, {ci[1]:+.3f}]" if ci[0] is not None else "—",
+            "n counties": prim.get("n", "—"), "Voided": "yes" if rec.get("void") else "no",
+        })
+    st.subheader("Forward clock — disclosure read, no verdict")
+    st.caption(
+        f"Six arms frozen 2026-09-11 (hashed; `data/forward_validation/arms_2025/`), graded {read.get('base', '?')} → "
+        f"{read.get('end', '?')}. Spearman of each frozen score vs state-demeaned 3-yr appreciation over the quiet universe. "
+        "The pre-registration (`documentation/PREREG_FORWARD_2025.md`) permits no verdict before the decisive read ≈ Jan-2029; "
+        "a non-kill is not evidence of skill. No external hash anchor exists yet, so this is internally dated, not tamper-evident."
+    )
+    if rows:
+        st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True, height=38 + 35 * len(rows))
 
 
 def _render_recal_reads_block() -> None:
@@ -7742,7 +7766,7 @@ def _render_recal_reads_block() -> None:
     m1.metric("Universe B capture (inside / unrestricted)", f"{uc.get('ratio_vs_unrestricted', float('nan')):.2f}×" if uc else "—",
               f"class {uc.get('class_median', float('nan')):.3f}" if uc else "", delta_color="off")
     m2.metric("Rent yield validation (VAL-1)", f"ρ {vl.get('spearman', float('nan')):.2f}" if vl else "—", "FMR vs ZORI yield", delta_color="off")
-    m3.metric("Embargoed statistical precision", f"{pr.get('median_lift_p100', float('nan')):.2f}× random" if pr else "—",
+    m3.metric("Embargoed statistical precision", f"{pr.get('median_lift_p100', float('nan')):.2f}× uniform random" if pr else "—",
               f"{pr.get('median_ratio_vs_best_naive', float('nan')):.2f}× best naive rule" if pr else "", delta_color="off")
     cmp = (qa.get("comparison_ai_vs_landinvest_vs_universeB") or {}).get("ai_picks", {})
     m4.metric("Quick-AI picks that are documented past booms", f"{100 * cmp.get('share_in_documented_boom_family_library', float('nan')):.0f}%" if cmp else "—",
@@ -8533,6 +8557,22 @@ def _render_quiet_shortlist_tab(sim_df: pd.DataFrame, reads: dict | None) -> Non
         "(the same basis as the operator packets and the frozen forward-validation snapshots); the lane-agnostic class rank "
         "is shown beside it. Value is observed facts. Nothing here changes production ranks."
     )
+    _cov = ((reads or {}).get("gates") or {}).get("serve_year_coverage") or {}
+    _cov_status = _cov.get("status") or (
+        sim_df["serve_year_coverage_status"].dropna().iloc[0]
+        if "serve_year_coverage_status" in sim_df.columns and sim_df["serve_year_coverage_status"].notna().any()
+        else None)
+    if _cov_status in ("warn", "fail"):
+        _empty, _tot = _cov.get("empty_cols_serve_year"), _cov.get("n_base_cols")
+        _detail = (f" {_empty} of {_tot} feature columns are empty in the {_cov.get('serve_year')} scoring year "
+                   f"(coverage {_cov.get('mean_coverage_serve_year')} vs {_cov.get('mean_coverage_reference')} "
+                   f"in the years the model learned from)." if _empty else "")
+        st.warning(
+            f"**Serve-year data coverage: {_cov_status.upper()}.**{_detail} "
+            "Ranks from a year with much less data than the training years are partly an ordering of "
+            "missing data — the 2025 list reviewed in OPS-4 shared only 18 of its top 50 with the "
+            "point-in-time model's list. Treat the order as provisional."
+        )
     uc = (reads or {}).get("universe_capture") or {}
     hc = (reads or {}).get("honest") or {}
     b = (uc.get("universes") or {}).get("B") or {}
@@ -8540,8 +8580,12 @@ def _render_quiet_shortlist_tab(sim_df: pd.DataFrame, reads: dict | None) -> Non
     c1.metric("Universe B counties", f"{b.get('n_counties', '—')}")
     c2.metric("Capture inside vs unrestricted", f"{b.get('ratio_vs_unrestricted', float('nan')):.2f}×" if b.get("ratio_vs_unrestricted") else "—",
               "UNIV-1 pass" if b.get("UNIV-1_capture_floor_0.8x") else "", delta_color="off")
-    c3.metric("Honest capture (held-out)", f"{hc.get('classifier', {}).get('honest_held_out_capture_at_100', float('nan')):.3f}" if hc else "—",
-              f"{hc.get('classifier', {}).get('vs_random_multiple', '')}× random" if hc else "", delta_color="off")
+    _hcc = (hc or {}).get("classifier", {})
+    _c3_null = {"random_quiet_county": "random quiet county",
+                "uniform_top_k": "random county"}.get(_hcc.get("vs_random_null_name"), "random")
+    c3.metric(f"Honest capture ({_hcc.get('measured_on', 'held-out')})",
+              f"{_hcc.get('honest_held_out_capture_at_100', float('nan')):.3f}" if hc else "—",
+              f"{_hcc.get('vs_random_multiple', '')}× {_c3_null}" if hc else "", delta_color="off")
     c4.metric("Operator precision (proxy)", f"{hc.get('operator_review', {}).get('operator_precision', float('nan')):.2f}" if hc else "—")
     pool = sim_df[
         sim_df["universe_B"].fillna(False).astype(bool)
@@ -8663,7 +8707,9 @@ def _render_product_mode(
         )
         st.caption("Score mix")
         growth = st.slider("Timing (boom-onset resemblance)", 0, 100, int(preset["growth"]), step=5, key="product_growth",
-                           help="Classifier ensemble-class rank: how much this quiet county resembles the years before past booms.")
+                           help="Classifier ensemble-class rank: how much this quiet county resembles the years before past booms. "
+                                "A research column: under live conditions it captures 1.1× a random quiet county (honest coordinates). "
+                                "Whether the regional screen S2 replaces it as the default order is an open operator decision (D-RULE).")
         value = st.slider("Value (yield & cheapness)", 0, 100, int(preset.get("value", 15)), step=5, key="product_value",
                           help="Observed facts: gross rent yield within the county's RUCC band, home-value and land cheapness, farm cap-rate proxy.")
         value_focus = st.selectbox("Value focus", ["Balanced", "Rent yield", "Farmland income"],
@@ -8673,8 +8719,10 @@ def _render_product_mode(
         h3, h5 = 0, 0
         risk = st.slider("Risk control", 0, 100, int(preset["risk"]), step=5, key="product_risk")
         structure = st.slider("Land thesis", 0, 100, int(preset["structure"]), step=5, key="product_structure")
-        confidence = st.slider("Confidence", 0, 100, int(preset["confidence"]), step=5, key="product_confidence")
-        uncertainty = st.slider("Uncertainty penalty", 0, 25, int(preset["uncertainty"]), step=1, key="product_uncertainty")
+        confidence = st.slider("Data coverage", 0, 100, int(preset["confidence"]), step=5, key="product_confidence",
+                               help="Share of populated facts columns (HUD, NASS, AEI, BEA, ACS, NRI). Not a model confidence.")
+        uncertainty = st.slider("Thin-data penalty", 0, 25, int(preset["uncertainty"]), step=1, key="product_uncertainty",
+                                help="Subtracts points for missing facts. The retired regression's interval width is no longer used.")
         _focus_options = ["Overall land thesis", "Optionality", "Low fragility", "Recreation access", "Buildable scarcity", "Tourism intensity", "Farmland income"]
         structural_focus = st.selectbox(
             "Land thesis focus",
@@ -8769,6 +8817,7 @@ def _render_product_mode(
             tab_search,
             tab_explore,
             tab_preboom,
+            tab_property,
             tab_play,
             tab_screen,
             tab_region,
@@ -8777,6 +8826,7 @@ def _render_product_mode(
                 "Search",
                 "Explore",
                 "Quiet Shortlist",
+                "Property",
                 "Strategy",
                 "Screening",
                 "Region",
@@ -8881,8 +8931,8 @@ def _render_product_mode(
         m2.metric("Median Risk", _fmt_score(filtered["composite_risk"].median()) if not filtered.empty else "—")
         high_conf = filtered["confidence"].astype(str).str.upper().eq("HIGH").mean() if not filtered.empty else np.nan
         m3.metric("High Confidence", f"{100 * high_conf:.0f}%" if pd.notna(high_conf) else "—")
-        fallback = filtered.get("use_stable_3yr_fallback", pd.Series(dtype=bool)).mean() if not filtered.empty else np.nan
-        m4.metric("3yr Fallback", f"{100 * fallback:.0f}%" if pd.notna(fallback) else "—")
+        coverage = filtered.get("facts_coverage", pd.Series(dtype=float)).mean() if not filtered.empty else np.nan
+        m4.metric("Facts coverage", f"{100 * coverage:.0f}%" if pd.notna(coverage) else "—")
 
         for title, caption, slice_df in _insight_slices(filtered):
             st.subheader(title)
@@ -9043,6 +9093,10 @@ def _render_product_mode(
                 p0_repeatable_residual_candidates=p0_repeatable_residual_candidates,
             )
 
+    with tab_property:
+        render_property_analyzer(sim_df, key_prefix="product_property", crosswalk_path=ZCTA_CROSSWALK_PATH,
+                                 band_table_path=S2_BAND_TABLE_PATH)
+
     with tab_play:
         _render_pro_tab_guide("strategy")
         st.header("Strategy Playground")
@@ -9088,7 +9142,7 @@ def _render_product_mode(
                     y="sim_rank",
                     color="sim_score",
                     hover_name="county_name",
-                    hover_data=["state", "composite_risk", "pred_avg_5yr", "pred_policy_3yr"],
+                    hover_data=["state", "composite_risk", "fmr_gross_yield"],
                     title="Production Rank vs Strategy Rank",
                     labels={"overall_rank": "Production rank", "sim_rank": "Strategy rank"},
                     color_continuous_scale="Viridis",
@@ -9221,8 +9275,8 @@ def _render_product_mode(
                 "opportunity_score",
                 "composite_risk",
                 "sim_structure_score",
-                "pred_avg_5yr",
-                "pred_policy_3yr",
+                "fmr_gross_yield",
+                "pred_1yr_pct",
             ],
             format_func=lambda x: x.replace("_", " ").title(),
             key="product_map_metric",
@@ -9307,13 +9361,13 @@ def _render_product_mode(
             st.subheader("County Matchmaker")
             match_goal = st.radio(
                 "Find alternatives with",
-                ["More upside", "Lower risk", "Same region", "Different region", "Stronger structural support", "Less rank volatility"],
+                ["Higher rent yield", "Lower risk", "Same region", "Different region", "Stronger structural support", "Less rank volatility"],
                 horizontal=True,
                 key="product_match_goal",
             )
             base = filtered[filtered["fips"].astype(str).str.zfill(5) != str(row.get("fips")).zfill(5)].copy()
-            if match_goal == "More upside":
-                base = base[base["pred_avg_5yr"] >= _product_numeric(row, "pred_avg_5yr", 0.0)].sort_values(["pred_avg_5yr", "sim_rank"], ascending=[False, True])
+            if match_goal == "Higher rent yield":
+                base = base[base["fmr_gross_yield"] >= _product_numeric(row, "fmr_gross_yield", 0.0)].sort_values(["fmr_gross_yield", "sim_rank"], ascending=[False, True])
             elif match_goal == "Lower risk":
                 base = base[base["composite_risk"] <= _product_numeric(row, "composite_risk", 50.0)].sort_values(["composite_risk", "sim_rank"])
             elif match_goal == "Same region":
@@ -9329,6 +9383,7 @@ def _render_product_mode(
 
     with tab_disagree:
         _render_pro_tab_guide("disagreement")
+        st.caption(RETIRED_DIAGNOSTICS_NOTE)
         st.header("Model Disagreement Explorer")
         st.caption("Counties here are thesis-dependent or less settled across models/horizons.")
         if filtered.empty:
@@ -9338,7 +9393,7 @@ def _render_product_mode(
             cols = [
                 "county_name", "state", "sim_rank", "overall_rank", "model_disagreement_lens",
                 "model_disagreement", "horizon_disagreement", "sim_uncertainty_score",
-                "pred_avg_1yr", "pred_policy_3yr", "pred_avg_5yr", "confidence",
+                "pred_1yr_pct", "confidence",
             ]
             view = disagree_df[[c for c in cols if c in disagree_df.columns]].head(50).copy()
             view = view.rename(
@@ -9351,10 +9406,8 @@ def _render_product_mode(
                     "model_disagreement": "Model Disagreement",
                     "horizon_disagreement": "Horizon Disagreement",
                     "sim_uncertainty_score": "Uncertainty",
-                    "pred_avg_1yr": "1yr",
-                    "pred_policy_3yr": "3yr",
-                    "pred_avg_5yr": "5yr",
-                    "confidence": "Confidence",
+                    "pred_1yr_pct": "1yr (ordinal)",
+                    "confidence": "Data coverage",
                 }
             )
             for col in ["Strategy Rank", "Production Rank"]:
@@ -9363,9 +9416,8 @@ def _render_product_mode(
             for col in ["Disagreement Lens", "Model Disagreement", "Horizon Disagreement", "Uncertainty"]:
                 if col in view.columns:
                     view[col] = view[col].map(lambda x: f"{float(x):.3f}" if pd.notna(x) else "—")
-            for col in ["1yr", "3yr", "5yr"]:
-                if col in view.columns:
-                    view[col] = view[col].map(_fmt_pct)
+            if "1yr (ordinal)" in view.columns:
+                view["1yr (ordinal)"] = view["1yr (ordinal)"].map(_fmt_ordinal_value)
             st.dataframe(view, width="stretch", hide_index=True, height=520)
 
     with tab_region:
@@ -9387,8 +9439,8 @@ def _render_product_mode(
             for col in ["avg_strategy_score", "avg_risk"]:
                 if col in roll.columns:
                     roll[col] = roll[col].map(_fmt_score)
-            if "avg_5yr" in roll.columns:
-                roll["avg_5yr"] = roll["avg_5yr"].map(_fmt_pct)
+            if "avg_rent_yield" in roll.columns:
+                roll["avg_rent_yield"] = roll["avg_rent_yield"].map(_fmt_pct)
             if "high_conf_share" in roll.columns:
                 roll["high_conf_share"] = roll["high_conf_share"].map(lambda x: f"{100 * float(x):.0f}%")
             st.dataframe(roll, width="stretch", hide_index=True, height=300)
@@ -9562,6 +9614,7 @@ def _render_product_mode(
 
     with tab_run:
         _render_pro_tab_guide("run_review")
+        st.caption(RETIRED_DIAGNOSTICS_NOTE)
         st.header("Run Review")
         review = _run_review_summary(filtered, latest_compare_rank_df, latest_compare_boundary_df)
         if not review:
@@ -9604,7 +9657,6 @@ def _render_product_mode(
                         "Reason": rec.get("autopsy_reason"),
                         "Risk": _fmt_score(rec.get("composite_risk")),
                         "Confidence": rec.get("confidence"),
-                        "3yr Fallback": bool(rec.get("use_stable_3yr_fallback", False)),
                         "What to review": "; ".join(_why_not_bullets(rec)[:2]),
                     }
                 )
@@ -9612,6 +9664,7 @@ def _render_product_mode(
 
     with tab_promo:
         _render_pro_tab_guide("promotion_gate")
+        st.caption(RETIRED_DIAGNOSTICS_NOTE)
         st.header("Promotion-Readiness Console")
         st.caption("This is a compact product gate for deciding whether candidate model/policy changes deserve promotion work.")
         st.dataframe(_promotion_readiness_rows(status_bundle), width="stretch", hide_index=True, height=260)
@@ -9668,6 +9721,7 @@ def _render_product_mode(
 
     with tab_health:
         _render_pro_tab_guide("model_health")
+        st.caption(RETIRED_DIAGNOSTICS_NOTE)
         st.header("Model Health")
         model_health = (status_bundle or {}).get("model_health_3yr") or {}
         wave3_closeout = (status_bundle or {}).get("wave3_closeout") or {}
@@ -9701,6 +9755,7 @@ def _render_product_mode(
 
     with tab_system_status:
         _render_pro_tab_guide("system_status")
+        st.caption(RETIRED_DIAGNOSTICS_NOTE)
         _render_system_status_console()
 
     with tab_tokenization:
@@ -10831,6 +10886,28 @@ if RECAL_ACTIVE:
     _brief_cols = [c for c in RECAL_BRIEF_COLUMNS if c in recal_briefs_df.columns]
     df = df.drop(columns=[c for c in _brief_cols if c != "fips" and c in df.columns], errors="ignore")
     df = df.merge(recal_briefs_df[_brief_cols], on="fips", how="left")
+
+
+@st.cache_data
+def load_regional_screen(_mtime: float) -> pd.DataFrame | None:
+    """The served S2 regional screen for the live year (scripts/serve_regional_screen.py; P0.5)."""
+    if not REGIONAL_SCREEN_PATH.exists():
+        return None
+    try:
+        rs = pd.read_csv(REGIONAL_SCREEN_PATH, dtype={"fips": str})
+    except Exception:
+        return None
+    rs["fips"] = rs["fips"].astype(str).str.zfill(5)
+    keep = [c for c in REGIONAL_SCREEN_COLUMNS if c in rs.columns]
+    return rs[keep].drop_duplicates("fips")
+
+
+regional_screen_df = load_regional_screen(_mtime=_file_mtime(REGIONAL_SCREEN_PATH))
+if regional_screen_df is not None and not regional_screen_df.empty:
+    df["fips"] = df["fips"].astype(str).str.zfill(5)
+    df = df.drop(columns=[c for c in REGIONAL_SCREEN_COLUMNS if c != "fips" and c in df.columns], errors="ignore")
+    df = df.merge(regional_screen_df, on="fips", how="left")
+s2_band_table = load_band_table(S2_BAND_TABLE_PATH)
 states = get_states(df)
 calibration_diag = compute_calibration_diagnostics(df)
 latest_run, latest_deltas = load_latest_run_snapshot(
@@ -10991,7 +11068,7 @@ header_run_id = latest_run.get("run_id", "unknown") if latest_run else "unknown"
 header_run_year = latest_run.get("year", "n/a") if latest_run else "n/a"
 header_churn = latest_deltas.get("top25_churn") if latest_deltas and latest_deltas.get("has_previous") else None
 header_churn_text = f"{100 * header_churn:.1f}%" if header_churn is not None else "n/a"
-header_health = ((status_bundle or {}).get("model_health_3yr") or {}).get("assessment", {}).get("health_status")
+header_health = None  # retired 3yr model-health chip; the Timing engine chip carries the honest coordinates
 header_health_text = _humanize_status_label(header_health) if header_health else None
 st.markdown(
     _brand_header_html(
